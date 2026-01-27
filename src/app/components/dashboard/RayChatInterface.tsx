@@ -65,6 +65,7 @@ export const RayChatInterface = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const messageRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const prevMessageCountRef = useRef(0);
   
   // Widget States
   const [showAddFundsWidget, setShowAddFundsWidget] = useState(false);
@@ -106,17 +107,33 @@ export const RayChatInterface = () => {
     }
   }, [currentPersona.id, messages.length]);
 
-  // Auto-scroll to bottom on new message
+  // Auto-scroll: user messages to top of viewport, AI messages show start
   useEffect(() => {
-    if (scrollContainerRef.current) {
-        // slight delay to allow layout animation to start
-        setTimeout(() => {
-            scrollContainerRef.current?.scrollTo({ 
-                top: scrollContainerRef.current.scrollHeight, 
-                behavior: 'smooth' 
-            });
-        }, 100);
-    }
+    if (!scrollContainerRef.current || messages.length === 0) return;
+
+    const isNewMessage = messages.length > prevMessageCountRef.current;
+    prevMessageCountRef.current = messages.length;
+
+    if (!isNewMessage) return;
+
+    const lastMessage = messages[messages.length - 1];
+
+    setTimeout(() => {
+      const messageEl = messageRefs.current.get(lastMessage.id);
+      if (!messageEl || !scrollContainerRef.current) return;
+
+      if (lastMessage.sender === 'user') {
+        // User message: scroll so it's at the TOP of viewport
+        const targetScroll = messageEl.offsetTop - 24;
+        scrollContainerRef.current.scrollTo({
+          top: Math.max(0, targetScroll),
+          behavior: 'smooth'
+        });
+      } else {
+        // AI message: scroll to show start of response
+        messageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
   }, [messages.length]);
 
   // Handle Scroll to toggle button visibility
@@ -196,7 +213,7 @@ export const RayChatInterface = () => {
       <div 
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto px-4 md:px-6 pt-6 pb-36 scrollbar-hide"
+        className="flex-1 overflow-y-auto px-4 md:px-6 pt-6 pb-56 scrollbar-hide"
       >
          <div className="flex flex-col gap-10 max-w-[800px] mx-auto">
             {messages.map((msg, index) => (

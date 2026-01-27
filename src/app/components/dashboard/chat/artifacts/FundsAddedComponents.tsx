@@ -39,7 +39,7 @@ export const FundsAddedHeader = ({ title }: { title: string }) => {
   return (
     <div className="flex gap-[6px] items-center relative shrink-0">
       <CheckIcon />
-      <h3 className="font-sans font-semibold text-[18px] leading-[26px] text-[#020202]">
+      <h3 className="font-sans font-bold text-[20px] leading-[28px] text-[#020202]">
         {title}
       </h3>
     </div>

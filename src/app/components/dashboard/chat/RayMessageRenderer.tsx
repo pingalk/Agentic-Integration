@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import clsx from 'clsx';
 import { PerplexityStreamText } from './PerplexityStreamingTypography';
 import { RayThinking } from '../RayThinking';
+import { useStreamSequencer } from '../useStreamSequencer';
 
 // --- Elegant Tooltip Component ---
 const Tooltip = ({ children, text, position = 'top' }: { children: React.ReactNode; text: string; position?: 'top' | 'bottom' | 'left' | 'right' }) => {
@@ -98,6 +99,20 @@ export interface RayResponseData {
     };
   } | {
     type: 'funds_added_card';
+  } | {
+    type: 'followup_question';
+    data: {
+      headline: string;
+      question: string;
+      buttons: Array<{ label: string; variant: 'primary' | 'secondary' }>;
+    };
+  } | {
+    type: 'simple_text';
+    data: {
+      headline?: string;
+      body: string;
+      suggestions?: string[];
+    };
   };
 }
 
@@ -107,192 +122,547 @@ const itemVar = { hidden: { opacity: 0, y: 5, filter: 'blur(4px)' }, visible: { 
 
 // --- Investigation Report Component ---
 const InvestigationReportArtifact = ({ data, onRowClick, onSuggestionClick, isLast }: any) => {
+  const [subtextStarted, setSubtextStarted] = useState(false);
+
+  const { phase, onNarrativeComplete } = useStreamSequencer({
+    hasDataAsset: !!data.table,
+    hasInsight: !!data.resolution,
+    hasSuggestions: data.suggestions?.length > 0,
+    thinkingDuration: 7000  // 7 seconds for primary response
+  });
+
+  // Start subtext after 1.3s cognitive pause following headline
+  const handleHeadlineComplete = React.useCallback(() => {
+    setTimeout(() => setSubtextStarted(true), 1300);
+  }, []);
+
   return (
-    <motion.div className="flex flex-col gap-[24px] w-full mt-2" initial="hidden" animate="visible" variants={containerVar}>
-      
-      {/* Primary Content Section - gap-[16px] between subsections */}
-      <div className="flex flex-col gap-[16px]">
-        {/* Header + Subtext + Stats Group - gap-[4px] internally */}
-        <div className="flex flex-col gap-[4px] px-[0px] py-[4px]">
-          {/* 1. Header: Icon + Bold Text */}
-          <motion.div variants={itemVar} className="flex gap-[6px] items-center">
-             <div className="shrink-0 size-[20px] bg-[#E9690C] rounded-[3.33px] flex items-center justify-center shadow-sm">
-                <Wallet size={12} strokeWidth={2.5} className="text-white" />
-             </div>
-             <h3 className="text-[18px] leading-[24px] font-semibold text-[#020202]">
-                {data.headline}
-             </h3>
-          </motion.div>
+    <>
+      {/* Phase 0: Thinking */}
+      {phase === 0 && <RayThinking />}
 
-          {/* 2. Subtext with inline bold */}
-          <motion.div variants={itemVar} className="text-[16px] text-[#40566d] leading-[26px] tracking-[0.16px]">
-             <span>This happened because </span>
-             <span className="font-semibold text-[#192839]">your refunds this week exceeded your payments</span>
-             <span>:</span>
-          </motion.div>
+      {/* Phase 1+: Content */}
+      {phase >= 1 && (
+        <motion.div
+          className="flex flex-col gap-[24px] w-full mt-2"
+          initial="hidden"
+          animate="visible"
+          variants={containerVar}
+        >
+          {/* Primary Content Section - gap-[16px] between subsections */}
+          <div className="flex flex-col gap-[16px]">
+            {/* Header + Subtext + Stats Group - gap-[4px] internally */}
+            <div className="flex flex-col gap-[4px] px-[0px] py-[4px]">
+              {/* 1. Header: Icon + Bold Text (streamed) */}
+              <motion.div variants={itemVar} className="flex gap-[6px] items-center">
+                <div className="shrink-0 size-[20px] bg-[#E9690C] rounded-[3.33px] flex items-center justify-center shadow-sm">
+                  <Wallet size={12} strokeWidth={2.5} className="text-white" />
+                </div>
+                <h3 className="text-[20px] leading-[28px] font-bold text-[#020202]">
+                  <PerplexityStreamText
+                    content={data.headline}
+                    speed={15}
+                    onComplete={handleHeadlineComplete}
+                  />
+                </h3>
+              </motion.div>
 
-          {/* 3. Stats List (using native list-disc) */}
-          <motion.ul variants={itemVar} className="flex flex-col gap-[6px] pl-[48px] list-disc ml-0">
-             {data.stats.map((stat: any, i: number) => (
-                <li key={i} className="text-[16px] leading-[24px] text-[#40566d]">
-                   <span className="text-[#40566d]">{stat.label}: </span>
-                   <span className="font-semibold text-[#192839]">{stat.value}</span>
-                </li>
-             ))}
-          </motion.ul>
-        </div>
+              {/* 2. Subtext with inline bold (streamed after 1.3s pause) */}
+              {subtextStarted && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-[16px] text-[#40566d] leading-[26px] tracking-[0.16px]"
+                >
+                  <PerplexityStreamText
+                    content={data.subtext}
+                    speed={10}
+                    onComplete={onNarrativeComplete}
+                  />
+                </motion.div>
+              )}
 
-        {/* 4. Table Section */}
-        <motion.div variants={itemVar} className="pl-0 py-[12px]">
-           <h4 className="text-[15px] font-bold text-slate-900 mb-3">Your recent refunds:</h4>
-           
-           <div className="w-full rounded-[12px] overflow-hidden border border-[#E4E7EC] relative group/table">
-              {/* Table Header */}
-              <div className="flex h-[48px] text-[14px] font-semibold text-[#192839] bg-[rgba(108,132,157,0.06)] px-[16px] border-b border-[rgba(108,132,157,0.18)]">
-                  <div className="w-[140px] flex items-center pl-[20px]">Amount</div>
-                  <div className="w-[120px] flex items-center">Status</div>
-                  <div className="w-[160px] flex items-center">Issued On</div>
-                  <div className="w-[140px] flex items-center">Bank RRN</div>
-                  <div className="flex-1 flex items-center">Customer Email</div>
-              </div>
-              {/* Table Rows */}
-              <div className="bg-white">
-                 {data.table.rows.map((row: any) => (
-                   <div key={row.id} className="relative flex h-[56px] items-center px-[16px] border-b border-[#E4E7EC] last:border-b-0 hover:bg-[#F9FAFB] transition-colors group/row">
-                      <div className="w-[140px] font-semibold text-[#1D2939] text-[14px] pl-[20px]">{row.amount}</div>
-                      <div className="w-[120px]">
+              {/* 3. Stats List (appears after subtext starts streaming) */}
+              {subtextStarted && (
+                <motion.ul
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="flex flex-col gap-[6px] pl-[48px] list-disc ml-0"
+                >
+                  {data.stats.map((stat: any, i: number) => (
+                    <li key={i} className="text-[16px] leading-[24px] text-[#40566d]">
+                      <span className="text-[#40566d]">{stat.label}: </span>
+                      <span className="font-semibold text-[#192839]">{stat.value}</span>
+                    </li>
+                  ))}
+                </motion.ul>
+              )}
+            </div>
+
+            {/* 4. Table Section (Phase 2+) */}
+            {phase >= 2 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="pl-0 py-[12px]"
+              >
+                <h4 className="text-[15px] font-bold text-slate-900 mb-3">Your recent refunds:</h4>
+
+                <div className="w-full rounded-[12px] overflow-hidden border border-[#E4E7EC] relative group/table">
+                  {/* Table Header */}
+                  <div className="flex h-[48px] text-[14px] font-semibold text-[#192839] bg-[rgba(108,132,157,0.06)] px-[16px] border-b border-[rgba(108,132,157,0.18)]">
+                    <div className="w-[140px] flex items-center pl-[20px]">Amount</div>
+                    <div className="w-[120px] flex items-center">Status</div>
+                    <div className="w-[160px] flex items-center">Issued On</div>
+                    <div className="w-[140px] flex items-center">Bank RRN</div>
+                    <div className="flex-1 flex items-center">Customer Email</div>
+                  </div>
+                  {/* Table Rows with staggered animation */}
+                  <div className="bg-white">
+                    {data.table.rows.map((row: any, rowIndex: number) => (
+                      <motion.div
+                        key={row.id}
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: rowIndex * 0.1, duration: 0.3 }}
+                        className="relative flex h-[56px] items-center px-[16px] border-b border-[#E4E7EC] last:border-b-0 hover:bg-[#F9FAFB] transition-colors group/row"
+                      >
+                        <div className="w-[140px] font-semibold text-[#1D2939] text-[14px] pl-[20px]">{row.amount}</div>
+                        <div className="w-[120px]">
                           <span className="inline-flex items-center h-[20px] px-[8px] bg-[rgba(18,145,208,0.09)] text-[#0f78ad] text-[12px] font-medium leading-[18px] rounded-[1000px]">
-                              {row.status}
+                            {row.status}
                           </span>
-                      </div>
-                      <div className="w-[160px] text-[#5D6B82] text-[14px] font-normal">{row.date}</div>
-                      <div className="w-[140px] text-[#5D6B82] font-mono text-[14px] font-normal group/cell overflow-visible">
-                        <div className="flex items-center gap-[8px]">
-                          <span>{row.rrn}</span>
-                          <Tooltip text="Copy RRN" position="top">
-                            <button 
-                              className="size-[16px] shrink-0 opacity-0 group-hover/cell:opacity-100 transition-all duration-300 ease-out transform -translate-x-2 group-hover/cell:translate-x-0 hover:scale-110"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigator.clipboard.writeText(row.rrn);
-                              }}
-                            >
-                              <Copy />
-                            </button>
-                          </Tooltip>
                         </div>
-                      </div>
-                      <Tooltip text={row.email} position="top">
-                        <div className="flex-1 text-[#5D6B82] text-[14px] font-normal underline decoration-slate-300 underline-offset-2 hover:text-blue-600 truncate">{row.email}</div>
-                      </Tooltip>
-                   </div>
-                 ))}
-              </div>
-              
-              {/* Table-level hover actions - bottom right */}
-              <div className="absolute bottom-0 right-0 flex items-center gap-2 bg-white shadow-lg border border-slate-200 rounded-md p-1.5 opacity-0 group-hover/table:opacity-100 transition-opacity z-10 m-[8px]">
-                <Tooltip text="Copy table data" position="top">
-                  <button 
-                    className="p-1.5 hover:bg-slate-50 rounded text-slate-500 hover:text-slate-700 transition-colors"
-                  >
-                    <CopyIcon size={16} />
-                  </button>
-                </Tooltip>
-                <Tooltip text="Download table" position="top">
-                  <button 
-                    className="p-1.5 hover:bg-slate-50 rounded text-slate-500 hover:text-slate-700 transition-colors"
-                  >
-                    <Download size={16} />
-                  </button>
-                </Tooltip>
-              </div>
-           </div>
-        </motion.div>
+                        <div className="w-[160px] text-[#5D6B82] text-[14px] font-normal">{row.date}</div>
+                        <div className="w-[140px] text-[#5D6B82] font-mono text-[14px] font-normal group/cell overflow-visible">
+                          <div className="flex items-center gap-[8px]">
+                            <span>{row.rrn}</span>
+                            <Tooltip text="Copy RRN" position="top">
+                              <button
+                                className="size-[16px] shrink-0 opacity-0 group-hover/cell:opacity-100 transition-all duration-300 ease-out transform -translate-x-2 group-hover/cell:translate-x-0 hover:scale-110"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigator.clipboard.writeText(row.rrn);
+                                }}
+                              >
+                                <Copy />
+                              </button>
+                            </Tooltip>
+                          </div>
+                        </div>
+                        <Tooltip text={row.email} position="top">
+                          <div className="flex-1 text-[#5D6B82] text-[14px] font-normal underline decoration-slate-300 underline-offset-2 hover:text-blue-600 truncate">{row.email}</div>
+                        </Tooltip>
+                      </motion.div>
+                    ))}
+                  </div>
 
-        {/* 5. Resolution */}
-        <motion.div variants={itemVar} className="flex flex-col gap-[4px]">
-           <h3 className="text-[18px] leading-[24px] font-semibold text-[#020202]">
-              {data.resolution.title}
-           </h3>
-           <p className="text-[16px] leading-[26px] text-[#40566d] tracking-[0.16px]">
-              <span>You have ₹1.26 Lakhs in settlements waiting. </span>
-              <span className="font-medium text-[#192839]">Add ₹46,000 to your Razorpay account now</span>
-              <span> to clear the negative balance, and your full </span>
-              <span className="font-medium text-[#192839]">₹1.26 Lakhs will be transferred</span>
-              <span> to your bank by the </span>
-              <span className="font-medium text-[#192839]">next business day.</span>
-           </p>
-        </motion.div>
-      </div>
+                  {/* Table-level hover actions - bottom right */}
+                  <div className="absolute bottom-0 right-0 flex items-center gap-2 bg-white shadow-lg border border-slate-200 rounded-md p-1.5 opacity-0 group-hover/table:opacity-100 transition-opacity z-10 m-[8px]">
+                    <Tooltip text="Copy table data" position="top">
+                      <button className="p-1.5 hover:bg-slate-50 rounded text-slate-500 hover:text-slate-700 transition-colors">
+                        <CopyIcon size={16} />
+                      </button>
+                    </Tooltip>
+                    <Tooltip text="Download table" position="top">
+                      <button className="p-1.5 hover:bg-slate-50 rounded text-slate-500 hover:text-slate-700 transition-colors">
+                        <Download size={16} />
+                      </button>
+                    </Tooltip>
+                  </div>
+                </div>
+              </motion.div>
+            )}
 
-      {/* 6. Footer Actions Strip - Only visible for last message */}
-      {isLast && (
-        <motion.div variants={itemVar} className="flex gap-[8px] items-center">
-          <Tooltip text="Good response" position="bottom">
-            <button 
-              className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors"
+            {/* 5. Resolution (Phase 3+) */}
+            {phase >= 3 && (
+              <motion.div
+                initial={{ opacity: 0, y: 5, filter: 'blur(4px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0)' }}
+                transition={{ duration: 0.4, ease: 'easeOut' }}
+                className="flex flex-col gap-[4px]"
+              >
+                <h3 className="text-[20px] leading-[28px] font-bold text-[#020202]">
+                  {data.resolution.title}
+                </h3>
+                <p className="text-[16px] leading-[26px] text-[#40566d] tracking-[0.16px]">
+                  {data.resolution.content}
+                </p>
+              </motion.div>
+            )}
+          </div>
+
+          {/* 6. Footer Actions Strip (Phase 4+) - Only visible for last message */}
+          {phase >= 4 && isLast && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2 }}
+              className="flex gap-[8px] items-center"
             >
+              <Tooltip text="Good response" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <ThumbsUp size={16} className="text-[#40566D]" strokeWidth={2} />
+                </button>
+              </Tooltip>
+              <Tooltip text="Bad response" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <ThumbsDown size={16} className="text-[#40566D]" strokeWidth={2} />
+                </button>
+              </Tooltip>
+              <Tooltip text="Copy to clipboard" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <div className="size-[16px]">
+                    <Copy />
+                  </div>
+                </button>
+              </Tooltip>
+              <Tooltip text="Share" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <Share2 size={16} className="text-[#40566D]" strokeWidth={2} />
+                </button>
+              </Tooltip>
+            </motion.div>
+          )}
+
+          {/* 7. Divider (Phase 5+) - Only if suggestions are present and it's the last message */}
+          {phase >= 5 && isLast && data.suggestions && (
+            <motion.div
+              initial={{ opacity: 0, scaleX: 0 }}
+              animate={{ opacity: 1, scaleX: 1 }}
+              transition={{ duration: 0.3 }}
+              className="w-full h-[0.5px] bg-[#CBD5E2] origin-left"
+            />
+          )}
+
+          {/* 8. Suggestions Section (Phase 5+) - Only visible for last message */}
+          {phase >= 5 && isLast && data.suggestions && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex flex-col gap-[12px] mt-[0px] mr-[0px] mb-[30px] ml-[0px]"
+            >
+              <h3 className="text-[18px] leading-[26px] font-semibold text-[#193f47]">
+                Suggestions
+              </h3>
+              <div className="flex flex-col gap-[2px]">
+                {data.suggestions.map((sug: string, i: number) => (
+                  <motion.button
+                    key={i}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1, duration: 0.2 }}
+                    onClick={() => onSuggestionClick?.(sug)}
+                    className="flex items-center gap-[4px] p-[4px] text-left w-full rounded-[4px] transition-colors hover:bg-[#f1f5fa] group"
+                  >
+                    <div className="shrink-0 size-[20px] rounded-full flex items-center justify-center bg-[#f1f5fa] group-hover:bg-white transition-colors">
+                      <span className="text-[10px] font-medium leading-[14px] text-[#40566d] group-hover:text-[#2980e1] transition-colors">
+                        {i + 1}
+                      </span>
+                    </div>
+                    <p className="text-[16px] leading-[26px] tracking-[0.16px] font-medium text-[#40566d] group-hover:text-[#2980e1] transition-colors">
+                      {sug}
+                    </p>
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </motion.div>
+      )}
+    </>
+  );
+};
+
+// --- Followup Question Artifact Component ---
+const FollowupQuestionArtifact = ({
+  data,
+  isLast,
+  onButtonClick
+}: {
+  data: { headline: string; question: string; buttons: Array<{ label: string; variant: 'primary' | 'secondary' }> };
+  isLast: boolean;
+  onButtonClick?: (label: string) => void;
+}) => {
+  const [questionStarted, setQuestionStarted] = useState(false);
+
+  const { phase, onNarrativeComplete } = useStreamSequencer({
+    hasDataAsset: true,   // buttons count as data asset
+    hasInsight: false,
+    hasSuggestions: false,
+    thinkingDuration: 0   // No thinking animation for followup questions
+  });
+
+  // Start question text after 1.3s cognitive pause following headline
+  const handleHeadlineComplete = React.useCallback(() => {
+    setTimeout(() => setQuestionStarted(true), 1300);
+  }, []);
+
+  return (
+    <motion.div
+      className="flex flex-col gap-[16px] w-full mt-2"
+      initial="hidden"
+      animate="visible"
+      variants={containerVar}
+    >
+      {/* Phase 1: Headline (streamed) */}
+      <motion.div variants={itemVar} className="flex gap-[6px] items-center">
+        <div className="shrink-0 size-[20px] bg-[#2563EB] rounded-[3.33px] flex items-center justify-center shadow-sm">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+        </div>
+        <h3 className="text-[20px] leading-[28px] font-bold text-[#020202]">
+          <PerplexityStreamText
+            content={data.headline}
+            speed={15}
+            onComplete={handleHeadlineComplete}
+          />
+        </h3>
+      </motion.div>
+
+      {/* Question text (streamed after 1.3s pause) */}
+      {questionStarted && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-[16px] text-[#40566d] leading-[26px] tracking-[0.16px]"
+        >
+          <PerplexityStreamText
+            content={data.question}
+            speed={10}
+            onComplete={onNarrativeComplete}
+          />
+        </motion.div>
+      )}
+
+      {/* Phase 2+: Action Buttons */}
+      {phase >= 2 && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="flex gap-3"
+        >
+          {data.buttons.map((button, i) => (
+            <button
+              key={i}
+              onClick={() => onButtonClick?.(button.label)}
+              className={clsx(
+                'px-4 py-2 rounded-lg font-medium text-[14px] transition-all duration-200',
+                button.variant === 'primary'
+                  ? 'bg-[#2563EB] text-white hover:bg-[#1d4ed8] shadow-sm'
+                  : 'bg-[#f1f5fa] text-[#40566d] hover:bg-[#e2e8f0] border border-[#e2e8f0]'
+              )}
+            >
+              {button.label}
+            </button>
+          ))}
+        </motion.div>
+      )}
+
+      {/* Phase 4+: Footer Actions Strip - Only visible for last message */}
+      {phase >= 4 && isLast && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
+          className="flex gap-[8px] items-center mt-2"
+        >
+          <Tooltip text="Good response" position="bottom">
+            <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
               <ThumbsUp size={16} className="text-[#40566D]" strokeWidth={2} />
             </button>
           </Tooltip>
           <Tooltip text="Bad response" position="bottom">
-            <button 
-              className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors"
-            >
+            <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
               <ThumbsDown size={16} className="text-[#40566D]" strokeWidth={2} />
             </button>
           </Tooltip>
           <Tooltip text="Copy to clipboard" position="bottom">
-            <button 
-              className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors"
-            >
+            <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
               <div className="size-[16px]">
                 <Copy />
               </div>
             </button>
           </Tooltip>
           <Tooltip text="Share" position="bottom">
-            <button 
-              className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors"
-            >
+            <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
               <Share2 size={16} className="text-[#40566D]" strokeWidth={2} />
             </button>
           </Tooltip>
         </motion.div>
       )}
+    </motion.div>
+  );
+};
 
-      {/* 7. Divider - Only if suggestions are present and it's the last message */}
-      {isLast && data.suggestions && (
-         <motion.div variants={itemVar} className="w-full h-[0.5px] bg-[#CBD5E2]" />
-      )}
+// --- Simple Text Artifact Component ---
+const SimpleTextArtifact = ({
+  data,
+  isLast,
+  onSuggestionClick
+}: {
+  data: { headline?: string; body: string; suggestions?: string[] };
+  isLast: boolean;
+  onSuggestionClick?: (suggestion: string) => void;
+}) => {
+  const [bodyStarted, setBodyStarted] = useState(false);
+  const [bodyComplete, setBodyComplete] = useState(false);
 
-      {/* 8. Suggestions Section - Only visible for last message */}
-      {isLast && data.suggestions && (
-        <motion.div variants={itemVar} className="flex flex-col gap-[12px] mt-[0px] mr-[0px] mb-[30px] ml-[0px]">
-           <h3 className="text-[18px] leading-[26px] font-semibold text-[#193f47]">
-              Suggestions
-           </h3>
-           <div className="flex flex-col gap-[2px]">
-              {data.suggestions.map((sug: string, i: number) => (
-                <button 
-                  key={i} 
-                  onClick={() => onSuggestionClick?.(sug)}
-                  className="flex items-center gap-[4px] p-[4px] text-left w-full rounded-[4px] transition-colors hover:bg-[#f1f5fa] group"
-                >
-                  <div className="shrink-0 size-[20px] rounded-full flex items-center justify-center bg-[#f1f5fa] group-hover:bg-white transition-colors">
-                    <span className="text-[10px] font-medium leading-[14px] text-[#40566d] group-hover:text-[#2980e1] transition-colors">
-                      {i + 1}
-                    </span>
-                  </div>
-                  <p className="text-[16px] leading-[26px] tracking-[0.16px] font-medium text-[#40566d] group-hover:text-[#2980e1] transition-colors">
-                    {sug}
-                  </p>
+  const { phase, onNarrativeComplete } = useStreamSequencer({
+    hasDataAsset: false,
+    hasInsight: false,
+    hasSuggestions: !!data.suggestions?.length,
+    thinkingDuration: 2000  // 2 seconds for simple text
+  });
+
+  // Start body after 1.3s cognitive pause following headline (or immediately if no headline)
+  const handleHeadlineComplete = React.useCallback(() => {
+    setTimeout(() => setBodyStarted(true), 1300);
+  }, []);
+
+  // If no headline, start body immediately when phase 1 begins
+  useEffect(() => {
+    if (phase >= 1 && !data.headline) {
+      setBodyStarted(true);
+    }
+  }, [phase, data.headline]);
+
+  const handleBodyComplete = React.useCallback(() => {
+    setBodyComplete(true);
+    onNarrativeComplete();
+  }, [onNarrativeComplete]);
+
+  return (
+    <>
+      {/* Phase 0: Thinking */}
+      {phase === 0 && <RayThinking />}
+
+      {/* Phase 1+: Content */}
+      {phase >= 1 && (
+        <motion.div
+          className="flex flex-col gap-[16px] w-full mt-2"
+          initial="hidden"
+          animate="visible"
+          variants={containerVar}
+        >
+          {/* Headline (optional, streamed) */}
+          {data.headline && (
+            <motion.div variants={itemVar} className="flex gap-[6px] items-center">
+              <div className="shrink-0 size-[20px] bg-[#10B981] rounded-[3.33px] flex items-center justify-center shadow-sm">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              <h3 className="text-[20px] leading-[28px] font-bold text-[#020202]">
+                <PerplexityStreamText
+                  content={data.headline}
+                  speed={15}
+                  onComplete={handleHeadlineComplete}
+                />
+              </h3>
+            </motion.div>
+          )}
+
+          {/* Body text (streamed after 1.3s pause if headline exists, otherwise immediately) */}
+          {bodyStarted && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-[16px] text-[#40566d] leading-[26px] tracking-[0.16px]"
+            >
+              <PerplexityStreamText
+                content={data.body}
+                speed={10}
+                onComplete={handleBodyComplete}
+              />
+            </motion.div>
+          )}
+
+          {/* Phase 4+: Footer Actions Strip - Only visible for last message */}
+          {phase >= 4 && isLast && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2 }}
+              className="flex gap-[8px] items-center mt-2"
+            >
+              <Tooltip text="Good response" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <ThumbsUp size={16} className="text-[#40566D]" strokeWidth={2} />
                 </button>
-              ))}
-           </div>
+              </Tooltip>
+              <Tooltip text="Bad response" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <ThumbsDown size={16} className="text-[#40566D]" strokeWidth={2} />
+                </button>
+              </Tooltip>
+              <Tooltip text="Copy to clipboard" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <div className="size-[16px]">
+                    <Copy />
+                  </div>
+                </button>
+              </Tooltip>
+              <Tooltip text="Share" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <Share2 size={16} className="text-[#40566D]" strokeWidth={2} />
+                </button>
+              </Tooltip>
+            </motion.div>
+          )}
+
+          {/* Phase 5+: Divider - Only if suggestions are present and it's the last message */}
+          {phase >= 5 && isLast && data.suggestions && (
+            <motion.div
+              initial={{ opacity: 0, scaleX: 0 }}
+              animate={{ opacity: 1, scaleX: 1 }}
+              transition={{ duration: 0.3 }}
+              className="w-full h-[0.5px] bg-[#CBD5E2] origin-left"
+            />
+          )}
+
+          {/* Phase 5+: Suggestions Section - Only visible for last message */}
+          {phase >= 5 && isLast && data.suggestions && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex flex-col gap-[12px] mt-[0px] mr-[0px] mb-[30px] ml-[0px]"
+            >
+              <h3 className="text-[18px] leading-[26px] font-semibold text-[#193f47]">
+                Suggestions
+              </h3>
+              <div className="flex flex-col gap-[2px]">
+                {data.suggestions.map((sug: string, i: number) => (
+                  <motion.button
+                    key={i}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1, duration: 0.2 }}
+                    onClick={() => onSuggestionClick?.(sug)}
+                    className="flex items-center gap-[4px] p-[4px] text-left w-full rounded-[4px] transition-colors hover:bg-[#f1f5fa] group"
+                  >
+                    <div className="shrink-0 size-[20px] rounded-full flex items-center justify-center bg-[#f1f5fa] group-hover:bg-white transition-colors">
+                      <span className="text-[10px] font-medium leading-[14px] text-[#40566d] group-hover:text-[#2980e1] transition-colors">
+                        {i + 1}
+                      </span>
+                    </div>
+                    <p className="text-[16px] leading-[26px] tracking-[0.16px] font-medium text-[#40566d] group-hover:text-[#2980e1] transition-colors">
+                      {sug}
+                    </p>
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+          )}
         </motion.div>
       )}
-    </motion.div>
+    </>
   );
 };
 
@@ -518,7 +888,33 @@ export const RayMessageRenderer = ({ data, onSuggestionClick, isLast = true }: {
     return <FundsAddedMessage data={data} isLast={isLast} onSuggestionClick={onSuggestionClick} />;
   }
 
-  // 5. Ray AI Message (Standard Blocks, Max Width 398px)
+  // 5. Ray AI Message with Followup Question
+  if (data.artifact?.type === 'followup_question') {
+    return (
+      <div className="w-full animate-fade-in-up">
+        <FollowupQuestionArtifact
+          data={data.artifact.data}
+          isLast={isLast}
+          onButtonClick={onSuggestionClick}
+        />
+      </div>
+    );
+  }
+
+  // 6. Ray AI Message with Simple Text
+  if (data.artifact?.type === 'simple_text') {
+    return (
+      <div className="w-full animate-fade-in-up">
+        <SimpleTextArtifact
+          data={data.artifact.data}
+          isLast={isLast}
+          onSuggestionClick={onSuggestionClick}
+        />
+      </div>
+    );
+  }
+
+  // 7. Ray AI Message (Standard Blocks, Max Width 398px)
   return (
     <div className="flex gap-4 items-start w-full max-w-[398px] animate-fade-in-up">
         {/* Content Container - No Avatar */}
@@ -526,7 +922,7 @@ export const RayMessageRenderer = ({ data, onSuggestionClick, isLast = true }: {
             
             {/* Headline */}
             {data.headline && (
-                <h3 className="text-[17px] font-bold text-slate-900 leading-snug tracking-tight mb-1">
+                <h3 className="text-[20px] font-bold text-[#020202] leading-[28px] mb-1">
                     {data.headline}
                 </h3>
             )}
