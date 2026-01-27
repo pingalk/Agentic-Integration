@@ -95,6 +95,7 @@ export interface RayResponseData {
         title: string;
         content: string;
       };
+      buttons?: Array<{ label: string; variant: 'primary' | 'secondary' }>;
       suggestions: string[];
     };
   } | {
@@ -291,6 +292,31 @@ const InvestigationReportArtifact = ({ data, onRowClick, onSuggestionClick, isLa
                 <p className="text-[16px] leading-[26px] text-[#40566d] tracking-[0.16px]">
                   {data.resolution.content}
                 </p>
+              </motion.div>
+            )}
+
+            {/* 5b. Action Buttons (Phase 3+) - if buttons exist */}
+            {phase >= 3 && data.buttons && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.2 }}
+                className="flex gap-3 mt-2"
+              >
+                {data.buttons.map((button: { label: string; variant: 'primary' | 'secondary' }, i: number) => (
+                  <button
+                    key={i}
+                    onClick={() => onSuggestionClick?.(button.label)}
+                    className={clsx(
+                      'px-4 py-2 rounded-lg font-medium text-[14px] transition-all duration-200',
+                      button.variant === 'primary'
+                        ? 'bg-[#2563EB] text-white hover:bg-[#1d4ed8] shadow-sm'
+                        : 'bg-[#f1f5fa] text-[#40566d] hover:bg-[#e2e8f0] border border-[#e2e8f0]'
+                    )}
+                  >
+                    {button.label}
+                  </button>
+                ))}
               </motion.div>
             )}
           </div>
