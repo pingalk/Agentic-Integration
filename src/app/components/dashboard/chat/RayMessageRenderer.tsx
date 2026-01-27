@@ -158,11 +158,12 @@ const InvestigationReportArtifact = ({ data, onRowClick, onSuggestionClick, isLa
                 <div className="shrink-0 size-[20px] bg-[#E9690C] rounded-[3.33px] flex items-center justify-center shadow-sm">
                   <Wallet size={12} strokeWidth={2.5} className="text-white" />
                 </div>
-                <h3 className="text-[20px] leading-[28px] font-bold text-[#020202]">
+                <h3 className="text-[18px] leading-[24px] font-semibold text-[#020202]">
                   <PerplexityStreamText
                     content={data.headline}
                     speed={15}
                     onComplete={handleHeadlineComplete}
+                    inheritStyles
                   />
                 </h3>
               </motion.div>
@@ -284,7 +285,7 @@ const InvestigationReportArtifact = ({ data, onRowClick, onSuggestionClick, isLa
                 transition={{ duration: 0.4, ease: 'easeOut' }}
                 className="flex flex-col gap-[4px]"
               >
-                <h3 className="text-[20px] leading-[28px] font-bold text-[#020202]">
+                <h3 className="text-[18px] leading-[24px] font-semibold text-[#020202]">
                   {data.resolution.title}
                 </h3>
                 <p className="text-[16px] leading-[26px] text-[#40566d] tracking-[0.16px]">
@@ -416,11 +417,12 @@ const FollowupQuestionArtifact = ({
             <line x1="12" y1="17" x2="12.01" y2="17" />
           </svg>
         </div>
-        <h3 className="text-[20px] leading-[28px] font-bold text-[#020202]">
+        <h3 className="text-[18px] leading-[24px] font-semibold text-[#020202]">
           <PerplexityStreamText
             content={data.headline}
             speed={15}
             onComplete={handleHeadlineComplete}
+            inheritStyles
           />
         </h3>
       </motion.div>
@@ -559,11 +561,12 @@ const SimpleTextArtifact = ({
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               </div>
-              <h3 className="text-[20px] leading-[28px] font-bold text-[#020202]">
+              <h3 className="text-[18px] leading-[24px] font-semibold text-[#020202]">
                 <PerplexityStreamText
                   content={data.headline}
                   speed={15}
                   onComplete={handleHeadlineComplete}
+                  inheritStyles
                 />
               </h3>
             </motion.div>
@@ -922,7 +925,7 @@ export const RayMessageRenderer = ({ data, onSuggestionClick, isLast = true }: {
             
             {/* Headline */}
             {data.headline && (
-                <h3 className="text-[20px] font-bold text-[#020202] leading-[28px] mb-1">
+                <h3 className="text-[17px] font-bold text-slate-900 leading-snug tracking-tight mb-1">
                     {data.headline}
                 </h3>
             )}

@@ -6,6 +6,7 @@ interface PerplexityStreamProps {
   speed?: number; // ms per char
   onComplete?: () => void;
   className?: string;
+  inheritStyles?: boolean; // When true, inherits font styles from parent (for headlines)
 }
 
 interface TextSegment {
@@ -13,11 +14,12 @@ interface TextSegment {
   isBold: boolean;
 }
 
-export const PerplexityStreamText = ({ 
-  content, 
-  speed = 10, 
+export const PerplexityStreamText = ({
+  content,
+  speed = 10,
   onComplete,
-  className 
+  className,
+  inheritStyles = false
 }: PerplexityStreamProps) => {
   const [visibleCount, setVisibleCount] = useState(0);
   const requestRef = useRef<number>();
@@ -91,10 +93,12 @@ export const PerplexityStreamText = ({
       const textSlice = segment.text.slice(0, charCountInSegment);
 
       elements.push(
-        <span 
-          key={i} 
+        <span
+          key={i}
           className={clsx(
-            segment.isBold ? "font-semibold text-slate-900" : "font-normal text-slate-600"
+            inheritStyles
+              ? (segment.isBold ? "font-bold" : "") // Inherit from parent, only add bold for **text**
+              : (segment.isBold ? "font-semibold text-slate-900" : "font-normal text-slate-600")
           )}
         >
           {textSlice}
@@ -111,8 +115,8 @@ export const PerplexityStreamText = ({
   };
 
   return (
-    <div className={clsx("inline text-[15px] leading-[1.6]", className)}>
+    <span className={clsx(inheritStyles ? "inline" : "inline text-[15px] leading-[1.6]", className)}>
       {renderContent()}
-    </div>
+    </span>
   );
 };
