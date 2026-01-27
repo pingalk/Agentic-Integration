@@ -121,6 +121,21 @@ export interface RayResponseData {
 const containerVar = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } };
 const itemVar = { hidden: { opacity: 0, y: 5, filter: 'blur(4px)' }, visible: { opacity: 1, y: 0, filter: 'blur(0)' } };
 
+// --- Markdown Bold Parser for Static Text ---
+const parseMarkdownBold = (content: string): React.ReactNode[] => {
+  if (!content) return [];
+  const parts = content.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <span key={i} className="font-semibold text-[#192839]">{part.slice(2, -2)}</span>;
+    }
+    return <span key={i}>{part}</span>;
+  }).filter(node => {
+    const text = typeof node === 'string' ? node : (node as React.ReactElement).props.children;
+    return text && text.length > 0;
+  });
+};
+
 // --- Investigation Report Component ---
 const InvestigationReportArtifact = ({ data, onRowClick, onSuggestionClick, isLast }: any) => {
   const [subtextStarted, setSubtextStarted] = useState(false);
@@ -289,8 +304,8 @@ const InvestigationReportArtifact = ({ data, onRowClick, onSuggestionClick, isLa
                 <h3 className="text-[18px] leading-[24px] font-semibold text-[#020202]">
                   {data.resolution.title}
                 </h3>
-                <p className="text-[16px] leading-[26px] text-[#40566d] tracking-[0.16px]">
-                  {data.resolution.content}
+                <p className="text-[16px] leading-[26px] text-[#40566d] tracking-[0.16px] whitespace-pre-line">
+                  {parseMarkdownBold(data.resolution.content)}
                 </p>
               </motion.div>
             )}
