@@ -1,0 +1,547 @@
+import React, { useState, useEffect } from 'react';
+import { SmartTable, MessageFooter, SuggestionStack } from './RayComponents';
+import Ray from '@/imports/Ray';
+import Copy from '@/imports/Copy';
+import { FundsAddedCard } from './artifacts/FundsAddedCard';
+import { FundsAddedHeader, FundsAddedBody, SettlementCard, RayInsightCard } from './artifacts/FundsAddedComponents';
+import { Wallet, Download, ExternalLink, ThumbsUp, ThumbsDown, Share2, Copy as CopyIcon } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import clsx from 'clsx';
+import { PerplexityStreamText } from './PerplexityStreamingTypography';
+import { RayThinking } from '../RayThinking';
+
+// --- Elegant Tooltip Component ---
+const Tooltip = ({ children, text, position = 'top' }: { children: React.ReactNode; text: string; position?: 'top' | 'bottom' | 'left' | 'right' }) => {
+  const [isVisible, setIsVisible] = React.useState(false);
+
+  const positionClasses = {
+    top: 'bottom-full left-1/2 -translate-x-1/2 mb-2',
+    bottom: 'top-full left-1/2 -translate-x-1/2 mt-2',
+    left: 'right-full top-1/2 -translate-y-1/2 mr-2',
+    right: 'left-full top-1/2 -translate-y-1/2 ml-2'
+  };
+
+  return (
+    <div 
+      className="relative inline-flex"
+      onMouseEnter={() => setIsVisible(true)}
+      onMouseLeave={() => setIsVisible(false)}
+    >
+      {children}
+      <AnimatePresence>
+        {isVisible && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: position === 'top' ? 5 : position === 'bottom' ? -5 : 0 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: position === 'top' ? 5 : position === 'bottom' ? -5 : 0 }}
+            transition={{ duration: 0.15, ease: 'easeOut' }}
+            className={clsx(
+              'absolute z-[9999] pointer-events-none whitespace-nowrap',
+              'px-3 py-1.5 text-xs font-medium text-white',
+              'bg-slate-900 rounded-lg shadow-lg',
+              positionClasses[position]
+            )}
+          >
+            {text}
+            {/* Arrow */}
+            <div 
+              className={clsx(
+                'absolute w-2 h-2 bg-slate-900 rotate-45',
+                position === 'top' && 'bottom-[-4px] left-1/2 -translate-x-1/2',
+                position === 'bottom' && 'top-[-4px] left-1/2 -translate-x-1/2',
+                position === 'left' && 'right-[-4px] top-1/2 -translate-y-1/2',
+                position === 'right' && 'left-[-4px] top-1/2 -translate-y-1/2'
+              )}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+// Flexible content block types
+export type ContentBlock = 
+  | { type: 'text'; content: string }
+  | { type: 'table'; headers: string[]; rows: any[] }
+  | { type: 'card'; title: string; value: string; trend?: string }; // Future proofing
+
+export interface RayResponseData {
+  id: string;
+  sender: 'user' | 'ai';
+  headline?: string;     // Optional Top Headline
+  blocks?: ContentBlock[]; // Flexible array of content
+  suggestions?: string[];
+  isThinking?: boolean;
+  resolution?: { title: string; content: string };
+  artifact?: {
+    type: 'investigation_report';
+    data: {
+      headline: string;
+      subtext: string;
+      stats: Array<{ label: string; value: string }>;
+      table: {
+        rows: Array<{
+          id: string;
+          amount: string;
+          status: string;
+          date: string;
+          rrn: string;
+          email: string;
+        }>;
+      };
+      resolution: {
+        title: string;
+        content: string;
+      };
+      suggestions: string[];
+    };
+  } | {
+    type: 'funds_added_card';
+  };
+}
+
+// --- Animation Primitives ---
+const containerVar = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } };
+const itemVar = { hidden: { opacity: 0, y: 5, filter: 'blur(4px)' }, visible: { opacity: 1, y: 0, filter: 'blur(0)' } };
+
+// --- Investigation Report Component ---
+const InvestigationReportArtifact = ({ data, onRowClick, onSuggestionClick, isLast }: any) => {
+  return (
+    <motion.div className="flex flex-col gap-[24px] w-full mt-2" initial="hidden" animate="visible" variants={containerVar}>
+      
+      {/* Primary Content Section - gap-[16px] between subsections */}
+      <div className="flex flex-col gap-[16px]">
+        {/* Header + Subtext + Stats Group - gap-[4px] internally */}
+        <div className="flex flex-col gap-[4px] px-[0px] py-[4px]">
+          {/* 1. Header: Icon + Bold Text */}
+          <motion.div variants={itemVar} className="flex gap-[6px] items-center">
+             <div className="shrink-0 size-[20px] bg-[#E9690C] rounded-[3.33px] flex items-center justify-center shadow-sm">
+                <Wallet size={12} strokeWidth={2.5} className="text-white" />
+             </div>
+             <h3 className="text-[18px] leading-[24px] font-semibold text-[#020202]">
+                {data.headline}
+             </h3>
+          </motion.div>
+
+          {/* 2. Subtext with inline bold */}
+          <motion.div variants={itemVar} className="text-[16px] text-[#40566d] leading-[26px] tracking-[0.16px]">
+             <span>This happened because </span>
+             <span className="font-semibold text-[#192839]">your refunds this week exceeded your payments</span>
+             <span>:</span>
+          </motion.div>
+
+          {/* 3. Stats List (using native list-disc) */}
+          <motion.ul variants={itemVar} className="flex flex-col gap-[6px] pl-[48px] list-disc ml-0">
+             {data.stats.map((stat: any, i: number) => (
+                <li key={i} className="text-[16px] leading-[24px] text-[#40566d]">
+                   <span className="text-[#40566d]">{stat.label}: </span>
+                   <span className="font-semibold text-[#192839]">{stat.value}</span>
+                </li>
+             ))}
+          </motion.ul>
+        </div>
+
+        {/* 4. Table Section */}
+        <motion.div variants={itemVar} className="pl-0 py-[12px]">
+           <h4 className="text-[15px] font-bold text-slate-900 mb-3">Your recent refunds:</h4>
+           
+           <div className="w-full rounded-[12px] overflow-hidden border border-[#E4E7EC] relative group/table">
+              {/* Table Header */}
+              <div className="flex h-[48px] text-[14px] font-semibold text-[#192839] bg-[rgba(108,132,157,0.06)] px-[16px] border-b border-[rgba(108,132,157,0.18)]">
+                  <div className="w-[140px] flex items-center pl-[20px]">Amount</div>
+                  <div className="w-[120px] flex items-center">Status</div>
+                  <div className="w-[160px] flex items-center">Issued On</div>
+                  <div className="w-[140px] flex items-center">Bank RRN</div>
+                  <div className="flex-1 flex items-center">Customer Email</div>
+              </div>
+              {/* Table Rows */}
+              <div className="bg-white">
+                 {data.table.rows.map((row: any) => (
+                   <div key={row.id} className="relative flex h-[56px] items-center px-[16px] border-b border-[#E4E7EC] last:border-b-0 hover:bg-[#F9FAFB] transition-colors group/row">
+                      <div className="w-[140px] font-semibold text-[#1D2939] text-[14px] pl-[20px]">{row.amount}</div>
+                      <div className="w-[120px]">
+                          <span className="inline-flex items-center h-[20px] px-[8px] bg-[rgba(18,145,208,0.09)] text-[#0f78ad] text-[12px] font-medium leading-[18px] rounded-[1000px]">
+                              {row.status}
+                          </span>
+                      </div>
+                      <div className="w-[160px] text-[#5D6B82] text-[14px] font-normal">{row.date}</div>
+                      <div className="w-[140px] text-[#5D6B82] font-mono text-[14px] font-normal group/cell overflow-visible">
+                        <div className="flex items-center gap-[8px]">
+                          <span>{row.rrn}</span>
+                          <Tooltip text="Copy RRN" position="top">
+                            <button 
+                              className="size-[16px] shrink-0 opacity-0 group-hover/cell:opacity-100 transition-all duration-300 ease-out transform -translate-x-2 group-hover/cell:translate-x-0 hover:scale-110"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigator.clipboard.writeText(row.rrn);
+                              }}
+                            >
+                              <Copy />
+                            </button>
+                          </Tooltip>
+                        </div>
+                      </div>
+                      <Tooltip text={row.email} position="top">
+                        <div className="flex-1 text-[#5D6B82] text-[14px] font-normal underline decoration-slate-300 underline-offset-2 hover:text-blue-600 truncate">{row.email}</div>
+                      </Tooltip>
+                   </div>
+                 ))}
+              </div>
+              
+              {/* Table-level hover actions - bottom right */}
+              <div className="absolute bottom-0 right-0 flex items-center gap-2 bg-white shadow-lg border border-slate-200 rounded-md p-1.5 opacity-0 group-hover/table:opacity-100 transition-opacity z-10 m-[8px]">
+                <Tooltip text="Copy table data" position="top">
+                  <button 
+                    className="p-1.5 hover:bg-slate-50 rounded text-slate-500 hover:text-slate-700 transition-colors"
+                  >
+                    <CopyIcon size={16} />
+                  </button>
+                </Tooltip>
+                <Tooltip text="Download table" position="top">
+                  <button 
+                    className="p-1.5 hover:bg-slate-50 rounded text-slate-500 hover:text-slate-700 transition-colors"
+                  >
+                    <Download size={16} />
+                  </button>
+                </Tooltip>
+              </div>
+           </div>
+        </motion.div>
+
+        {/* 5. Resolution */}
+        <motion.div variants={itemVar} className="flex flex-col gap-[4px]">
+           <h3 className="text-[18px] leading-[24px] font-semibold text-[#020202]">
+              {data.resolution.title}
+           </h3>
+           <p className="text-[16px] leading-[26px] text-[#40566d] tracking-[0.16px]">
+              <span>You have ₹1.26 Lakhs in settlements waiting. </span>
+              <span className="font-medium text-[#192839]">Add ₹46,000 to your Razorpay account now</span>
+              <span> to clear the negative balance, and your full </span>
+              <span className="font-medium text-[#192839]">₹1.26 Lakhs will be transferred</span>
+              <span> to your bank by the </span>
+              <span className="font-medium text-[#192839]">next business day.</span>
+           </p>
+        </motion.div>
+      </div>
+
+      {/* 6. Footer Actions Strip - Only visible for last message */}
+      {isLast && (
+        <motion.div variants={itemVar} className="flex gap-[8px] items-center">
+          <Tooltip text="Good response" position="bottom">
+            <button 
+              className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors"
+            >
+              <ThumbsUp size={16} className="text-[#40566D]" strokeWidth={2} />
+            </button>
+          </Tooltip>
+          <Tooltip text="Bad response" position="bottom">
+            <button 
+              className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors"
+            >
+              <ThumbsDown size={16} className="text-[#40566D]" strokeWidth={2} />
+            </button>
+          </Tooltip>
+          <Tooltip text="Copy to clipboard" position="bottom">
+            <button 
+              className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors"
+            >
+              <div className="size-[16px]">
+                <Copy />
+              </div>
+            </button>
+          </Tooltip>
+          <Tooltip text="Share" position="bottom">
+            <button 
+              className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors"
+            >
+              <Share2 size={16} className="text-[#40566D]" strokeWidth={2} />
+            </button>
+          </Tooltip>
+        </motion.div>
+      )}
+
+      {/* 7. Divider - Only if suggestions are present and it's the last message */}
+      {isLast && data.suggestions && (
+         <motion.div variants={itemVar} className="w-full h-[0.5px] bg-[#CBD5E2]" />
+      )}
+
+      {/* 8. Suggestions Section - Only visible for last message */}
+      {isLast && data.suggestions && (
+        <motion.div variants={itemVar} className="flex flex-col gap-[12px] mt-[0px] mr-[0px] mb-[30px] ml-[0px]">
+           <h3 className="text-[18px] leading-[26px] font-semibold text-[#193f47]">
+              Suggestions
+           </h3>
+           <div className="flex flex-col gap-[2px]">
+              {data.suggestions.map((sug: string, i: number) => (
+                <button 
+                  key={i} 
+                  onClick={() => onSuggestionClick?.(sug)}
+                  className="flex items-center gap-[4px] p-[4px] text-left w-full rounded-[4px] transition-colors hover:bg-[#f1f5fa] group"
+                >
+                  <div className="shrink-0 size-[20px] rounded-full flex items-center justify-center bg-[#f1f5fa] group-hover:bg-white transition-colors">
+                    <span className="text-[10px] font-medium leading-[14px] text-[#40566d] group-hover:text-[#2980e1] transition-colors">
+                      {i + 1}
+                    </span>
+                  </div>
+                  <p className="text-[16px] leading-[26px] tracking-[0.16px] font-medium text-[#40566d] group-hover:text-[#2980e1] transition-colors">
+                    {sug}
+                  </p>
+                </button>
+              ))}
+           </div>
+        </motion.div>
+      )}
+    </motion.div>
+  );
+};
+
+// --- Block Sequencer ---
+const BlockSequencer = ({ blocks, onComplete }: { blocks: ContentBlock[], onComplete?: () => void }) => {
+  const [visibleIndex, setVisibleIndex] = useState(0);
+  const onCompleteCalled = React.useRef(false);
+
+  useEffect(() => {
+     // Check if we are done
+     if (visibleIndex >= blocks.length) {
+       if (onComplete && !onCompleteCalled.current) {
+         onCompleteCalled.current = true;
+         onComplete();
+       }
+       return;
+     }
+
+     const currentBlock = blocks[visibleIndex];
+     if (currentBlock && currentBlock.type !== 'text') {
+        const timer = setTimeout(() => {
+           setVisibleIndex(prev => prev + 1);
+        }, 600); 
+        return () => clearTimeout(timer);
+     }
+  }, [visibleIndex, blocks, onComplete]);
+
+  return (
+    <div className="flex flex-col gap-4 w-full">
+      {blocks.map((block, idx) => {
+        if (idx > visibleIndex) return null;
+
+        return (
+          <motion.div 
+            key={idx} 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="w-full"
+          >
+             {block.type === 'text' ? (
+                <PerplexityStreamText 
+                   content={block.content} 
+                   speed={20} // fast typing (20ms/char)
+                   onComplete={() => {
+                      // Only advance if this is the currently active block
+                      if (visibleIndex === idx) setVisibleIndex(prev => prev + 1);
+                   }}
+                />
+             ) : block.type === 'table' ? (
+                <SmartTable headers={block.headers} rows={block.rows} />
+             ) : null}
+          </motion.div>
+        )
+      })}
+    </div>
+  )
+}
+
+// --- Sequenced Funds Added Message Component ---
+const FundsAddedMessage = ({ data, isLast, onSuggestionClick }: { data: RayResponseData, isLast: boolean, onSuggestionClick?: (s: string) => void }) => {
+  // Sequence state: headline -> body -> artifact -> done
+  const [sequence, setSequence] = useState<'headline' | 'body' | 'artifact' | 'done'>(() => {
+    if (data.headline) return 'headline';
+    return 'body';
+  });
+
+  const handleHeadlineComplete = React.useCallback(() => {
+    setSequence('body');
+  }, []);
+
+  // For the body text, since we are using a static component that renders immediately,
+  // we can use a simple timeout or animation complete callback to trigger the next step.
+  // We'll treat it as "appearing" then moving to artifact.
+  const handleBodyComplete = React.useCallback(() => {
+    setSequence('artifact');
+  }, []);
+
+  const handleArtifactComplete = React.useCallback(() => {
+    setSequence('done');
+  }, []);
+
+  return (
+      <div className="flex gap-4 items-start w-full animate-fade-in-up">
+        {/* Content Container - No Avatar */}
+        <div className="flex flex-col gap-4 flex-1 min-w-0">
+             
+            {/* 1. Headline (Custom Component) */}
+            {data.headline && (
+                 <div className={sequence === 'headline' || sequence === 'body' || sequence === 'artifact' || sequence === 'done' ? 'block' : 'hidden'}> 
+                    <motion.div
+                       initial={{ opacity: 0, y: 10 }}
+                       animate={{ opacity: 1, y: 0 }}
+                       onAnimationComplete={handleHeadlineComplete}
+                    >
+                        <FundsAddedHeader title={data.headline} />
+                    </motion.div>
+                 </div>
+            )}
+
+            {/* 2. Body Text (Custom Component mimicking Frame7 text) */}
+            {(sequence === 'body' || sequence === 'artifact' || sequence === 'done') && (
+                 <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                    onAnimationComplete={handleBodyComplete}
+                 >
+                    <FundsAddedBody />
+                 </motion.div>
+            )}
+            
+            {/* 3. Artifacts (Card + Insight) */}
+            {(sequence === 'artifact' || sequence === 'done') && (
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                    onAnimationComplete={handleArtifactComplete}
+                    className="flex flex-col gap-4"
+                >
+                    <SettlementCard />
+                    <RayInsightCard />
+                </motion.div>
+            )}
+
+            {/* 4. Footer & Suggestions (Only when done and is last) */}
+            {(sequence === 'done') && isLast && (
+              <motion.div 
+                initial={{ opacity: 0 }} 
+                animate={{ opacity: 1 }} 
+                className="flex flex-col gap-6 mt-2"
+              >
+                  {/* Footer Actions */}
+                  <div className="flex gap-[8px] items-center">
+                    <Tooltip text="Good response" position="bottom">
+                      <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                        <ThumbsUp size={16} className="text-[#40566D]" strokeWidth={2} />
+                      </button>
+                    </Tooltip>
+                    <Tooltip text="Bad response" position="bottom">
+                      <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                        <ThumbsDown size={16} className="text-[#40566D]" strokeWidth={2} />
+                      </button>
+                    </Tooltip>
+                    <Tooltip text="Copy to clipboard" position="bottom">
+                      <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                        <div className="size-[16px]"><Copy /></div>
+                      </button>
+                    </Tooltip>
+                    <Tooltip text="Share" position="bottom">
+                      <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                        <Share2 size={16} className="text-[#40566D]" strokeWidth={2} />
+                      </button>
+                    </Tooltip>
+                  </div>
+
+                  {/* Divider */}
+                  {data.suggestions && <div className="w-full h-[0.5px] bg-[#CBD5E2]" />}
+
+                  {/* Suggestions */}
+                  {data.suggestions && (
+                    <div className="flex flex-col gap-[12px]">
+                       <h3 className="text-[18px] leading-[26px] font-semibold text-[#193f47]">Suggestions</h3>
+                       <div className="flex flex-col gap-[2px]">
+                          {data.suggestions.map((sug: string, i: number) => (
+                            <button 
+                              key={i} 
+                              onClick={() => onSuggestionClick?.(sug)}
+                              className="flex items-center gap-[4px] p-[4px] text-left w-full rounded-[4px] transition-colors hover:bg-[#f1f5fa] group"
+                            >
+                              <div className="shrink-0 size-[20px] rounded-full flex items-center justify-center bg-[#f1f5fa] group-hover:bg-white transition-colors">
+                                <span className="text-[10px] font-medium leading-[14px] text-[#40566d] group-hover:text-[#2980e1] transition-colors">
+                                  {i + 1}
+                                </span>
+                              </div>
+                              <p className="text-[16px] leading-[26px] tracking-[0.16px] font-medium text-[#40566d] group-hover:text-[#2980e1] transition-colors">
+                                {sug}
+                              </p>
+                            </button>
+                          ))}
+                       </div>
+                    </div>
+                  )}
+              </motion.div>
+            )}
+        </div>
+      </div>
+  );
+};
+
+export const RayMessageRenderer = ({ data, onSuggestionClick, isLast = true }: { data: RayResponseData; onSuggestionClick?: (suggestion: string) => void, isLast?: boolean }) => {
+  // 1. User Message (Right Aligned)
+  if (data.sender === 'user') {
+    return (
+      <motion.div 
+        initial={{ opacity: 0, y: 40, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }} // Cubic bezier for "rolling up" feel
+        className="bg-[#e6eafa] text-[#090e13] px-[16px] py-[12px] rounded-[12px] shadow-[0px_2px_2px_0px_rgba(237,236,236,0.16)] max-w-[398px] ml-auto w-fit text-[14px] leading-[20px] tracking-[-0.28px]"
+      >
+        {data.blocks?.[0].type === 'text' ? data.blocks[0].content : ''}
+      </motion.div>
+    );
+  }
+
+  // 2. Ray Thinking State
+  if (data.isThinking) {
+    return <RayThinking />;
+  }
+
+  // 3. Ray AI Message with Investigation Report Artifact
+  if (data.artifact?.type === 'investigation_report') {
+    return (
+      <div className="w-full animate-fade-in-up">
+        <InvestigationReportArtifact data={data.artifact.data} onSuggestionClick={onSuggestionClick} isLast={isLast} />
+      </div>
+    );
+  }
+
+  // 4. Ray AI Message with Funds Added Card
+  if (data.artifact?.type === 'funds_added_card') {
+    return <FundsAddedMessage data={data} isLast={isLast} onSuggestionClick={onSuggestionClick} />;
+  }
+
+  // 5. Ray AI Message (Standard Blocks, Max Width 398px)
+  return (
+    <div className="flex gap-4 items-start w-full max-w-[398px] animate-fade-in-up">
+        {/* Content Container - No Avatar */}
+        <div className="flex flex-col gap-2 flex-1 min-w-0">
+            
+            {/* Headline */}
+            {data.headline && (
+                <h3 className="text-[17px] font-bold text-slate-900 leading-snug tracking-tight mb-1">
+                    {data.headline}
+                </h3>
+            )}
+
+            {/* Sequenced Blocks */}
+            {data.blocks && <BlockSequencer blocks={data.blocks} />}
+
+            {/* Footer Actions - Only visible for last message */}
+            {isLast && <MessageFooter />}
+
+            {/* Stacked Suggestions - Only visible for last message */}
+            {isLast && data.suggestions && (
+                <SuggestionStack items={data.suggestions} />
+            )}
+        </div>
+    </div>
+  );
+};

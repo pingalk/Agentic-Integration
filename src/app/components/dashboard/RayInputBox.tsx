@@ -1,0 +1,118 @@
+import React, { useRef, useLayoutEffect, useState } from 'react';
+import { ArrowUp, Mic, Plus } from 'lucide-react';
+import { motion } from 'motion/react';
+import clsx from 'clsx';
+
+interface RayInputBoxProps {
+  value: string;
+  onChange: (value: string) => void;
+  onSend: () => void;
+  variant?: 'hero' | 'compact';
+  placeholder?: string;
+  autoFocus?: boolean;
+}
+
+export const RayInputBox: React.FC<RayInputBoxProps> = ({
+  value,
+  onChange,
+  onSend,
+  variant = 'hero',
+  placeholder = "Ask anything...",
+  autoFocus = false
+}) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [isFocused, setIsFocused] = useState(false);
+
+  // Configuration based on variant
+  const isHero = variant === 'hero';
+  const minHeight = 48; // Always start at 2 lines (48px = 2 × 24px line-height)
+  const maxHeight = 160; // Approx 5-6 lines
+  const fontSize = isHero ? 'text-lg' : 'text-[15px]';
+  const paddingRight = isHero ? 'pr-36' : 'pr-28'; // Ensure text never overlaps buttons
+
+  // Smooth Auto-Resize Logic
+  useLayoutEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    // Reset height to read scrollHeight correctly (shrink if needed)
+    textarea.style.height = '0px';
+    
+    // Calculate new height constrained by min/max
+    const newHeight = Math.min(Math.max(textarea.scrollHeight, minHeight), maxHeight);
+    
+    textarea.style.height = `${newHeight}px`;
+  }, [value, minHeight, maxHeight]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      onSend();
+    }
+  };
+
+  return (
+    <motion.div
+      layout
+      transition={{ type: "spring", bounce: 0, duration: 0.3 }}
+      className="bg-[#f8fafc] relative rounded-[26px] w-full"
+    >
+      <div className="content-stretch flex flex-col gap-[4px] items-end justify-end overflow-clip px-[20px] py-[16px] relative rounded-[inherit] size-full">
+        <textarea
+          ref={textareaRef}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          autoFocus={autoFocus}
+          placeholder={placeholder}
+          className="content-stretch flex gap-[8px] items-center relative shrink-0 w-full bg-transparent border-none outline-none resize-none font-['TASA_Orbiter_Display',sans-serif] leading-[24px] text-[#40566d] text-[18px] tracking-[0.36px] placeholder:text-[#768ea7]"
+          style={{ 
+            minHeight: '48px',
+            height: '48px'
+          }}
+        />
+        
+        {/* Buttons */}
+        <div className="content-stretch flex gap-[8px] items-center justify-end relative shrink-0 w-[197px]">
+          {/* Secondary Actions (Mic/Plus) */}
+          <div className="content-stretch flex gap-[4px] items-center relative shrink-0">
+            {/* Plus Button - Flat with hover background */}
+            <button className="relative rounded-[8px] shrink-0 size-[32px] hover:bg-[rgba(0,0,0,0.04)] transition-colors group" title="Add attachment">
+              <div className="absolute left-1/2 size-[20px] top-1/2 translate-x-[-50%] translate-y-[-50%]">
+                <Plus size={20} className="text-[#768EA7]" />
+              </div>
+            </button>
+            
+            {/* Mic Button - Flat with hover background */}
+            <button className="relative rounded-[8px] shrink-0 size-[32px] hover:bg-[rgba(0,0,0,0.04)] transition-colors group" title="Voice input">
+              <div className="absolute left-1/2 size-[16px] top-1/2 translate-x-[-50%] translate-y-[-50%]">
+                <Mic size={16} className="text-[#768EA7]" />
+              </div>
+            </button>
+          </div>
+          
+          {/* Send Button - UP Arrow (no rotation) */}
+          <button
+            onClick={onSend}
+            disabled={!value.trim()}
+            className="bg-[rgba(0,0,0,0.04)] relative rounded-[100px] shrink-0 size-[32px] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <div className="overflow-clip relative rounded-[inherit] size-full">
+              <div className="absolute border border-[#0354e0] border-solid inset-0 rounded-[8px] shadow-[0px_2px_4px_0px_rgba(0,0,0,0.1)]" style={{ backgroundImage: "linear-gradient(-73.0125deg, rgb(21, 102, 241) 54.842%, rgb(71, 147, 253) 98.573%)" }}>
+                <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_-2px_0px_0px_rgba(255,255,255,0.2),inset_0px_2px_0px_0px_rgba(255,255,255,0.2)]" />
+              </div>
+              <div className="absolute flex items-center justify-center left-1/2 size-[16px] top-[8px] translate-x-[-50%]">
+                <ArrowUp size={16} strokeWidth={2} className="text-white" />
+              </div>
+            </div>
+            <div aria-hidden="true" className="absolute border-[0.5px] border-solid border-white inset-0 pointer-events-none rounded-[100px]" />
+          </button>
+        </div>
+      </div>
+      
+      <div aria-hidden="true" className="absolute border border-[#6db7e8] border-solid inset-0 pointer-events-none rounded-[26px] shadow-[0px_6px_32px_4px_rgba(25,40,57,0.09)]" />
+    </motion.div>
+  );
+};
