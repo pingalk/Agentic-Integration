@@ -59,14 +59,14 @@ const generateArjunData = (): RayResponseData => {
 
 export const RayChatInterface = () => {
   const { currentPersona } = useDemo();
-  const { arjunScript } = useDemoScript();
+  const { arjunScript, sarahScript } = useDemoScript();
   const [messages, setMessages] = useState<RayResponseData[]>([]);
   const [inputValue, setInputValue] = useState("");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const messageRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const [showScrollButton, setShowScrollButton] = useState(false);
   const prevMessageCountRef = useRef(0);
-  
+
   // Widget States
   const [showAddFundsWidget, setShowAddFundsWidget] = useState(false);
   const [widgetAmount, setWidgetAmount] = useState('');
@@ -75,18 +75,21 @@ export const RayChatInterface = () => {
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [isInputHovered, setIsInputHovered] = useState(false);
   const isInputExpanded = isInputFocused || isInputHovered || inputValue.length > 0;
+
+  // Sarah Flow State
+  const [sarahFlowStep, setSarahFlowStep] = useState(0);
   
-  // Triggers for demo flow
+  // Triggers for demo flow - Arjun
   useEffect(() => {
     if (currentPersona.id === 'arjun' && messages.length === 0) {
         // Step 1: User asks question
         setTimeout(() => {
-            setMessages([{ 
-                id: 'u1', 
-                sender: 'user', 
-                blocks: [{ type: 'text', content: "Where are my settlements? Why is my account balance negative? We had high value txns this week" }] 
+            setMessages([{
+                id: 'u1',
+                sender: 'user',
+                blocks: [{ type: 'text', content: "Where are my settlements? Why is my account balance negative? We had high value txns this week" }]
             }]);
-            
+
             // Step 2: Show Thinking State
             setTimeout(() => {
                 const thinkingMsg: RayResponseData = {
@@ -98,7 +101,7 @@ export const RayChatInterface = () => {
 
                 // Step 3: Replace with Real Response after delay
                 setTimeout(() => {
-                    setMessages(prev => prev.map(msg => 
+                    setMessages(prev => prev.map(msg =>
                         msg.id === 'ai-response-1' ? generateArjunData() : msg
                     ));
                 }, 2000); // 2s thinking time
@@ -106,6 +109,42 @@ export const RayChatInterface = () => {
         }, 600);
     }
   }, [currentPersona.id, messages.length]);
+
+  // Triggers for demo flow - Sarah
+  useEffect(() => {
+    if (currentPersona.id === 'sarah' && messages.length === 0) {
+        // Step 1: User asks question
+        setTimeout(() => {
+            setMessages([{
+                id: 'sarah-u1',
+                sender: 'user',
+                blocks: [{ type: 'text', content: "My customer called and said payment was refunded. I didn't initiate this.. What is going on?" }]
+            }]);
+            setSarahFlowStep(1);
+
+            // Step 2: Show Thinking State
+            setTimeout(() => {
+                const thinkingMsg: RayResponseData = {
+                    id: 'sarah-ai-1',
+                    sender: 'ai',
+                    isThinking: true
+                };
+                setMessages(prev => [...prev, thinkingMsg]);
+
+                // Step 3: Replace with Investigation Report after delay
+                setTimeout(() => {
+                    setMessages(prev => prev.map(msg =>
+                        msg.id === 'sarah-ai-1' ? {
+                            ...sarahScript.sarah_step_1,
+                            id: 'sarah-ai-1',
+                            sender: 'ai' as const
+                        } : msg
+                    ));
+                }, 2000); // 2s thinking time
+            }, 600);
+        }, 600);
+    }
+  }, [currentPersona.id, messages.length, sarahScript]);
 
   // Auto-scroll: user messages to top of viewport, AI messages show start
   useEffect(() => {
@@ -193,17 +232,102 @@ export const RayChatInterface = () => {
   }, [inputValue]);
 
   const handleSuggestionClick = (suggestion: string) => {
+    // Handle Arjun's Add Funds suggestion
     if (suggestion.toLowerCase().includes('add funds')) {
       // Extract amount: "Add funds worth ₹46,000"
       const match = suggestion.match(/₹([0-9,]+)/);
       const amount = match ? match[1].replace(/,/g, '') : ''; // 46000
-      
+
       setWidgetAmount(amount); // This will pass '46000' which widget formats as needed
       setShowAddFundsWidget(true);
-      
-      // Optionally populate input or just keep widget open
-      // setInputValue(suggestion); // User might expect this
+      return;
     }
+
+    // Handle Sarah's flow transitions
+    if (currentPersona.id === 'sarah') {
+      // Handle "Yes" button click
+      if (suggestion === 'Yes') {
+        if (sarahFlowStep === 1) {
+          // Transition from step 1 to step 2 (auto-capture confirmation)
+          handleSarahFlowAdvance("Change payment setting to auto-capture", sarahScript.sarah_step_2, 2);
+        } else if (sarahFlowStep === 2) {
+          // Transition from step 2 to step 3 (WhatsApp alerts)
+          handleSarahFlowAdvance("Yes", sarahScript.sarah_step_3, 3);
+        } else if (sarahFlowStep === 3) {
+          // Transition from step 3 to step 4 (WhatsApp enabled confirmation)
+          handleSarahFlowAdvance("Yes, enable WhatsApp alerts", sarahScript.sarah_step_4, 4);
+        }
+        return;
+      }
+
+      // Handle "Not now" button click
+      if (suggestion === 'Not now') {
+        // Show dismissal message and end flow
+        setMessages(prev => [...prev, {
+          id: `sarah-u-${Date.now()}`,
+          sender: 'user',
+          blocks: [{ type: 'text', content: 'Not now' }]
+        }]);
+
+        setTimeout(() => {
+          setMessages(prev => [...prev, {
+            id: `sarah-ai-dismiss-${Date.now()}`,
+            sender: 'ai',
+            artifact: {
+              type: 'simple_text',
+              data: {
+                headline: "No problem!",
+                body: "I'll be here whenever you need help. Feel free to ask me anything about your payments or account settings.",
+                suggestions: []
+              }
+            }
+          }]);
+        }, 600);
+        return;
+      }
+
+      // Handle suggestion clicks that trigger auto-capture flow
+      if (sarahFlowStep === 1 && (
+        suggestion.toLowerCase().includes('auto-capture') ||
+        suggestion.toLowerCase().includes('change payment')
+      )) {
+        handleSarahFlowAdvance(suggestion, sarahScript.sarah_step_2, 2);
+        return;
+      }
+    }
+  };
+
+  // Helper function to advance Sarah's flow
+  const handleSarahFlowAdvance = (userMessage: string, nextStep: any, nextFlowStep: number) => {
+    // Add user message
+    setMessages(prev => [...prev, {
+      id: `sarah-u-${Date.now()}`,
+      sender: 'user',
+      blocks: [{ type: 'text', content: userMessage }]
+    }]);
+
+    // Show thinking state
+    setTimeout(() => {
+      const thinkingId = `sarah-ai-thinking-${Date.now()}`;
+      setMessages(prev => [...prev, {
+        id: thinkingId,
+        sender: 'ai',
+        isThinking: true
+      }]);
+
+      // Replace with next step response
+      setTimeout(() => {
+        setMessages(prev => {
+          const withoutThinking = prev.filter(m => !m.isThinking);
+          return [...withoutThinking, {
+            ...nextStep,
+            id: `sarah-ai-${Date.now()}`,
+            sender: 'ai' as const
+          }];
+        });
+        setSarahFlowStep(nextFlowStep);
+      }, 1500);
+    }, 600);
   };
 
   return (

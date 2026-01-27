@@ -100,7 +100,7 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
     theme: 'neutral',
     landing: {
       greeting: "Welcome back, Sarah!",
-      initialPrompt: "Why are my settlements paused?",
+      initialPrompt: "My customer called and said payment was refunded. I didn't initiate this.. What is going on?",
       cards: [
         {
           id: 'briefing',

@@ -86,13 +86,13 @@ export const useDemoScript = () => {
             headline: "Funds added successfully & settlements resumed",
             // Using blocks for the main text content to support the specific layout
             blocks: [
-                { 
-                    type: 'text', 
-                    content: "Great news! We have received your ₹46,000. This has cleared your negative balance, and the hold on your funds has been removed." 
+                {
+                    type: 'text',
+                    content: "Great news! We have received your ₹46,000. This has cleared your negative balance, and the hold on your funds has been removed."
                 },
-                { 
-                    type: 'text', 
-                    content: "**What happens next?** Your full settlement of ₹1.26 Lakhs is now scheduled to be transferred to your bank account by tomorrow, Jan 24." 
+                {
+                    type: 'text',
+                    content: "**What happens next?** Your full settlement of ₹1.26 Lakhs is now scheduled to be transferred to your bank account by tomorrow, Jan 24."
                 }
             ],
             // Complex artifact type to render both cards
@@ -100,14 +100,90 @@ export const useDemoScript = () => {
                 type: 'funds_added_card'
             },
             // Resolution is now part of blocks to ensure correct ordering (Text -> Card)
-            // But we keep the key if needed, or set to undefined. 
-            // The renderer will be updated to ignore this if blocks cover it, 
+            // But we keep the key if needed, or set to undefined.
+            // The renderer will be updated to ignore this if blocks cover it,
             // OR we can leave it undefined.
             suggestions: [
                 "How do I setup refund credits?",
                 "Do refund credits expire?",
                 "Tell me how Refund Credits can keep my settlements running smoothly."
             ]
+        }
+    };
+
+    // Sarah's Journey (Auto-Refunded Payments)
+    const sarahScript = {
+        sarah_step_1: {
+            artifact: {
+                type: 'investigation_report',
+                data: {
+                    headline: "Diagnosis: 5 Payments worth ₹5,400 were auto-refunded",
+                    subtext: "I see 5 transactions totalling **₹5,400 were authorized** by the customer's bank but were auto-refunded because they were not 'Captured' by your system within the mandatory window.",
+                    stats: [
+                        { label: "Payments authorized", value: "₹5,400" },
+                        { label: "Payments captured", value: "₹0" },
+                        { label: "Auto-refunded", value: "₹5,400" }
+                    ],
+                    table: {
+                        rows: [
+                            { id: '1', amount: '₹1,500', status: 'Refunded', date: '23 Jan 2026, 08:53', rrn: '514633500160', email: 'customer1@email.com' },
+                            { id: '2', amount: '₹1,500', status: 'Refunded', date: '23 Jan 2026, 08:53', rrn: '514633500161', email: 'customer2@email.com' },
+                            { id: '3', amount: '₹1,000', status: 'Refunded', date: '23 Jan 2026, 08:53', rrn: '514633500162', email: 'customer3@email.com' },
+                            { id: '4', amount: '₹1,000', status: 'Refunded', date: '23 Jan 2026, 08:53', rrn: '514633500163', email: 'customer4@email.com' },
+                            { id: '5', amount: '₹400', status: 'Refunded', date: '21 Jan 2026, 08:53', rrn: '514633500164', email: 'customer5@email.com' }
+                        ]
+                    },
+                    resolution: {
+                        title: "The cause:",
+                        content: "Your payment capture setting was likely set to **manual capture**, when you updated your Shopify integration recently. This is likely the root cause.\n\n**My recommendation:** I can switch your account to \"Auto-capture\" right now so you never miss a payment again. Should I go and change this to auto-capture?"
+                    },
+                    suggestions: [
+                        "What is payment capture? Why does it matter?",
+                        "Can the payment capture setting be reversed later on?",
+                        "What are refund credits?"
+                    ]
+                }
+            }
+        },
+        sarah_step_2: {
+            artifact: {
+                type: 'followup_question',
+                data: {
+                    headline: "Your payments are now set to \"auto-capture\"",
+                    question: "While future payments are now safe, the 5 orders mentioned earlier have already been refunded to your customers.\n\nTo help you save these sales, I can instantly generate and email Payment Links to these 5 customers for the exact amounts they tried to pay.\n\nShall I send those Payment Links now?",
+                    buttons: [
+                        { label: "Yes", variant: "primary" },
+                        { label: "Not now", variant: "secondary" }
+                    ]
+                }
+            }
+        },
+        sarah_step_3: {
+            artifact: {
+                type: 'followup_question',
+                data: {
+                    headline: "Stay updated in real-time with WhatsApp alerts",
+                    question: "I noticed your notifications are currently turned off. Enabling these ensures you get a WhatsApp alert the moment a payment requires your attention, preventing any unexpected refunds in the future.\n\nWould you like me to enable WhatsApp alerts for your account?",
+                    buttons: [
+                        { label: "Yes", variant: "primary" },
+                        { label: "Not now", variant: "secondary" }
+                    ]
+                }
+            }
+        },
+        sarah_step_4: {
+            artifact: {
+                type: 'simple_text',
+                data: {
+                    headline: "WhatsApp alerts are now enabled!",
+                    body: "You'll now receive instant WhatsApp notifications whenever a payment requires your attention. This will help you stay on top of your transactions and avoid any unexpected issues in the future.",
+                    suggestions: [
+                        "What other notifications can I enable?",
+                        "How do I customize my alert preferences?",
+                        "Show me my notification settings"
+                    ]
+                }
+            }
         }
     };
 
@@ -136,6 +212,7 @@ export const useDemoScript = () => {
         processInput,
         scriptData,
         arjunScript,
+        sarahScript,
         getFutureDate
     };
 };
