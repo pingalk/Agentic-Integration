@@ -3,7 +3,7 @@ import { StoreProvider } from './StoreContext';
 import { FormProvider } from './FormStore';
 import { RayLayout } from './RayLayout';
 import clsx from "clsx";
-import { Menu, ChevronDown, Sparkles, Check, LayoutTemplate, ArrowUpRight, TrendingUp, AlertCircle, ArrowRight } from 'lucide-react';
+import { Menu, ChevronDown, Sparkles, Check, LayoutTemplate, ArrowUpRight, TrendingUp, AlertCircle, ArrowRight, CheckCircle2, ChevronRight } from 'lucide-react';
 import { RayInputBox } from './RayInputBox';
 import { RaySidebar } from './RaySidebar';
 import Ray from "../../../imports/Ray";
@@ -16,7 +16,6 @@ import svgPathsInput from "../../../imports/svg-h0tl9nb0vi";
 import svgPathsCards from "../../../imports/svg-9ik4xuwq12";
 import svgPathsStats from "../../../imports/svg-h6d9ul042g";
 import { motion } from 'motion/react';
-import { CheckCircle2, ChevronRight, ArrowRight } from 'lucide-react';
 
 // --- Balance & Settlement Card Component ---
 // Matches the Figma design with blue header + two-panel white card
