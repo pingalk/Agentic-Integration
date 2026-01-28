@@ -395,11 +395,13 @@ export default function LedContainer({ onClose, context = 'transactions-list', t
               <div className="relative shrink-0 size-[20px]">
                 <Ray />
               </div>
-              <p className="font-sans font-semibold text-[#192839] text-[16px] leading-[24px]">Ray</p>
+              <p className="font-sans font-semibold text-[#192839] text-[16px] leading-[24px]">
+                {mode === 'floating' ? 'Ask RAY' : 'Ray'}
+              </p>
             </div>
             
             <div className="flex items-center gap-1">
-                {onModeChange && (
+                {onModeChange && mode !== 'floating' && (
                     <DropdownMenu.Root>
                         <DropdownMenu.Trigger asChild>
                             <button className="cursor-pointer hover:bg-slate-100 p-1 rounded-md transition-colors text-slate-500 outline-none flex items-center justify-center">
@@ -487,12 +489,60 @@ export default function LedContainer({ onClose, context = 'transactions-list', t
       {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto bg-white relative">
         {view === 'landing' ? (
-             landingVariant === 'v2' ? (
-                <Variant2Landing 
-                    prompt={prompt} 
-                    setPrompt={setPrompt} 
-                    onSend={handleSend} 
-                    onChipClick={handleChipClick} 
+             mode === 'floating' ? (
+                // Compact floating mode - just input
+                <div className="flex flex-col h-full relative p-4">
+                    <div className="flex-1 flex items-start">
+                        <div className="w-full">
+                            <div className="backdrop-blur-[5.5px] backdrop-filter bg-white relative rounded-[16px] w-full shadow-[0px_2px_8px_rgba(0,0,0,0.04)] min-h-[100px] flex flex-col border border-[#a4d4fe] border-[1.5px]">
+                                <div className="flex-1 p-[16px] pb-[48px]">
+                                    <textarea
+                                        value={prompt}
+                                        onChange={(e) => setPrompt(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                e.preventDefault();
+                                                handleSend();
+                                            }
+                                        }}
+                                        placeholder="Ask me anything"
+                                        className="w-full h-full bg-transparent border-none outline-none text-[#192839] text-[16px] font-sans resize-none placeholder:text-[#7d7d7d] leading-[24px]"
+                                        rows={2}
+                                    />
+                                </div>
+                                {/* Action Buttons */}
+                                <div className="absolute bottom-[12px] right-[12px] flex gap-[8px] items-center">
+                                    <button className="size-[32px] flex items-center justify-center rounded-[8px] border border-slate-200 bg-white hover:bg-slate-50 transition-colors">
+                                        <svg width="16" height="16" viewBox="0 0 20 20" fill="#768EA7">
+                                            <path d={svgPathsInput.p83dad00} />
+                                        </svg>
+                                    </button>
+                                    <button className="size-[32px] flex items-center justify-center rounded-[8px] border border-slate-200 bg-white hover:bg-slate-50 transition-colors">
+                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="#768EA7">
+                                            <path clipRule="evenodd" d={svgPathsInput.p36c9dec0} fillRule="evenodd" />
+                                            <path d={svgPathsInput.p6ec300} />
+                                        </svg>
+                                    </button>
+                                    <button
+                                        onClick={handleSend}
+                                        className="size-[32px] flex items-center justify-center rounded-full bg-gradient-to-br from-[#1566f1] to-[#4793fd] hover:opacity-90 transition-opacity shadow-[inset_0px_2px_0px_0px_rgba(255,255,255,0.2)]"
+                                    >
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                            <line x1="12" y1="19" x2="12" y2="5"></line>
+                                            <polyline points="5 12 12 5 19 12"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+             ) : landingVariant === 'v2' ? (
+                <Variant2Landing
+                    prompt={prompt}
+                    setPrompt={setPrompt}
+                    onSend={handleSend}
+                    onChipClick={handleChipClick}
                 />
              ) : (
              <div className="flex flex-col h-full relative">
@@ -514,16 +564,16 @@ export default function LedContainer({ onClose, context = 'transactions-list', t
                         <p className="text-slate-400 text-xs font-medium uppercase tracking-wider text-center">Things you can ask me</p>
                         <div className="flex flex-col gap-2 w-full items-center">
                             {activeSuggestions.map((suggestion, idx) => (
-                                <SuggestionChip 
+                                <SuggestionChip
                                     key={idx}
                                     onClick={() => handleChipClick(suggestion)}
-                                    label={suggestion} 
+                                    label={suggestion}
                                 />
                             ))}
                         </div>
                     </div>
                 </div>
-                
+
                 <InputArea />
             </div>
             )

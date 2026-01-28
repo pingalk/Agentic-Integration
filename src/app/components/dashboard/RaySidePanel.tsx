@@ -51,12 +51,13 @@ export const RaySidePanel: React.FC<RaySidePanelProps> = ({ isOpen, onClose, mod
             exit={mode === 'floating' ? { x: '100%' } : { width: 0, opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             className={`
-              ${mode === 'floating' 
-                ? 'fixed top-2 right-2 bottom-16 z-50 rounded-xl shadow-2xl h-[calc(100vh-4rem)]' 
+              ${mode === 'floating'
+                ? 'fixed bottom-16 right-4 z-50 rounded-xl shadow-2xl'
                 : 'relative h-full border-l border-slate-200 bg-white shrink-0'
               }
                overflow-hidden
             `}
+            style={mode === 'floating' ? { height: '200px' } : undefined}
           >
              <div className="h-full w-full md:w-[420px] max-w-[calc(100vw-32px)] md:max-w-none"> {/* Wrapper to maintain width during resize animation */}
                 <LedContainer 
