@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { RayMessageRenderer, RayResponseData } from './chat/RayMessageRenderer';
 import { AddFundsWidget } from './chat/AddFundsWidget';
+import { PaymentLinkWidget, PaymentLinkPrefill, parsePaymentLinkIntent } from './chat/PaymentLinkWidget';
 import { TransactionPreviewPane, TransactionData } from './chat/TransactionPreviewPane';
 import { ArrowDown, ArrowUp, Mic, Plus, Sparkles } from 'lucide-react';
 import { useDemo } from '@/context/DemoContext';
@@ -76,6 +77,10 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
   // Widget States
   const [showAddFundsWidget, setShowAddFundsWidget] = useState(false);
   const [widgetAmount, setWidgetAmount] = useState('');
+
+  // Payment Link Widget States
+  const [showPaymentLinkWidget, setShowPaymentLinkWidget] = useState(false);
+  const [paymentLinkPrefill, setPaymentLinkPrefill] = useState<PaymentLinkPrefill | null>(null);
 
   // Input Box States
   const [isInputFocused, setIsInputFocused] = useState(false);
@@ -398,20 +403,21 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
     handleScroll();
   }, [messages]);
 
-  // Check for "Add Funds" in input
+  // Check for "Add Funds" or "Payment Link" in input
   useEffect(() => {
-    if (inputValue.toLowerCase().includes('add funds')) {
+    const lowerInput = inputValue.toLowerCase();
+
+    if (lowerInput.includes('add funds')) {
       setShowAddFundsWidget(true);
-    } else {
-      // Optionally hide it if they delete the text, but for better UX maybe keep it open if it was opened?
-      // For now, let's close it if text is cleared or doesn't match to keep it responsive to "typing"
-      // But if it was opened via suggestion, we shouldn't close it just because input is empty.
-      // So let's only auto-open via text. Auto-closing is tricky.
-      // Let's say: if input has "add funds", show it. 
-      // If input doesn't have it, ONLY hide if it was NOT opened by suggestion? 
-      // Simplified: If input includes "add funds", force show.
-      // If I want to close it, I need a close handler.
-      // For now: only open on match.
+    }
+
+    // Check for payment link intent
+    if (lowerInput.includes('payment link') || lowerInput.includes('create link')) {
+      const prefill = parsePaymentLinkIntent(inputValue);
+      if (prefill) {
+        setPaymentLinkPrefill(prefill);
+        setShowPaymentLinkWidget(true);
+      }
     }
   }, [inputValue]);
 
@@ -746,6 +752,60 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
                      }, 1500);
                  }, 600);
                }}
+             />
+           )}
+         </AnimatePresence>
+
+         {/* Payment Link Widget - Floats above input */}
+         <AnimatePresence>
+           {showPaymentLinkWidget && (
+             <PaymentLinkWidget
+               isOpen={showPaymentLinkWidget}
+               onClose={() => {
+                 setShowPaymentLinkWidget(false);
+                 setPaymentLinkPrefill(null);
+               }}
+               onComplete={(result) => {
+                 setShowPaymentLinkWidget(false);
+                 setPaymentLinkPrefill(null);
+                 setInputValue('');
+
+                 // 1. User Message
+                 setMessages(prev => [...prev, {
+                   id: `u-${Date.now()}`,
+                   sender: 'user',
+                   blocks: [{ type: 'text', content: `Create payment link for ₹${result.amount} - ${result.purpose}` }]
+                 }]);
+
+                 // 2. Thinking State
+                 setTimeout(() => {
+                   setMessages(prev => [...prev, {
+                     id: `ai-think-${Date.now()}`,
+                     sender: 'ai',
+                     isThinking: true
+                   }]);
+
+                   // 3. Success Response
+                   setTimeout(() => {
+                     setMessages(prev => {
+                       const withoutThinking = prev.filter(m => !m.isThinking);
+                       return [...withoutThinking, {
+                         id: `ai-${Date.now()}`,
+                         sender: 'ai',
+                         artifact: {
+                           type: 'simple_text',
+                           data: {
+                             headline: 'Payment link created!',
+                             body: `Your payment link for **₹${Number(result.amount).toLocaleString('en-IN')}** (${result.purpose}) is ready:\n\n${result.linkUrl}\n\nShare this link with your customer to collect payment.`,
+                             suggestions: ['Create another payment link', 'View all payment links']
+                           }
+                         }
+                       }];
+                     });
+                   }, 1500);
+                 }, 600);
+               }}
+               prefill={paymentLinkPrefill || undefined}
              />
            )}
          </AnimatePresence>
