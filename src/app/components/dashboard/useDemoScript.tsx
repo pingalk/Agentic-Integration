@@ -325,7 +325,7 @@ Maya`,
             artifact: {
                 type: 'support_ticket_status',
                 data: {
-                    headline: "Your last #4492 ticket is still under review.",
+                    headline: "Your last ticket #4492 is still under review.",
                     subtext: "",
                     ticket: {
                         id: '#4492',
@@ -336,16 +336,13 @@ Maya`,
                         eta: etaFormatted,
                         isOverdue: true
                     },
-                    explanation: {
-                        title: "Why is this taking longer?",
-                        content: "Your request involves a bank-side verification to track exactly why the ₹5,000 hasn't hit your customer's account yet. We usually resolve these within 5 business days."
-                    },
+                    explanation: null,
                     buttons: [
                         { label: "Escalate this Ticket", variant: "primary" }
                     ],
                     suggestions: [
-                        "Why is this taking so long?",
-                        "Are there any other open tickets"
+                        "Why is it taking so long?",
+                        "View my other open tickets"
                     ]
                 }
             }
