@@ -350,35 +350,8 @@ Maya`,
                 }
             }
         },
-        sam_step_2: {
-            artifact: {
-                type: 'support_ticket_status',
-                data: {
-                    headline: "Success! Your ticket has been Escalated.",
-                    subtext: "I have moved Ticket #4492 to our priority queue. A senior specialist is now personally overseeing this to ensure the refund status is cleared up as quickly as possible.",
-                    ticket: {
-                        id: '#4492',
-                        status: 'Escalated',
-                        issue: 'Customer Refund - ₹5,000 not received',
-                        raised: '5 days ago',
-                        createdOn: 'Jan 23, 2026, 5 days ago',
-                        eta: 'Today',
-                        isEscalated: true
-                    },
-                    explanation: {
-                        title: "What happens next?",
-                        content: "A senior specialist is now personally overseeing this ticket. You'll receive an update within 24 hours."
-                    },
-                    buttons: [
-                        { label: "Get Priority Support for ₹99", variant: "secondary" }
-                    ],
-                    suggestions: [
-                        "Show you other active tickets?",
-                        "Help you with anything else regarding your payments?"
-                    ]
-                }
-            }
-        }
+        // sam_step_2 is no longer used - escalation happens in-place on the card
+        sam_step_2: null
     };
 
     const processInput = (text: string) => {
