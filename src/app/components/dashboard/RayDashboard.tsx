@@ -31,7 +31,7 @@ function ChipIconContainer({ children }: { children: React.ReactNode }) {
 
 function SuggestionChip({ icon, label, onClick }: { icon: React.ReactNode, label: string, onClick?: () => void }) {
   return (
-    <div 
+    <div
       onClick={onClick}
       className="bg-[#f8fafc] relative rounded-[8px] shrink-0 cursor-pointer hover:bg-[rgba(48,94,255,0.09)] transition-colors border border-transparent hover:border-blue-100"
     >
@@ -42,6 +42,104 @@ function SuggestionChip({ icon, label, onClick }: { icon: React.ReactNode, label
     </div>
   );
 }
+
+// --- EXPERIMENTAL: Briefing Item with Hover Affordance ---
+// This component adds a "Review with Ray" hover interaction
+// To revert: Replace BriefingItem usage with original static JSX
+interface BriefingItemProps {
+  index: number;
+  children: React.ReactNode;
+  isHovered: boolean;
+  hoveredIndex: number | null;
+  onHover: (index: number | null) => void;
+}
+
+const BriefingItem = ({ index, children, isHovered, hoveredIndex, onHover }: BriefingItemProps) => {
+  const isOtherHovered = hoveredIndex !== null && hoveredIndex !== index;
+
+  return (
+    <motion.div
+      className="content-stretch flex flex-col gap-[8px] items-start relative shrink-0 w-full cursor-pointer"
+      onMouseEnter={() => onHover(index)}
+      onMouseLeave={() => onHover(null)}
+      animate={{
+        opacity: isOtherHovered ? 0.4 : 1,
+        filter: isOtherHovered ? 'blur(1px)' : 'blur(0px)',
+      }}
+      transition={{
+        duration: 0.3,
+        ease: [0.25, 0.1, 0.25, 1],
+      }}
+    >
+      {/* Main content row */}
+      <div className="content-stretch flex gap-[10px] items-start relative shrink-0 w-full">
+        <div className="content-stretch flex items-center pt-[4px] relative shrink-0">
+          <div className="bg-white content-stretch flex flex-col items-center justify-center overflow-clip px-[6px] relative rounded-[80px] shrink-0 size-[16px]">
+            <p className="font-['Inter',sans-serif] font-medium leading-[14px] not-italic relative shrink-0 text-[#2980e1] text-[10px]">{index}</p>
+          </div>
+        </div>
+        <p className="font-['TASA_Orbiter_Display',sans-serif] font-normal leading-[24px] not-italic relative shrink-0 text-[#fdfdfd] text-[18px] tracking-[-0.234px]">
+          {children}
+        </p>
+      </div>
+
+      {/* "Review with Ray" affordance - appears on hover */}
+      <motion.div
+        className="flex items-center gap-[6px] pl-[26px] overflow-hidden"
+        initial={false}
+        animate={{
+          height: isHovered ? 24 : 0,
+          opacity: isHovered ? 1 : 0,
+        }}
+        transition={{
+          height: {
+            duration: 0.25,
+            ease: [0.25, 0.1, 0.25, 1],
+          },
+          opacity: {
+            duration: 0.2,
+            delay: isHovered ? 0.05 : 0,
+          },
+        }}
+      >
+        {/* Circular chevron icon */}
+        <motion.div
+          className="size-[18px] rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm"
+          initial={false}
+          animate={{
+            scale: isHovered ? 1 : 0.6,
+            opacity: isHovered ? 1 : 0,
+          }}
+          transition={{
+            duration: 0.2,
+            ease: [0.34, 1.56, 0.64, 1], // spring-like
+          }}
+        >
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </motion.div>
+
+        {/* Text reveal */}
+        <motion.span
+          className="text-[14px] font-medium text-white/90 whitespace-nowrap"
+          initial={false}
+          animate={{
+            x: isHovered ? 0 : -10,
+            opacity: isHovered ? 1 : 0,
+          }}
+          transition={{
+            duration: 0.25,
+            delay: isHovered ? 0.08 : 0,
+            ease: [0.25, 0.1, 0.25, 1],
+          }}
+        >
+          Review with Ray
+        </motion.span>
+      </motion.div>
+    </motion.div>
+  );
+};
 
 // --- Main Components ---
 
@@ -73,6 +171,9 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [landingVariant, setLandingVariant] = useState<'v1' | 'v2'>('v1'); // Changed to 'v1' to show responsive cards
+
+  // EXPERIMENTAL: Track which briefing item is hovered (null = none)
+  const [hoveredBriefingItem, setHoveredBriefingItem] = useState<number | null>(null);
 
   // Sync prompt with persona when on landing page
   useEffect(() => {
@@ -429,47 +530,42 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                           <p className="absolute font-['Inter',sans-serif] font-normal leading-[26px] left-[47px] not-italic text-[14px] text-white top-[28px] tracking-[-0.28px]">TODAY'S BRIEFING</p>
                           
                           {/* Content List - Dynamic based on persona */}
-                          <div className="absolute content-stretch flex flex-col gap-[20px] items-start left-[19px] top-[79px] w-[239px]">
+                          {/* EXPERIMENTAL: Using BriefingItem with hover affordance */}
+                          <div className="absolute content-stretch flex flex-col gap-[16px] items-start left-[19px] top-[79px] w-[239px]">
                             {/* Item 1 */}
-                            <div className="content-stretch flex gap-[10px] items-start relative shrink-0 w-full">
-                              <div className="content-stretch flex items-center pt-[4px] relative shrink-0">
-                                <div className="bg-white content-stretch flex flex-col items-center justify-center overflow-clip px-[6px] relative rounded-[80px] shrink-0 size-[16px]">
-                                  <p className="font-['Inter',sans-serif] font-medium leading-[14px] not-italic relative shrink-0 text-[#2980e1] text-[10px]">1</p>
-                                </div>
-                              </div>
-                              <p className="font-['TASA_Orbiter_Display',sans-serif] font-normal leading-[24px] not-italic relative shrink-0 text-[#fdfdfd] text-[18px] tracking-[-0.234px]">
-                                {isNegative
-                                  ? <>Your refund volume for last<br />3 days was unusually high</>
-                                  : isNeutral
-                                    ? <>Your refund volumes are<br />unusually high</>
-                                    : <>No refunds or disputes so far<br />today</>
-                                }
-                              </p>
-                            </div>
+                            <BriefingItem
+                              index={1}
+                              isHovered={hoveredBriefingItem === 1}
+                              hoveredIndex={hoveredBriefingItem}
+                              onHover={setHoveredBriefingItem}
+                            >
+                              {isNegative
+                                ? <>Your refund volume for last<br />3 days was unusually high</>
+                                : isNeutral
+                                  ? <>Your refund volumes are<br />unusually high</>
+                                  : <>No refunds or disputes so far<br />today</>
+                              }
+                            </BriefingItem>
 
                             {/* Item 2 */}
-                            <div className="content-stretch flex gap-[10px] items-start relative shrink-0 w-full">
-                              <div className="content-stretch flex items-center pt-[4px] relative shrink-0">
-                                <div className="bg-white content-stretch flex flex-col items-center justify-center overflow-clip px-[6px] relative rounded-[80px] shrink-0 size-[16px]">
-                                  <p className="font-['Inter',sans-serif] font-medium leading-[14px] not-italic relative shrink-0 text-[#2980e1] text-[10px]">2</p>
-                                </div>
-                              </div>
-                              <p className="font-['TASA_Orbiter_Display',sans-serif] font-normal leading-[24px] not-italic relative shrink-0 text-[#fdfdfd] text-[18px] tracking-[-0.234px] w-[173px]">
-                                Payment timeouts are the most common failure reason (2%)
-                              </p>
-                            </div>
+                            <BriefingItem
+                              index={2}
+                              isHovered={hoveredBriefingItem === 2}
+                              hoveredIndex={hoveredBriefingItem}
+                              onHover={setHoveredBriefingItem}
+                            >
+                              Payment timeouts are the most common failure reason (2%)
+                            </BriefingItem>
 
                             {/* Item 3 */}
-                            <div className="content-stretch flex gap-[10px] items-start relative shrink-0">
-                              <div className="content-stretch flex items-center pt-[4px] relative shrink-0">
-                                <div className="bg-white content-stretch flex flex-col items-center justify-center overflow-clip px-[6px] relative rounded-[80px] shrink-0 size-[16px]">
-                                  <p className="font-['Inter',sans-serif] font-medium leading-[14px] not-italic relative shrink-0 text-[#2980e1] text-[10px]">3</p>
-                                </div>
-                              </div>
-                              <p className="font-['TASA_Orbiter_Display',sans-serif] font-normal leading-[24px] relative shrink-0 text-[#fdfdfd] text-[18px] tracking-[-0.234px]">
-                                Cards & UPI payments<br />account for 96% of this<br />week's payment volume<br />(₹7.1 lakh)
-                              </p>
-                            </div>
+                            <BriefingItem
+                              index={3}
+                              isHovered={hoveredBriefingItem === 3}
+                              hoveredIndex={hoveredBriefingItem}
+                              onHover={setHoveredBriefingItem}
+                            >
+                              Cards & UPI payments<br />account for 96% of this<br />week's payment volume<br />(₹7.1 lakh)
+                            </BriefingItem>
                           </div>
                         </motion.div>
                         
