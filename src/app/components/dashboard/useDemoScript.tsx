@@ -264,6 +264,68 @@ Maya`,
         }
     };
 
+    // Sam's Journey (Support Ticket Escalation)
+    const samScript = {
+        sam_step_0: {
+            input: "What is the status of my ticket #4492?",
+            response: null,
+            suggestions: []
+        },
+        sam_step_1: {
+            artifact: {
+                type: 'support_ticket_status',
+                data: {
+                    headline: "Ticket #4492 is currently Open and under review.",
+                    subtext: "Here is the latest update on your request regarding the customer refund:",
+                    ticket: {
+                        id: '#4492',
+                        status: 'OPEN',
+                        issue: 'Customer Refund - ₹5,000 not received',
+                        raised: '3 days ago'
+                    },
+                    explanation: {
+                        title: "Why is this taking longer?",
+                        content: "Your request involves a bank-side verification to track exactly why the ₹5,000 hasn't hit your customer's account yet. We usually resolve these within 5 business days."
+                    },
+                    buttons: [
+                        { label: "Escalate", variant: "primary" },
+                        { label: "Pay ₹99 for Priority Support", variant: "secondary" }
+                    ],
+                    suggestions: [
+                        "Escalate this to a senior specialist right now?",
+                        "Explain the typical timeline for refunds?"
+                    ]
+                }
+            }
+        },
+        sam_step_2: {
+            artifact: {
+                type: 'ticket_escalated',
+                data: {
+                    headline: "Success! Your ticket has been Escalated.",
+                    subtext: "I have moved Ticket #4492 to our priority queue. A senior specialist is now personally overseeing this to ensure the refund status is cleared up as quickly as possible.",
+                    ticket: {
+                        id: '#4492',
+                        status: 'ESCALATED',
+                        newStatus: 'High Priority',
+                        nextUpdate: 'Within 24 hours'
+                    },
+                    whatNext: {
+                        title: "What happens next?",
+                        items: [
+                            { bold: "Email Confirmation:", text: "I've sent a confirmation of this escalation to your registered email address." },
+                            { bold: "Direct Monitoring:", text: "I will keep a close watch on this ticket and notify you the moment there is a breakthrough." }
+                        ]
+                    },
+                    suggestions: [
+                        "Show you other active tickets?",
+                        "Help you with anything else regarding your payments?"
+                    ]
+                }
+            }
+        }
+    };
+
     const processInput = (text: string) => {
         const lowerText = text.toLowerCase();
         let nextStep = step;
@@ -291,6 +353,7 @@ Maya`,
         mayaScript,
         arjunScript,
         sarahScript,
+        samScript,
         getFutureDate
     };
 };

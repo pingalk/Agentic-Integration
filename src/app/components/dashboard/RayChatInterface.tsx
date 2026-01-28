@@ -60,7 +60,7 @@ const generateArjunData = (): RayResponseData => {
 
 export const RayChatInterface = () => {
   const { currentPersona } = useDemo();
-  const { arjunScript, sarahScript, mayaScript } = useDemoScript();
+  const { arjunScript, sarahScript, mayaScript, samScript } = useDemoScript();
   const [messages, setMessages] = useState<RayResponseData[]>([]);
   const [inputValue, setInputValue] = useState("");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -82,6 +82,9 @@ export const RayChatInterface = () => {
 
   // Maya Flow State
   const [mayaFlowStep, setMayaFlowStep] = useState(0);
+
+  // Sam Flow State
+  const [samFlowStep, setSamFlowStep] = useState(0);
 
   // Transaction Preview State
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionData | null>(null);
@@ -206,6 +209,42 @@ export const RayChatInterface = () => {
         }, 600);
     }
   }, [currentPersona.id, messages.length, mayaScript]);
+
+  // Triggers for demo flow - Sam
+  useEffect(() => {
+    if (currentPersona.id === 'sam' && messages.length === 0) {
+        // Step 1: User asks about ticket status
+        setTimeout(() => {
+            setMessages([{
+                id: 'sam-u1',
+                sender: 'user',
+                blocks: [{ type: 'text', content: "What is the status of my ticket #4492?" }]
+            }]);
+            setSamFlowStep(1);
+
+            // Step 2: Show Thinking State
+            setTimeout(() => {
+                const thinkingMsg: RayResponseData = {
+                    id: 'sam-ai-1',
+                    sender: 'ai',
+                    isThinking: true
+                };
+                setMessages(prev => [...prev, thinkingMsg]);
+
+                // Step 3: Replace with Support Ticket Status after delay
+                setTimeout(() => {
+                    setMessages(prev => prev.map(msg =>
+                        msg.id === 'sam-ai-1' ? {
+                            ...samScript.sam_step_1,
+                            id: 'sam-ai-1',
+                            sender: 'ai' as const
+                        } : msg
+                    ));
+                }, 2000); // 2s thinking time
+            }, 600);
+        }, 600);
+    }
+  }, [currentPersona.id, messages.length, samScript]);
 
   // Auto-scroll: user messages to top of viewport, AI messages show start
   useEffect(() => {
@@ -381,6 +420,21 @@ export const RayChatInterface = () => {
         }
       }
     }
+
+    // Handle Sam's flow transitions
+    if (currentPersona.id === 'sam') {
+      // Handle "Escalate" button click
+      if (samFlowStep === 1 && suggestion === 'Escalate') {
+        handleSamFlowAdvance("Escalate", samScript.sam_step_2, 2);
+        return;
+      }
+
+      // Handle suggestion clicks that trigger escalation
+      if (samFlowStep === 1 && suggestion.toLowerCase().includes('escalate')) {
+        handleSamFlowAdvance(suggestion, samScript.sam_step_2, 2);
+        return;
+      }
+    }
   };
 
   // Helper function to advance Sarah's flow
@@ -469,6 +523,39 @@ export const RayChatInterface = () => {
           }];
         });
         setMayaFlowStep(nextFlowStep);
+      }, 1500);
+    }, 600);
+  };
+
+  // Helper function to advance Sam's flow
+  const handleSamFlowAdvance = (userMessage: string, nextStep: any, nextFlowStep: number) => {
+    // Add user message
+    setMessages(prev => [...prev, {
+      id: `sam-u-${Date.now()}`,
+      sender: 'user',
+      blocks: [{ type: 'text', content: userMessage }]
+    }]);
+
+    // Show thinking state
+    setTimeout(() => {
+      const thinkingId = `sam-ai-thinking-${Date.now()}`;
+      setMessages(prev => [...prev, {
+        id: thinkingId,
+        sender: 'ai',
+        isThinking: true
+      }]);
+
+      // Replace with next step response
+      setTimeout(() => {
+        setMessages(prev => {
+          const withoutThinking = prev.filter(m => !m.isThinking);
+          return [...withoutThinking, {
+            ...nextStep,
+            id: `sam-ai-${Date.now()}`,
+            sender: 'ai' as const
+          }];
+        });
+        setSamFlowStep(nextFlowStep);
       }, 1500);
     }, 600);
   };

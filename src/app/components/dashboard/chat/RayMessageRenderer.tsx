@@ -188,6 +188,41 @@ export interface RayResponseData {
       draftMessage: string;
       suggestions: string[];
     };
+  } | {
+    type: 'support_ticket_status';
+    data: {
+      headline: string;
+      subtext: string;
+      ticket: {
+        id: string;
+        status: string;
+        issue: string;
+        raised: string;
+      };
+      explanation: {
+        title: string;
+        content: string;
+      };
+      buttons: Array<{ label: string; variant: 'primary' | 'secondary' }>;
+      suggestions: string[];
+    };
+  } | {
+    type: 'ticket_escalated';
+    data: {
+      headline: string;
+      subtext: string;
+      ticket: {
+        id: string;
+        status: string;
+        newStatus: string;
+        nextUpdate: string;
+      };
+      whatNext: {
+        title: string;
+        items: Array<{ bold: string; text: string }>;
+      };
+      suggestions: string[];
+    };
   };
 }
 
@@ -1895,6 +1930,385 @@ const MayaDraftMessageArtifact = ({ data, onSuggestionClick, isLast }: any) => {
   );
 };
 
+// --- Sam's Support Ticket Status Artifact ---
+const SupportTicketStatusArtifact = ({ data, onButtonClick, onSuggestionClick, isLast }: any) => {
+  const [subtextStarted, setSubtextStarted] = useState(false);
+
+  const { phase, onNarrativeComplete } = useStreamSequencer({
+    hasDataAsset: true,
+    hasInsight: true,
+    hasSuggestions: data.suggestions?.length > 0,
+    thinkingDuration: 3000
+  });
+
+  const handleHeadlineComplete = React.useCallback(() => {
+    setTimeout(() => setSubtextStarted(true), 800);
+  }, []);
+
+  return (
+    <>
+      {phase === 0 && <RayThinking />}
+
+      {phase >= 1 && (
+        <motion.div
+          className="flex flex-col gap-[24px] w-full mt-2"
+          initial="hidden"
+          animate="visible"
+          variants={containerVar}
+        >
+          <div className="flex flex-col gap-[16px]">
+            {/* Header */}
+            <motion.div variants={itemVar} className="flex gap-[6px] items-center">
+              <div className="shrink-0 size-[20px] bg-[#10B981] rounded-[3.33px] flex items-center justify-center shadow-sm">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              <h3 className="text-[18px] leading-[24px] font-semibold text-[#020202]">
+                <PerplexityStreamText
+                  content={data.headline}
+                  speed={15}
+                  onComplete={handleHeadlineComplete}
+                  inheritStyles
+                />
+              </h3>
+            </motion.div>
+
+            {subtextStarted && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-[16px] text-[#40566d] leading-[26px] tracking-[0.16px]"
+              >
+                <PerplexityStreamText
+                  content={data.subtext}
+                  speed={10}
+                  onComplete={onNarrativeComplete}
+                />
+              </motion.div>
+            )}
+          </div>
+
+          {/* Support Ticket Card (Phase 2+) */}
+          {phase >= 2 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              className="border border-[#e2e8f0] rounded-[12px] overflow-hidden bg-white"
+            >
+              {/* Card Header */}
+              <div className="p-[16px] border-b border-[#e2e8f0] flex items-center justify-between">
+                <div className="flex items-center gap-[8px]">
+                  <span className="text-[16px] font-semibold text-[#192839]">Ticket {data.ticket.id}</span>
+                  <span className="px-[8px] py-[2px] bg-[#FEF3C7] text-[#B45309] text-[12px] font-semibold rounded-full uppercase">
+                    {data.ticket.status}
+                  </span>
+                </div>
+              </div>
+
+              {/* Card Body */}
+              <div className="p-[16px] flex flex-col gap-[12px]">
+                <div className="flex flex-col gap-[4px]">
+                  <span className="text-[12px] font-medium text-[#768ea7] uppercase tracking-wide">Issue</span>
+                  <span className="text-[14px] text-[#40566d]">{data.ticket.issue}</span>
+                </div>
+                <div className="flex flex-col gap-[4px]">
+                  <span className="text-[12px] font-medium text-[#768ea7] uppercase tracking-wide">Raised</span>
+                  <span className="text-[14px] text-[#40566d]">{data.ticket.raised}</span>
+                </div>
+              </div>
+
+              {/* Card Footer with Buttons */}
+              <div className="p-[16px] border-t border-[#e2e8f0] flex gap-[12px]">
+                {data.buttons.map((button: any, i: number) => (
+                  <button
+                    key={i}
+                    onClick={() => onButtonClick?.(button.label)}
+                    className={clsx(
+                      'px-[16px] py-[8px] rounded-lg font-medium text-[14px] transition-all duration-200',
+                      button.variant === 'primary'
+                        ? 'bg-[#2563EB] text-white hover:bg-[#1d4ed8] shadow-sm'
+                        : 'bg-[#f1f5fa] text-[#40566d] hover:bg-[#e2e8f0] border border-[#e2e8f0]'
+                    )}
+                  >
+                    {button.label}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Explanation Section (Phase 3+) */}
+          {phase >= 3 && data.explanation && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="flex flex-col gap-[8px]"
+            >
+              <h4 className="text-[16px] font-semibold text-[#192839]">{data.explanation.title}</h4>
+              <p className="text-[14px] text-[#40566d] leading-[22px]">{data.explanation.content}</p>
+            </motion.div>
+          )}
+
+          {/* Footer Actions (Phase 4+) */}
+          {phase >= 4 && isLast && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex gap-[8px] items-center"
+            >
+              <Tooltip text="Good response" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <ThumbsUp size={16} className="text-[#40566D]" strokeWidth={2} />
+                </button>
+              </Tooltip>
+              <Tooltip text="Bad response" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <ThumbsDown size={16} className="text-[#40566D]" strokeWidth={2} />
+                </button>
+              </Tooltip>
+              <Tooltip text="Copy to clipboard" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <div className="size-[16px]"><Copy /></div>
+                </button>
+              </Tooltip>
+              <Tooltip text="Share" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <Share2 size={16} className="text-[#40566D]" strokeWidth={2} />
+                </button>
+              </Tooltip>
+            </motion.div>
+          )}
+
+          {/* Divider */}
+          {phase >= 5 && isLast && data.suggestions && (
+            <motion.div
+              initial={{ opacity: 0, scaleX: 0 }}
+              animate={{ opacity: 1, scaleX: 1 }}
+              className="w-full h-[0.5px] bg-[#CBD5E2] origin-left"
+            />
+          )}
+
+          {/* Suggestions */}
+          {phase >= 5 && isLast && data.suggestions && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex flex-col gap-[12px] mb-[30px]"
+            >
+              <h3 className="text-[18px] leading-[26px] font-semibold text-[#193f47]">Suggestions</h3>
+              <div className="flex flex-col gap-[2px]">
+                {data.suggestions.map((sug: string, i: number) => (
+                  <motion.button
+                    key={i}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    onClick={() => onSuggestionClick?.(sug)}
+                    className="flex items-center gap-[4px] p-[4px] text-left w-full rounded-[4px] hover:bg-[#f1f5fa] group"
+                  >
+                    <div className="shrink-0 size-[20px] rounded-full flex items-center justify-center bg-[#f1f5fa] group-hover:bg-white">
+                      <span className="text-[10px] font-medium text-[#40566d] group-hover:text-[#2980e1]">{i + 1}</span>
+                    </div>
+                    <p className="text-[16px] leading-[26px] tracking-[0.16px] font-medium text-[#40566d] group-hover:text-[#2980e1]">{sug}</p>
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </motion.div>
+      )}
+    </>
+  );
+};
+
+// --- Sam's Ticket Escalated Artifact ---
+const TicketEscalatedArtifact = ({ data, onSuggestionClick, isLast }: any) => {
+  const [subtextStarted, setSubtextStarted] = useState(false);
+
+  const { phase, onNarrativeComplete } = useStreamSequencer({
+    hasDataAsset: true,
+    hasInsight: true,
+    hasSuggestions: data.suggestions?.length > 0,
+    thinkingDuration: 3000
+  });
+
+  const handleHeadlineComplete = React.useCallback(() => {
+    setTimeout(() => setSubtextStarted(true), 800);
+  }, []);
+
+  return (
+    <>
+      {phase === 0 && <RayThinking />}
+
+      {phase >= 1 && (
+        <motion.div
+          className="flex flex-col gap-[24px] w-full mt-2"
+          initial="hidden"
+          animate="visible"
+          variants={containerVar}
+        >
+          <div className="flex flex-col gap-[16px]">
+            {/* Header with Success Icon */}
+            <motion.div variants={itemVar} className="flex gap-[6px] items-center">
+              <div className="shrink-0 size-[20px] bg-[#10B981] rounded-[3.33px] flex items-center justify-center shadow-sm">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              <h3 className="text-[18px] leading-[24px] font-semibold text-[#020202]">
+                <PerplexityStreamText
+                  content={data.headline}
+                  speed={15}
+                  onComplete={handleHeadlineComplete}
+                  inheritStyles
+                />
+              </h3>
+            </motion.div>
+
+            {subtextStarted && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-[16px] text-[#40566d] leading-[26px] tracking-[0.16px]"
+              >
+                <PerplexityStreamText
+                  content={data.subtext}
+                  speed={10}
+                  onComplete={onNarrativeComplete}
+                />
+              </motion.div>
+            )}
+          </div>
+
+          {/* Escalated Ticket Card (Phase 2+) */}
+          {phase >= 2 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              className="border border-[#e2e8f0] rounded-[12px] overflow-hidden bg-white"
+            >
+              {/* Card Header */}
+              <div className="p-[16px] border-b border-[#e2e8f0] flex items-center justify-between">
+                <div className="flex items-center gap-[8px]">
+                  <span className="text-[16px] font-semibold text-[#192839]">Ticket {data.ticket.id}</span>
+                  <span className="px-[8px] py-[2px] bg-[#DCFCE7] text-[#16A34A] text-[12px] font-semibold rounded-full uppercase">
+                    {data.ticket.status}
+                  </span>
+                </div>
+              </div>
+
+              {/* Card Body */}
+              <div className="p-[16px] flex flex-col gap-[12px]">
+                <div className="flex items-center justify-between">
+                  <span className="text-[12px] font-medium text-[#768ea7] uppercase tracking-wide">New Status</span>
+                  <span className="text-[14px] font-semibold text-[#DC2626]">{data.ticket.newStatus}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[12px] font-medium text-[#768ea7] uppercase tracking-wide">Next Update</span>
+                  <span className="text-[14px] text-[#40566d]">{data.ticket.nextUpdate}</span>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* What Happens Next Section (Phase 3+) */}
+          {phase >= 3 && data.whatNext && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="flex flex-col gap-[12px]"
+            >
+              <h4 className="text-[16px] font-semibold text-[#192839]">{data.whatNext.title}</h4>
+              <ul className="flex flex-col gap-[8px]">
+                {data.whatNext.items.map((item: any, i: number) => (
+                  <li key={i} className="flex gap-[8px] text-[14px] text-[#40566d] leading-[22px]">
+                    <span className="text-[#768ea7]">•</span>
+                    <span>
+                      <span className="font-semibold text-[#192839]">{item.bold}</span> {item.text}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          )}
+
+          {/* Footer Actions (Phase 4+) */}
+          {phase >= 4 && isLast && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex gap-[8px] items-center"
+            >
+              <Tooltip text="Good response" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <ThumbsUp size={16} className="text-[#40566D]" strokeWidth={2} />
+                </button>
+              </Tooltip>
+              <Tooltip text="Bad response" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <ThumbsDown size={16} className="text-[#40566D]" strokeWidth={2} />
+                </button>
+              </Tooltip>
+              <Tooltip text="Copy to clipboard" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <div className="size-[16px]"><Copy /></div>
+                </button>
+              </Tooltip>
+              <Tooltip text="Share" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <Share2 size={16} className="text-[#40566D]" strokeWidth={2} />
+                </button>
+              </Tooltip>
+            </motion.div>
+          )}
+
+          {/* Divider */}
+          {phase >= 5 && isLast && data.suggestions && (
+            <motion.div
+              initial={{ opacity: 0, scaleX: 0 }}
+              animate={{ opacity: 1, scaleX: 1 }}
+              className="w-full h-[0.5px] bg-[#CBD5E2] origin-left"
+            />
+          )}
+
+          {/* Suggestions */}
+          {phase >= 5 && isLast && data.suggestions && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex flex-col gap-[12px] mb-[30px]"
+            >
+              <h3 className="text-[18px] leading-[26px] font-semibold text-[#193f47]">Suggestions</h3>
+              <div className="flex flex-col gap-[2px]">
+                {data.suggestions.map((sug: string, i: number) => (
+                  <motion.button
+                    key={i}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    onClick={() => onSuggestionClick?.(sug)}
+                    className="flex items-center gap-[4px] p-[4px] text-left w-full rounded-[4px] hover:bg-[#f1f5fa] group"
+                  >
+                    <div className="shrink-0 size-[20px] rounded-full flex items-center justify-center bg-[#f1f5fa] group-hover:bg-white">
+                      <span className="text-[10px] font-medium text-[#40566d] group-hover:text-[#2980e1]">{i + 1}</span>
+                    </div>
+                    <p className="text-[16px] leading-[26px] tracking-[0.16px] font-medium text-[#40566d] group-hover:text-[#2980e1]">{sug}</p>
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </motion.div>
+      )}
+    </>
+  );
+};
+
 // --- Block Sequencer ---
 const BlockSequencer = ({ blocks, onComplete }: { blocks: ContentBlock[], onComplete?: () => void }) => {
   const [visibleIndex, setVisibleIndex] = useState(0);
@@ -2223,7 +2637,34 @@ export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast
     );
   }
 
-  // 12. Ray AI Message (Standard Blocks, Max Width 398px)
+  // 12. Sam's Support Ticket Status
+  if (data.artifact?.type === 'support_ticket_status') {
+    return (
+      <div className="w-full animate-fade-in-up">
+        <SupportTicketStatusArtifact
+          data={data.artifact.data}
+          isLast={isLast}
+          onButtonClick={onSuggestionClick}
+          onSuggestionClick={onSuggestionClick}
+        />
+      </div>
+    );
+  }
+
+  // 13. Sam's Ticket Escalated
+  if (data.artifact?.type === 'ticket_escalated') {
+    return (
+      <div className="w-full animate-fade-in-up">
+        <TicketEscalatedArtifact
+          data={data.artifact.data}
+          isLast={isLast}
+          onSuggestionClick={onSuggestionClick}
+        />
+      </div>
+    );
+  }
+
+  // 14. Ray AI Message (Standard Blocks, Max Width 398px)
   return (
     <div className="flex gap-4 items-start w-full max-w-[398px] animate-fade-in-up">
         {/* Content Container - No Avatar */}

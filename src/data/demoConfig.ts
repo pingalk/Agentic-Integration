@@ -1,6 +1,6 @@
 // src/data/demoConfig.ts
 
-export type PersonaId = 'maya' | 'arjun' | 'sarah';
+export type PersonaId = 'maya' | 'arjun' | 'sarah' | 'sam';
 export type Theme = 'positive' | 'negative' | 'neutral';
 
 export interface DashboardCard {
@@ -124,6 +124,40 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
           value: "On Hold",
           subtext: "Dormant Account",
           status: 'paused'
+        }
+      ]
+    }
+  },
+  sam: {
+    id: 'sam',
+    name: 'Sam',
+    theme: 'positive',
+    landing: {
+      greeting: "Good afternoon, Sam!",
+      initialPrompt: "What is the status of my ticket #4492?",
+      cards: [
+        {
+          id: 'briefing',
+          type: 'briefing',
+          title: "No refunds or disputes so far today",
+          subtext: "All systems operational"
+        },
+        {
+          id: 'stats',
+          type: 'stats',
+          title: "Payment volumes higher than usual today",
+          value: "₹1,13,000.00",
+          secondaryValue: "₹1,00,000.00",
+          trend: 'up',
+          status: 'healthy'
+        },
+        {
+          id: 'settlement',
+          type: 'settlement',
+          title: "Your settlements are on track",
+          value: "₹1.26L",
+          subtext: "Next Settlement",
+          status: 'healthy'
         }
       ]
     }
