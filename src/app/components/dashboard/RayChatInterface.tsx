@@ -416,6 +416,30 @@ export const RayChatInterface = () => {
     }, 600);
   };
 
+  // Handle input submission
+  const handleInputSubmit = () => {
+    if (!inputValue.trim()) return;
+
+    const text = inputValue.toLowerCase();
+
+    // Maya: Handle "double debit" input
+    if (currentPersona.id === 'maya' && mayaFlowStep === 1 && text.includes('double debit')) {
+      setInputValue('');
+      handleMayaFlowAdvance(inputValue, mayaScript.maya_step_2, 2);
+      return;
+    }
+
+    // Maya: Handle "draft" input
+    if (currentPersona.id === 'maya' && mayaFlowStep === 2 && text.includes('draft')) {
+      setInputValue('');
+      handleMayaFlowAdvance(inputValue, mayaScript.maya_step_3, 3);
+      return;
+    }
+
+    // Default: Just echo back the input as user message (for demo purposes)
+    setInputValue('');
+  };
+
   // Helper function to advance Maya's flow
   const handleMayaFlowAdvance = (userMessage: string, nextStep: any, nextFlowStep: number) => {
     // Add user message
@@ -572,12 +596,18 @@ export const RayChatInterface = () => {
                onMouseEnter={() => setIsInputHovered(true)}
                onMouseLeave={() => setIsInputHovered(false)}
             >
-               <input 
+               <input
                   type="text"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onFocus={() => setIsInputFocused(true)}
                   onBlur={() => setIsInputFocused(false)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && inputValue.trim()) {
+                      e.preventDefault();
+                      handleInputSubmit();
+                    }
+                  }}
                   placeholder="Ask anything..."
                   className="w-full h-[52px] pl-5 pr-14 bg-white border border-slate-200 hover:border-slate-300 focus:border-blue-500 rounded-full text-[15px] outline-none transition-all shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)] placeholder:text-slate-400"
                />
@@ -590,8 +620,9 @@ export const RayChatInterface = () => {
                         <button className="p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-full hover:bg-slate-100"><Mic size={20} /></button>
                      </>
                   )}
-                  <button 
+                  <button
                     disabled={!inputValue}
+                    onClick={handleInputSubmit}
                     className="w-9 h-9 flex items-center justify-center bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:bg-slate-300 transition-all shadow-sm active:scale-95"
                   >
                      <ArrowUp size={18} strokeWidth={2.5} />

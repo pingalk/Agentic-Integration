@@ -1477,17 +1477,15 @@ const MayaTransactionsReportArtifact = ({ data, onRowClick, onSuggestionClick, i
                 initial={{ opacity: 0, y: 5, filter: 'blur(4px)' }}
                 animate={{ opacity: 1, y: 0, filter: 'blur(0)' }}
                 transition={{ duration: 0.4, ease: 'easeOut' }}
-                className="flex gap-[8px] items-start p-[16px] bg-[rgba(233,105,12,0.06)] rounded-[12px] border border-[rgba(233,105,12,0.15)]"
+                className="flex gap-[10px] items-start p-[16px] bg-[rgba(18,145,208,0.06)] rounded-[12px] border border-[rgba(18,145,208,0.12)]"
               >
-                <div className="shrink-0 size-[20px] bg-[#E9690C] rounded-[3.33px] flex items-center justify-center shadow-sm mt-[2px]">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="16" x2="12" y2="12" />
-                    <line x1="12" y1="8" x2="12.01" y2="8" />
+                <div className="shrink-0 size-[16px] flex items-center justify-center mt-[2px]">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M8 1L9.79 5.42L14.5 6.02L11 9.34L11.94 14L8 11.77L4.06 14L5 9.34L1.5 6.02L6.21 5.42L8 1Z" fill="#1291D0" stroke="#1291D0" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </div>
                 <div className="flex flex-col gap-[4px]">
-                  <span className="text-[14px] font-semibold text-[#E9690C]">Ray Insight</span>
+                  <span className="text-[14px] font-semibold text-[#1291D0]">Ray Insight</span>
                   <p className="text-[15px] leading-[24px] text-[#40566d]">
                     {parseMarkdownBold(data.insight.text)}
                   </p>

@@ -46,18 +46,18 @@ export const useDemoScript = () => {
                 type: 'maya_transactions_report',
                 data: {
                     headline: "Recent payments from arvind@gmail.com",
-                    subtext: "Arvind has **3 recent payments** totalling **₹26,000**. His most recent transaction was for **₹20,000** which is currently **pending**.",
+                    subtext: "Arvind has **3 recent payments** totalling **₹26,000**. Two are successful (captured) and have been settled. The **third—a netbanking payment—is still pending** as we wait for the customer's bank to confirm the transfer.",
                     table: {
                         rows: [
-                            { id: 'pay_arvind_1', amount: '₹20,000.00', status: 'Pending', method: 'UPI', date: getDateWithDayOffset(0, 14, 22), rrn: '648293742901' },
-                            { id: 'pay_arvind_2', amount: '₹2,000.00', status: 'Captured', method: 'Card', date: getDateWithDayOffset(1, 11, 8), rrn: '987654321012' },
-                            { id: 'pay_arvind_3', amount: '₹4,000.00', status: 'Captured', method: 'UPI', date: getDateWithDayOffset(2, 16, 45), rrn: '124294020234' }
+                            { id: 'pay_arvind_1', amount: '₹20,000.00', status: 'Pending', method: 'Netbanking', date: getDateWithDayOffset(0, 8, 53), rrn: '514633500160' },
+                            { id: 'pay_arvind_2', amount: '₹2,000.00', status: 'Captured', method: 'UPI', date: getDateWithDayOffset(1, 8, 53), rrn: '514633500160' },
+                            { id: 'pay_arvind_3', amount: '₹4,000.00', status: 'Captured', method: 'UPI', date: getDateWithDayOffset(0, 8, 53), rrn: '514633500160' }
                         ]
                     },
                     insight: {
-                        text: "There doesn't seem to be any double debit on this account. There's **1 pending payment (₹20,000)**. The other 2 payments have been captured successfully."
+                        text: "Arvind is a long time customer since 2023. He's placed 13 orders so far. They have a Lifetime Value (LTV) of **₹4.5 Lakhs** and, notably, **zero refunds** on record."
                     },
-                    suggestions: ["He claims double debit", "Download Statement", "View Customer Profile"]
+                    suggestions: ["Why is the netbanking payment pending", "Check payment gateway health"]
                 }
             }
         },
@@ -68,10 +68,10 @@ export const useDemoScript = () => {
                     headline: "Double debit diagnosis: Payment stuck with customer's bank",
                     subtext: "It's likely the customer attempted a payment, but it **failed at their bank's end** and was never collected by Razorpay. Such failed transactions are not visible on the Razorpay dashboard.",
                     resolution: {
-                        title: "What will happen:",
+                        title: "What happens next:",
                         content: `The money will be **automatically refunded** to Arvind's account by **${getFutureDate(7)}** (within 5-7 working days). No action is required from your side.`
                     },
-                    suggestions: ["Draft explanation for Arvind", "Check Gateway Health", "Raise Support Ticket"]
+                    suggestions: ["Draft an explanation for Arvind", "Check payment gateway health", "Raise support ticket"]
                 }
             }
         },
