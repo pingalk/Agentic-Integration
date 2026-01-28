@@ -4,19 +4,30 @@ interface StreamSequencerProps {
     hasDataAsset: boolean;
     hasInsight: boolean;
     hasSuggestions: boolean;
+    thinkingDuration?: number;  // 0 = skip thinking, 2000 = 2s, 7000 = 7s
 }
 
-export const useStreamSequencer = ({ 
-    hasDataAsset, 
-    hasInsight, 
-    hasSuggestions 
+export const useStreamSequencer = ({
+    hasDataAsset,
+    hasInsight,
+    hasSuggestions,
+    thinkingDuration = 0
 }: StreamSequencerProps) => {
+    // Phase 0: Thinking (if thinkingDuration > 0)
     // Phase 1: Narrative
     // Phase 2: Data Asset
     // Phase 3: Insight
     // Phase 4: Supporting Actions
     // Phase 5: Suggestions
-    const [phase, setPhase] = useState(1);
+    const [phase, setPhase] = useState(thinkingDuration > 0 ? 0 : 1);
+
+    // Phase 0 -> Phase 1 transition (thinking -> narrative)
+    useEffect(() => {
+        if (phase === 0 && thinkingDuration > 0) {
+            const timer = setTimeout(() => setPhase(1), thinkingDuration);
+            return () => clearTimeout(timer);
+        }
+    }, [phase, thinkingDuration]);
 
     const onNarrativeComplete = useCallback(() => {
         // Transition: When Subtext finishes -> Wait 1.3s -> Trigger Layer 2

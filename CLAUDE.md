@@ -18,6 +18,10 @@ npm run build  # Production build
 
 No lint or test commands are configured.
 
+## Workflow
+
+**Commit after every change.** Each modification should be committed immediately to preserve progress and maintain a granular history.
+
 ## Architecture
 
 ### Directory Structure

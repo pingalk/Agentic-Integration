@@ -151,10 +151,13 @@ export const useDemoScript = () => {
         },
         sarah_step_2: {
             artifact: {
-                type: 'followup_question',
+                type: 'bullet_list_with_buttons',
                 data: {
-                    headline: "Your payments are now set to \"auto-capture\"",
-                    question: "While future payments are now safe, the 5 orders mentioned earlier have already been refunded to your customers.\n\nTo help you save these sales, I can instantly generate and email Payment Links to these 5 customers for the exact amounts they tried to pay.\n\nShall I send those Payment Links now?",
+                    bullets: [
+                        { bold: "Payment Capture setting updated to auto-capture:", text: "All your payments are now set to Auto-Capture." },
+                        { bold: "", text: "However, **the 5 orders listed earlier above were already refunded** to the customers..." },
+                        { bold: "My recommendation:", text: "To save these sales, I can **instantly generate Payment Links to these 5 customers** for the exact amounts they attempted to pay?" }
+                    ],
                     buttons: [
                         { label: "Yes", variant: "primary" },
                         { label: "Not now", variant: "secondary" }
@@ -164,14 +167,25 @@ export const useDemoScript = () => {
         },
         sarah_step_3: {
             artifact: {
-                type: 'followup_question',
+                type: 'payment_links_created',
                 data: {
-                    headline: "Stay updated in real-time with WhatsApp alerts",
-                    question: "I noticed your notifications are currently turned off. Enabling these ensures you get a WhatsApp alert the moment a payment requires your attention, preventing any unexpected refunds in the future.\n\nWould you like me to enable WhatsApp alerts for your account?",
-                    buttons: [
-                        { label: "Yes", variant: "primary" },
-                        { label: "Not now", variant: "secondary" }
-                    ]
+                    headline: "Great news! Your payment links are ready to help you get paid.",
+                    body: "I've generated these links to help you get paid for those 5 auto-refunded orders. These are now Active and ready to be shared with your customers via WhatsApp, email, or SMS.",
+                    table: {
+                        rows: [
+                            { id: '1', email: 'customer1@email.com', amount: '₹1,500', status: 'Active', createdOn: '23 Jan 2026', linkUrl: 'rzp.io/i/abc123' },
+                            { id: '2', email: 'customer2@email.com', amount: '₹1,500', status: 'Active', createdOn: '23 Jan 2026', linkUrl: 'rzp.io/i/def456' },
+                            { id: '3', email: 'customer3@email.com', amount: '₹1,000', status: 'Active', createdOn: '23 Jan 2026', linkUrl: 'rzp.io/i/ghi789' }
+                        ]
+                    },
+                    followup: {
+                        title: "What next?",
+                        body: "As soon as a customer pays, I can notify you immediately. Would you like to enable notifications for this?",
+                        buttons: [
+                            { label: "Yes", variant: "primary" },
+                            { label: "Not now", variant: "secondary" }
+                        ]
+                    }
                 }
             }
         },
@@ -179,13 +193,9 @@ export const useDemoScript = () => {
             artifact: {
                 type: 'simple_text',
                 data: {
-                    headline: "WhatsApp alerts are now enabled!",
-                    body: "You'll now receive instant WhatsApp notifications whenever a payment requires your attention. This will help you stay on top of your transactions and avoid any unexpected issues in the future.",
-                    suggestions: [
-                        "What other notifications can I enable?",
-                        "How do I customize my alert preferences?",
-                        "Show me my notification settings"
-                    ]
+                    headline: "Notifications are now enabled!",
+                    body: "You'll receive instant notifications whenever a payment is made. This will help you stay on top of your transactions and follow up promptly with customers.\n\nIs there anything else I can help you with?",
+                    suggestions: []
                 }
             }
         }

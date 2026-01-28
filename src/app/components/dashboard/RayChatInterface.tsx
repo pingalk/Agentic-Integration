@@ -249,13 +249,13 @@ export const RayChatInterface = () => {
       if (suggestion === 'Yes') {
         if (sarahFlowStep === 1) {
           // Transition from step 1 to step 2 (auto-capture confirmation)
-          handleSarahFlowAdvance("Change payment setting to auto-capture", sarahScript.sarah_step_2, 2);
+          handleSarahFlowAdvance("Yes", sarahScript.sarah_step_2, 2);
         } else if (sarahFlowStep === 2) {
-          // Transition from step 2 to step 3 (WhatsApp alerts)
+          // Transition from step 2 to step 3 (payment links created)
           handleSarahFlowAdvance("Yes", sarahScript.sarah_step_3, 3);
         } else if (sarahFlowStep === 3) {
-          // Transition from step 3 to step 4 (WhatsApp enabled confirmation)
-          handleSarahFlowAdvance("Yes, enable WhatsApp alerts", sarahScript.sarah_step_4, 4);
+          // Transition from step 3 to step 4 (notifications enabled)
+          handleSarahFlowAdvance("Yes", sarahScript.sarah_step_4, 4);
         }
         return;
       }
