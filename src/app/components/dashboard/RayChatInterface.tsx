@@ -243,7 +243,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
             setMessages([{
                 id: 'sam-u1',
                 sender: 'user',
-                blocks: [{ type: 'text', content: "What is the status of my ticket #4492?" }]
+                blocks: [{ type: 'text', content: "What's the status of my last ticket" }]
             }]);
             setSamFlowStep(1);
 
