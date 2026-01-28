@@ -9,6 +9,18 @@ export const useDemoScript = () => {
         return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
     };
 
+    // Helper to get current date with timestamp offset (minutes)
+    const getTimestamp = (minuteOffset: number) => {
+        const date = new Date();
+        date.setMinutes(date.getMinutes() + minuteOffset);
+        const day = date.getDate();
+        const month = date.toLocaleDateString('en-GB', { month: 'short' });
+        const year = date.getFullYear();
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        return `${day} ${month} ${year}, ${hours}:${minutes}`;
+    };
+
     // Maya's Journey (Double Debit)
     const scriptData = {
         0: {
@@ -173,9 +185,9 @@ export const useDemoScript = () => {
                     body: "I've generated these links to help you get paid for those 5 auto-refunded orders. These are now Active and ready to be shared with your customers via WhatsApp, email, or SMS.",
                     table: {
                         rows: [
-                            { id: '1', linkUrl: 'https://rzp.io/rzp/zrcAOUD', amount: '₹ 1500.00', status: 'Active', createdOn: '23 Jan 2026, 08:53', expiry: '-' },
-                            { id: '2', linkUrl: 'https://rzp.io/rzp/iascAOCE', amount: '₹ 1000.00', status: 'Active', createdOn: '23 Jan 2026, 08:54', expiry: '-' },
-                            { id: '3', linkUrl: 'https://rzp.io/rzp/jcasuCHS', amount: '₹ 500.00', status: 'Active', createdOn: '23 Jan 2026, 08:55', expiry: '-' }
+                            { id: '1', linkUrl: 'https://rzp.io/rzp/zrcAOUD', amount: '₹ 1500.00', status: 'Active', createdOn: getTimestamp(0), expiry: '-' },
+                            { id: '2', linkUrl: 'https://rzp.io/rzp/iascAOCE', amount: '₹ 1000.00', status: 'Active', createdOn: getTimestamp(1), expiry: '-' },
+                            { id: '3', linkUrl: 'https://rzp.io/rzp/jcasuCHS', amount: '₹ 500.00', status: 'Active', createdOn: getTimestamp(2), expiry: '-' }
                         ]
                     },
                     followup: {
