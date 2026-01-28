@@ -290,13 +290,12 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
   useEffect(() => {
     if (currentPersona.id === 'shyam' && messages.length === 0 && !demoFlowStartedRef.current) {
         demoFlowStartedRef.current = true;
-        // Step 1: User uploads screenshot
+        // Step 1: User uploads screenshot (image only, no text)
         setTimeout(() => {
             setMessages([{
                 id: 'shyam-u1',
                 sender: 'user',
                 blocks: [
-                    { type: 'text', content: "Customer complaint - payment failed" },
                     { type: 'image', content: '/screenshot-failed-payment.png' }
                 ]
             }]);
