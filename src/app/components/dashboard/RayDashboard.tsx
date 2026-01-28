@@ -43,6 +43,56 @@ function SuggestionChip({ icon, label, onClick }: { icon: React.ReactNode, label
   );
 }
 
+// --- EXPERIMENTAL: Hover Affordance Component ---
+// Reusable "Review with Ray" / "Fix with Ray" affordance
+interface HoverAffordanceProps {
+  isVisible: boolean;
+  onClick?: () => void;
+  label?: string;
+  variant?: 'light' | 'dark'; // light = white text, dark = blue text
+}
+
+const HoverAffordance = ({ isVisible, onClick, label = "Review with Ray", variant = 'light' }: HoverAffordanceProps) => {
+  const textColor = variant === 'light' ? 'text-white/90' : 'text-[#2563EB]';
+  const bgColor = variant === 'light' ? 'bg-white/20' : 'bg-[#2563EB]/10';
+  const strokeColor = variant === 'light' ? 'white' : '#2563EB';
+
+  return (
+    <motion.div
+      className="flex items-center gap-[6px] overflow-hidden cursor-pointer"
+      onClick={onClick}
+      initial={false}
+      animate={{
+        height: isVisible ? 24 : 0,
+        opacity: isVisible ? 1 : 0,
+      }}
+      transition={{
+        height: { duration: 0.25, ease: [0.25, 0.1, 0.25, 1] },
+        opacity: { duration: 0.2, delay: isVisible ? 0.05 : 0 },
+      }}
+    >
+      <motion.div
+        className={`size-[18px] rounded-full ${bgColor} flex items-center justify-center backdrop-blur-sm`}
+        initial={false}
+        animate={{ scale: isVisible ? 1 : 0.6, opacity: isVisible ? 1 : 0 }}
+        transition={{ duration: 0.2, ease: [0.34, 1.56, 0.64, 1] }}
+      >
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={strokeColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
+      </motion.div>
+      <motion.span
+        className={`text-[14px] font-medium ${textColor} whitespace-nowrap`}
+        initial={false}
+        animate={{ x: isVisible ? 0 : -10, opacity: isVisible ? 1 : 0 }}
+        transition={{ duration: 0.25, delay: isVisible ? 0.08 : 0, ease: [0.25, 0.1, 0.25, 1] }}
+      >
+        {label}
+      </motion.span>
+    </motion.div>
+  );
+};
+
 // --- EXPERIMENTAL: Briefing Item with Hover Affordance ---
 // This component adds a "Review with Ray" hover interaction
 // To revert: Replace BriefingItem usage with original static JSX
@@ -53,9 +103,10 @@ interface BriefingItemProps {
   hoveredIndex: number | null;
   onHover: (index: number | null) => void;
   onReviewClick?: () => void;
+  actionLabel?: string;
 }
 
-const BriefingItem = ({ index, children, isHovered, hoveredIndex, onHover, onReviewClick }: BriefingItemProps) => {
+const BriefingItem = ({ index, children, isHovered, hoveredIndex, onHover, onReviewClick, actionLabel = "Review with Ray" }: BriefingItemProps) => {
   const isOtherHovered = hoveredIndex !== null && hoveredIndex !== index;
 
   return (
@@ -67,10 +118,7 @@ const BriefingItem = ({ index, children, isHovered, hoveredIndex, onHover, onRev
         opacity: isOtherHovered ? 0.4 : 1,
         filter: isOtherHovered ? 'blur(1px)' : 'blur(0px)',
       }}
-      transition={{
-        duration: 0.3,
-        ease: [0.25, 0.1, 0.25, 1],
-      }}
+      transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
     >
       {/* Main content row */}
       <div className="content-stretch flex gap-[10px] items-start relative shrink-0 w-full">
@@ -84,61 +132,10 @@ const BriefingItem = ({ index, children, isHovered, hoveredIndex, onHover, onRev
         </p>
       </div>
 
-      {/* "Review with Ray" affordance - appears on hover */}
-      <motion.div
-        className="flex items-center gap-[6px] pl-[26px] overflow-hidden cursor-pointer"
-        onClick={onReviewClick}
-        initial={false}
-        animate={{
-          height: isHovered ? 24 : 0,
-          opacity: isHovered ? 1 : 0,
-        }}
-        transition={{
-          height: {
-            duration: 0.25,
-            ease: [0.25, 0.1, 0.25, 1],
-          },
-          opacity: {
-            duration: 0.2,
-            delay: isHovered ? 0.05 : 0,
-          },
-        }}
-      >
-        {/* Circular chevron icon */}
-        <motion.div
-          className="size-[18px] rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm"
-          initial={false}
-          animate={{
-            scale: isHovered ? 1 : 0.6,
-            opacity: isHovered ? 1 : 0,
-          }}
-          transition={{
-            duration: 0.2,
-            ease: [0.34, 1.56, 0.64, 1], // spring-like
-          }}
-        >
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
-        </motion.div>
-
-        {/* Text reveal */}
-        <motion.span
-          className="text-[14px] font-medium text-white/90 whitespace-nowrap"
-          initial={false}
-          animate={{
-            x: isHovered ? 0 : -10,
-            opacity: isHovered ? 1 : 0,
-          }}
-          transition={{
-            duration: 0.25,
-            delay: isHovered ? 0.08 : 0,
-            ease: [0.25, 0.1, 0.25, 1],
-          }}
-        >
-          Review with Ray
-        </motion.span>
-      </motion.div>
+      {/* Affordance - appears on hover */}
+      <div className="pl-[26px]">
+        <HoverAffordance isVisible={isHovered} onClick={onReviewClick} label={actionLabel} variant="light" />
+      </div>
     </motion.div>
   );
 };
@@ -193,20 +190,39 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
     return "";
   };
 
-  // EXPERIMENTAL: Handle "Review with Ray" click
+  // EXPERIMENTAL: Handle "Review with Ray" click - just populate input
   const handleBriefingReviewClick = (index: number) => {
     const reviewPrompt = getBriefingReviewPrompt(index);
     setPrompt(reviewPrompt);
     setHoveredBriefingItem(null);
-
-    // Brief pause to show the prompt, then transition to chat
-    setTimeout(() => {
-      setLastQuery(reviewPrompt);
-      setPrompt('');
-      setView('chat');
-      setIsSidebarCollapsed(true);
-    }, 800);
   };
+
+  // EXPERIMENTAL: Prompts for other cards
+  const getCardReviewPrompt = (cardType: string): string => {
+    if (cardType === 'stats') {
+      if (isNegative) return "Why is my account balance negative and how do I fix it?";
+      if (isNeutral) return "Why are my payment volumes low today?";
+      return "Show me a breakdown of today's payment volume";
+    }
+    if (cardType === 'settlement') {
+      if (isNegative) return "How do I resume my paused settlements?";
+      return "When is my next settlement and what's included?";
+    }
+    if (cardType === 'success') {
+      return "How can I improve my payment success rate?";
+    }
+    return "";
+  };
+
+  // EXPERIMENTAL: Handle card review click
+  const handleCardReviewClick = (cardType: string) => {
+    const reviewPrompt = getCardReviewPrompt(cardType);
+    setPrompt(reviewPrompt);
+    setHoveredCard(null);
+  };
+
+  // EXPERIMENTAL: Track which card is hovered
+  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
   // Sync prompt with persona when on landing page
   useEffect(() => {
@@ -572,6 +588,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                               hoveredIndex={hoveredBriefingItem}
                               onHover={setHoveredBriefingItem}
                               onReviewClick={() => handleBriefingReviewClick(1)}
+                              actionLabel={isNegative || isNeutral ? "Fix with Ray" : "Review with Ray"}
                             >
                               {isNegative
                                 ? <>Your refund volume for last 3 days was unusually high</>
@@ -588,6 +605,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                               hoveredIndex={hoveredBriefingItem}
                               onHover={setHoveredBriefingItem}
                               onReviewClick={() => handleBriefingReviewClick(2)}
+                              actionLabel="Fix with Ray"
                             >
                               Payment timeouts are the most common failure reason (2%)
                             </BriefingItem>
@@ -599,6 +617,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                               hoveredIndex={hoveredBriefingItem}
                               onHover={setHoveredBriefingItem}
                               onReviewClick={() => handleBriefingReviewClick(3)}
+                              actionLabel="Review with Ray"
                             >
                               Cards & UPI payments account for 96% of this week's payment volume (₹7.1 lakh)
                             </BriefingItem>
@@ -611,7 +630,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                         {/* 2. ACCOUNT BALANCE / PAYMENT VOLUME CARD (Top Right) - Dynamic color based on theme */}
                         <motion.div
                           className={clsx(
-                            "bg-white border border-solid overflow-clip rounded-[10px] h-[201px] w-full relative",
+                            "bg-white border border-solid overflow-clip rounded-[10px] h-[201px] w-full relative cursor-pointer",
                             isNegative ? "border-[#fee4e2]" : isNeutral ? "border-[#fed7aa]" : "border-[#d1fae5]"
                           )}
                           initial={{ opacity: 0, y: 26 }}
@@ -621,6 +640,8 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                             delay: 0.3,
                             ease: [0.16, 1, 0.3, 1]
                           }}
+                          onMouseEnter={() => setHoveredCard('stats')}
+                          onMouseLeave={() => setHoveredCard(null)}
                         >
                           {/* Gradient SVG shapes in background - dynamic color */}
                           <div className="absolute inset-[calc(24.4%-1px)_calc(-39.84%-1px)_calc(-54.56%-1px)_calc(57.66%-1px)]">
@@ -740,39 +761,61 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                               </>
                             )}
                           </p>
+
+                          {/* EXPERIMENTAL: Hover affordance */}
+                          <div className="absolute bottom-[12px] right-[12px]">
+                            <HoverAffordance
+                              isVisible={hoveredCard === 'stats'}
+                              onClick={() => handleCardReviewClick('stats')}
+                              label={isNegative ? "Fix with Ray" : isNeutral ? "Fix with Ray" : "Review with Ray"}
+                              variant="dark"
+                            />
+                          </div>
                         </motion.div>
 
                         {/* Bottom Row - Success Rate and Settlement Cards side by side */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
                         
                         {/* 3. SUCCESS RATE CARD (Bottom Left) */}
-                        <motion.div 
-                          className="bg-[#fcfcfc] border border-[rgba(0,0,0,0.1)] border-solid not-italic overflow-clip rounded-[12px] h-[183px] w-full relative"
+                        <motion.div
+                          className="bg-[#fcfcfc] border border-[rgba(0,0,0,0.1)] border-solid not-italic overflow-clip rounded-[12px] h-[183px] w-full relative cursor-pointer"
                           initial={{ opacity: 0, y: 26 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ 
-                            duration: 2.0, 
+                          transition={{
+                            duration: 2.0,
                             delay: 0.6,
                             ease: [0.16, 1, 0.3, 1]
                           }}
+                          onMouseEnter={() => setHoveredCard('success')}
+                          onMouseLeave={() => setHoveredCard(null)}
                         >
                           {/* Title at top */}
                           <p className="absolute font-['TASA_Orbiter_Display',sans-serif] leading-[28px] left-[12px] text-[#40566d] text-[20px] top-[15px] tracking-[-0.26px]">
                             Your payment success rate is <span className="font-['TASA_Orbiter_Display',sans-serif] font-semibold text-[#00a251]">healthy</span>
                           </p>
-                          
+
                           {/* Label */}
                           <p className="absolute font-['Inter',sans-serif] font-medium leading-[16px] left-[12px] text-[#768ea7] text-[12px] top-[111px] tracking-[0.24px]">SUCCESS RATE</p>
-                          
+
                           {/* Large percentage value */}
                           <div className="absolute flex flex-col font-['TASA_Orbiter_Display',sans-serif] font-semibold justify-end leading-[0] left-[75px] text-[#192839] text-[32px] text-right top-[169px] translate-x-[-100%] translate-y-[-100%]">
                             <p className="leading-[38px]">98%</p>
+                          </div>
+
+                          {/* EXPERIMENTAL: Hover affordance */}
+                          <div className="absolute bottom-[12px] right-[12px]">
+                            <HoverAffordance
+                              isVisible={hoveredCard === 'success'}
+                              onClick={() => handleCardReviewClick('success')}
+                              label="Review with Ray"
+                              variant="dark"
+                            />
                           </div>
                         </motion.div>
 
                         {/* 4. SETTLEMENT CARD (Bottom Right) - Dynamic color based on theme */}
                         <motion.div
-                          className="bg-[#fcfcfc] border border-[rgba(0,0,0,0.1)] border-solid h-[183px] overflow-clip rounded-[12px] w-full relative"
+                          className="bg-[#fcfcfc] border border-[rgba(0,0,0,0.1)] border-solid h-[183px] overflow-clip rounded-[12px] w-full relative cursor-pointer"
                           initial={{ opacity: 0, y: 26 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{
@@ -780,6 +823,8 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                             delay: 0.9,
                             ease: [0.16, 1, 0.3, 1]
                           }}
+                          onMouseEnter={() => setHoveredCard('settlement')}
+                          onMouseLeave={() => setHoveredCard(null)}
                         >
                           {/* Ellipse gradient at bottom - dynamic color */}
                           <div className="absolute h-[98px] left-[-27px] top-[173px] w-[275px]">
@@ -821,6 +866,16 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
 
                           {/* Label */}
                           <p className="absolute font-['Inter',sans-serif] font-medium leading-[16px] left-[15px] not-italic text-[#768ea7] text-[10px] top-[111px] tracking-[0.3px]">NEXT SETTLEMENT</p>
+
+                          {/* EXPERIMENTAL: Hover affordance */}
+                          <div className="absolute bottom-[12px] right-[12px]">
+                            <HoverAffordance
+                              isVisible={hoveredCard === 'settlement'}
+                              onClick={() => handleCardReviewClick('settlement')}
+                              label={isNegative ? "Fix with Ray" : "Review with Ray"}
+                              variant="dark"
+                            />
+                          </div>
                         </motion.div>
                         
                         </div>
