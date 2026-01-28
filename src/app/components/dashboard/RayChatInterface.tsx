@@ -3,7 +3,7 @@ import { RayMessageRenderer, RayResponseData } from './chat/RayMessageRenderer';
 import { AddFundsWidget } from './chat/AddFundsWidget';
 import { PaymentLinkWidget, PaymentLinkPrefill, parsePaymentLinkIntent } from './chat/PaymentLinkWidget';
 import { TransactionPreviewPane, TransactionData } from './chat/TransactionPreviewPane';
-import { ArrowDown, ArrowUp, Mic, Plus, Sparkles } from 'lucide-react';
+import { ArrowDown, ArrowUp, Mic, Plus, Sparkles, Square } from 'lucide-react';
 import { useDemo } from '@/context/DemoContext';
 import { useDemoScript } from './useDemoScript';
 import { motion, AnimatePresence } from 'motion/react';
@@ -99,6 +99,9 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
   // Briefing Review Flow State
   const [briefingReviewHandled, setBriefingReviewHandled] = useState(false);
 
+  // Streaming state - shows stop button while Ray is responding
+  const [isStreaming, setIsStreaming] = useState(false);
+
   // Refs to prevent double execution in React StrictMode
   const demoFlowStartedRef = useRef(false);
 
@@ -142,6 +145,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
 
             // Step 2: Show Thinking State
             setTimeout(() => {
+                setIsStreaming(true);
                 const thinkingMsg: RayResponseData = {
                     id: 'ai-response-1',
                     sender: 'ai',
@@ -154,6 +158,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
                     setMessages(prev => prev.map(msg =>
                         msg.id === 'ai-response-1' ? generateArjunData() : msg
                     ));
+                    setTimeout(() => setIsStreaming(false), 3000);
                 }, 2000); // 2s thinking time
             }, 600);
         }, 600);
@@ -175,6 +180,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
 
             // Step 2: Show Thinking State
             setTimeout(() => {
+                setIsStreaming(true);
                 const thinkingMsg: RayResponseData = {
                     id: 'sarah-ai-1',
                     sender: 'ai',
@@ -191,6 +197,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
                             sender: 'ai' as const
                         } : msg
                     ));
+                    setTimeout(() => setIsStreaming(false), 3000);
                 }, 2000); // 2s thinking time
             }, 600);
         }, 600);
@@ -212,6 +219,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
 
             // Step 2: Show Thinking State
             setTimeout(() => {
+                setIsStreaming(true);
                 const thinkingMsg: RayResponseData = {
                     id: 'maya-ai-1',
                     sender: 'ai',
@@ -228,6 +236,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
                             sender: 'ai' as const
                         } : msg
                     ));
+                    setTimeout(() => setIsStreaming(false), 3000);
                 }, 2000); // 2s thinking time
             }, 600);
         }, 600);
@@ -249,6 +258,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
 
             // Step 2: Show Thinking State
             setTimeout(() => {
+                setIsStreaming(true);
                 const thinkingMsg: RayResponseData = {
                     id: 'sam-ai-1',
                     sender: 'ai',
@@ -265,6 +275,8 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
                             sender: 'ai' as const
                         } : msg
                     ));
+                    // Keep streaming for a bit while content animates, then stop
+                    setTimeout(() => setIsStreaming(false), 3000);
                 }, 2000); // 2s thinking time
             }, 600);
         }, 600);
@@ -538,6 +550,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
 
     // Show thinking state
     setTimeout(() => {
+      setIsStreaming(true);
       const thinkingId = `sarah-ai-thinking-${Date.now()}`;
       setMessages(prev => [...prev, {
         id: thinkingId,
@@ -556,6 +569,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
           }];
         });
         setSarahFlowStep(nextFlowStep);
+        setTimeout(() => setIsStreaming(false), 3000);
       }, 1500);
     }, 600);
   };
@@ -595,6 +609,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
 
     // Show thinking state
     setTimeout(() => {
+      setIsStreaming(true);
       const thinkingId = `maya-ai-thinking-${Date.now()}`;
       setMessages(prev => [...prev, {
         id: thinkingId,
@@ -613,6 +628,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
           }];
         });
         setMayaFlowStep(nextFlowStep);
+        setTimeout(() => setIsStreaming(false), 3000);
       }, 1500);
     }, 600);
   };
@@ -628,6 +644,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
 
     // Show thinking state
     setTimeout(() => {
+      setIsStreaming(true);
       const thinkingId = `sam-ai-thinking-${Date.now()}`;
       setMessages(prev => [...prev, {
         id: thinkingId,
@@ -646,6 +663,8 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
           }];
         });
         setSamFlowStep(nextFlowStep);
+        // Keep streaming for a bit while content animates, then stop
+        setTimeout(() => setIsStreaming(false), 3000);
       }, 1500);
     }, 600);
   };
@@ -841,19 +860,28 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
                
                {/* Right Actions */}
                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                  {inputValue.length === 0 && (
+                  {!isStreaming && inputValue.length === 0 && (
                      <>
                         <button className="p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-full hover:bg-slate-100"><Plus size={20} /></button>
                         <button className="p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-full hover:bg-slate-100"><Mic size={20} /></button>
                      </>
                   )}
-                  <button
-                    disabled={!inputValue}
-                    onClick={handleInputSubmit}
-                    className="w-9 h-9 flex items-center justify-center bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:bg-slate-300 transition-all shadow-sm active:scale-95"
-                  >
-                     <ArrowUp size={18} strokeWidth={2.5} />
-                  </button>
+                  {isStreaming ? (
+                    <button
+                      onClick={() => setIsStreaming(false)}
+                      className="w-9 h-9 flex items-center justify-center bg-[#0a0a0a] text-white rounded-full hover:bg-black transition-all shadow-sm active:scale-95"
+                    >
+                      <Square size={14} fill="white" />
+                    </button>
+                  ) : (
+                    <button
+                      disabled={!inputValue}
+                      onClick={handleInputSubmit}
+                      className="w-9 h-9 flex items-center justify-center bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:bg-slate-300 transition-all shadow-sm active:scale-95"
+                    >
+                      <ArrowUp size={18} strokeWidth={2.5} />
+                    </button>
+                  )}
                </div>
             </motion.div>
             

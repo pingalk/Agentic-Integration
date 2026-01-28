@@ -1937,8 +1937,6 @@ const MayaDraftMessageArtifact = ({ data, onSuggestionClick, isLast }: any) => {
 // --- Sam's Support Ticket Status Artifact ---
 const SupportTicketStatusArtifact = ({ data, onButtonClick, onSuggestionClick, isLast }: any) => {
   const [subtextStarted, setSubtextStarted] = useState(false);
-  // Local state to track in-place escalation
-  const [isLocallyEscalated, setIsLocallyEscalated] = useState(false);
 
   const { phase, onNarrativeComplete } = useStreamSequencer({
     hasDataAsset: true,
@@ -1951,13 +1949,13 @@ const SupportTicketStatusArtifact = ({ data, onButtonClick, onSuggestionClick, i
     setTimeout(() => setSubtextStarted(true), 800);
   }, []);
 
-  // Handle escalate click - update card in-place
+  // Handle escalate click - flow as user message via onButtonClick
   const handleEscalateClick = () => {
-    setIsLocallyEscalated(true);
+    onButtonClick?.('Escalate this Ticket');
   };
 
-  // Determine if escalated (from data or local state)
-  const isEscalated = data.ticket.isEscalated || isLocallyEscalated;
+  // Determine if escalated from data
+  const isEscalated = data.ticket.isEscalated;
 
   return (
     <>
@@ -2071,32 +2069,16 @@ const SupportTicketStatusArtifact = ({ data, onButtonClick, onSuggestionClick, i
                 <div className="flex gap-[12px]">
                   <AnimatePresence mode="wait">
                     {isEscalated ? (
-                      <motion.div
-                        key="escalated"
+                      <motion.button
+                        key="priority"
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="flex gap-[12px] w-full"
+                        onClick={() => onButtonClick?.('Priority Support')}
+                        className="flex-1 h-[36px] bg-white rounded-[8px] text-[#050505] text-[13px] font-semibold tracking-[-0.156px] relative hover:bg-[#f8fafc] transition-colors"
                       >
-                        {/* Escalated Confirmation Button */}
-                        <div
-                          className="w-1/2 h-[36px] rounded-[8px] text-white text-[12px] font-semibold tracking-[-0.156px] relative overflow-hidden flex items-center justify-center gap-[4px]"
-                          style={{ background: 'linear-gradient(-27deg, rgba(7, 51, 128, 0.5) 55%, rgba(71, 147, 253, 0.5) 99%)' }}
-                        >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="20 6 9 17 4 12" />
-                          </svg>
-                          <span className="relative z-10">Ticket escalated</span>
-                          <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_2px_0px_0px_rgba(255,255,255,0.2),inset_0px_-2px_0px_0px_rgba(255,255,255,0.2)]" />
-                        </div>
-                        {/* Priority Support Button - Single CTA */}
-                        <button
-                          onClick={() => onButtonClick?.('Priority Support')}
-                          className="w-1/2 h-[36px] bg-white rounded-[8px] text-[#050505] text-[12px] font-semibold tracking-[-0.156px] relative"
-                        >
-                          <span className="relative z-10">Need immediate resolution? Get Priority support</span>
-                          <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_-1px_0.5px_0px_rgba(0,0,0,0.2),inset_0px_0px_0px_1px_#d1d8db]" />
-                        </button>
-                      </motion.div>
+                        <span className="relative z-10">Need quicker resolution? Opt in for priority support</span>
+                        <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_-1px_0.5px_0px_rgba(0,0,0,0.2),inset_0px_0px_0px_1px_#d1d8db]" />
+                      </motion.button>
                     ) : (
                       <motion.button
                         key="escalate"

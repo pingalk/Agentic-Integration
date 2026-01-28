@@ -325,15 +325,15 @@ Maya`,
             artifact: {
                 type: 'support_ticket_status',
                 data: {
-                    headline: "Your last ticket #4492 is still under review",
-                    subtext: "", // Empty - removed per requirement
+                    headline: "Your last #4492 ticket is still under review.",
+                    subtext: "",
                     ticket: {
                         id: '#4492',
                         status: 'Active',
                         issue: 'Customer Refund - ₹5,000 not received',
                         raised: '5 days ago',
                         createdOn: 'Jan 23, 2026, 5 days ago',
-                        eta: etaFormatted, // SLA breach - 2 days overdue
+                        eta: etaFormatted,
                         isOverdue: true
                     },
                     explanation: {
@@ -341,17 +341,35 @@ Maya`,
                         content: "Your request involves a bank-side verification to track exactly why the ₹5,000 hasn't hit your customer's account yet. We usually resolve these within 5 business days."
                     },
                     buttons: [
-                        { label: "Escalate", variant: "primary" }
+                        { label: "Escalate this Ticket", variant: "primary" }
                     ],
-                    suggestions: [
-                        "Escalate this to a senior specialist right now?",
-                        "Explain the typical timeline for refunds?"
-                    ]
+                    suggestions: []
                 }
             }
         },
-        // sam_step_2 is no longer used - escalation happens in-place on the card
-        sam_step_2: null
+        sam_step_2: {
+            artifact: {
+                type: 'support_ticket_status',
+                data: {
+                    headline: "Your ticket #4492 has been Escalated.",
+                    subtext: "I've moved this ticket to our priority review team. A support manager will look into this by today.",
+                    ticket: {
+                        id: '#4492',
+                        status: 'Escalated',
+                        issue: 'Customer Refund - ₹5,000 not received',
+                        raised: '5 days ago',
+                        createdOn: 'Jan 23, 2026, 5 days ago',
+                        eta: 'Today',
+                        isEscalated: true
+                    },
+                    explanation: null,
+                    buttons: [
+                        { label: "Need quicker resolution? Opt in for priority support", variant: "secondary" }
+                    ],
+                    suggestions: []
+                }
+            }
+        }
     };
 
     const processInput = (text: string) => {
