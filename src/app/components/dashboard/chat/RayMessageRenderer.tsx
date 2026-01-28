@@ -1939,10 +1939,12 @@ const SupportTicketStatusArtifact = ({ data, onButtonClick, onSuggestionClick, i
   const [subtextStarted, setSubtextStarted] = useState(false);
   // Local state for immediate in-place button change
   const [isLocallyEscalated, setIsLocallyEscalated] = useState(false);
+  // Ref to prevent double-calling onNarrativeComplete
+  const narrativeCompleteCalledRef = React.useRef(false);
 
   const { phase, onNarrativeComplete } = useStreamSequencer({
     hasDataAsset: true,
-    hasInsight: true,
+    hasInsight: !!data.explanation,
     hasSuggestions: data.suggestions?.length > 0,
     thinkingDuration: 3000
   });
@@ -1950,6 +1952,14 @@ const SupportTicketStatusArtifact = ({ data, onButtonClick, onSuggestionClick, i
   const handleHeadlineComplete = React.useCallback(() => {
     setTimeout(() => setSubtextStarted(true), 800);
   }, []);
+
+  // Handle empty subtext case - trigger narrative complete via useEffect
+  React.useEffect(() => {
+    if (subtextStarted && !data.subtext && !narrativeCompleteCalledRef.current) {
+      narrativeCompleteCalledRef.current = true;
+      onNarrativeComplete();
+    }
+  }, [subtextStarted, data.subtext, onNarrativeComplete]);
 
   // Handle escalate click - immediately update button in-place AND trigger flow advance
   const handleEscalateClick = () => {
@@ -2002,7 +2012,6 @@ const SupportTicketStatusArtifact = ({ data, onButtonClick, onSuggestionClick, i
                 />
               </motion.div>
             )}
-            {subtextStarted && !data.subtext && (() => { onNarrativeComplete(); return null; })()}
           </div>
 
           {/* Support Ticket Card (Phase 2+) - New Figma Design */}
