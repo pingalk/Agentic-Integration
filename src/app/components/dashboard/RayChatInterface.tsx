@@ -108,6 +108,9 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
   // Streaming state - shows stop button while Ray is responding
   const [isStreaming, setIsStreaming] = useState(false);
 
+  // Input ref for focus checking
+  const inputRef = useRef<HTMLInputElement>(null);
+
   // Refs to prevent double execution in React StrictMode
   const demoFlowStartedRef = useRef(false);
 
@@ -115,6 +118,45 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
   useEffect(() => {
     demoFlowStartedRef.current = false;
   }, [currentPersona.id]);
+
+  // Keyboard shortcut listener for suggestions (1, 2, 3)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only activate when input is not focused and no modifier keys
+      if (isInputFocused || e.metaKey || e.ctrlKey || e.altKey) return;
+
+      // Check for 1, 2, or 3 keys
+      const keyNum = parseInt(e.key);
+      if (keyNum >= 1 && keyNum <= 3) {
+        // Get suggestions from the last AI message
+        const lastAiMessage = [...messages].reverse().find(m => m.sender === 'ai');
+        if (!lastAiMessage) return;
+
+        // Try to find suggestions in different artifact structures
+        let suggestions: string[] = [];
+        if (lastAiMessage.suggestions) {
+          suggestions = lastAiMessage.suggestions;
+        } else if (lastAiMessage.artifact?.data?.suggestions) {
+          suggestions = lastAiMessage.artifact.data.suggestions;
+        }
+
+        // Get the corresponding suggestion (1-indexed)
+        const suggestionIndex = keyNum - 1;
+        if (suggestions[suggestionIndex]) {
+          e.preventDefault();
+          setInputValue(suggestions[suggestionIndex]);
+          setIsInputFocused(true);
+          // Focus the input after a small delay to ensure state is updated
+          setTimeout(() => {
+            inputRef.current?.focus();
+          }, 50);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isInputFocused, messages]);
 
   // Transaction Preview State
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionData | null>(null);
@@ -960,14 +1002,15 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
          <div className="bg-white/80 backdrop-blur-xl border-t border-slate-100 px-3 md:px-4 pb-4 md:pb-6 pt-3 md:pt-4">
             <motion.div
                animate={{
-                 width: isInputExpanded ? "100%" : "280px"
+                 width: isInputExpanded ? "100%" : "475px"
                }}
                transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-               className="w-full max-w-full md:max-w-[700px] mx-auto relative group"
+               className="w-full max-w-full md:max-w-[700px] mx-auto relative group min-w-[475px]"
                onMouseEnter={() => setIsInputHovered(true)}
                onMouseLeave={() => setIsInputHovered(false)}
             >
                <input
+                  ref={inputRef}
                   type="text"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
