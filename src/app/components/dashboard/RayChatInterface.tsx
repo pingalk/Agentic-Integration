@@ -60,7 +60,7 @@ const generateArjunData = (): RayResponseData => {
 
 export const RayChatInterface = () => {
   const { currentPersona } = useDemo();
-  const { arjunScript, sarahScript } = useDemoScript();
+  const { arjunScript, sarahScript, mayaScript } = useDemoScript();
   const [messages, setMessages] = useState<RayResponseData[]>([]);
   const [inputValue, setInputValue] = useState("");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -79,6 +79,9 @@ export const RayChatInterface = () => {
 
   // Sarah Flow State
   const [sarahFlowStep, setSarahFlowStep] = useState(0);
+
+  // Maya Flow State
+  const [mayaFlowStep, setMayaFlowStep] = useState(0);
 
   // Transaction Preview State
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionData | null>(null);
@@ -167,6 +170,42 @@ export const RayChatInterface = () => {
         }, 600);
     }
   }, [currentPersona.id, messages.length, sarahScript]);
+
+  // Triggers for demo flow - Maya
+  useEffect(() => {
+    if (currentPersona.id === 'maya' && messages.length === 0) {
+        // Step 1: User asks for Arvind's transactions
+        setTimeout(() => {
+            setMessages([{
+                id: 'maya-u1',
+                sender: 'user',
+                blocks: [{ type: 'text', content: "Show me recent payments from arvind@gmail.com" }]
+            }]);
+            setMayaFlowStep(1);
+
+            // Step 2: Show Thinking State
+            setTimeout(() => {
+                const thinkingMsg: RayResponseData = {
+                    id: 'maya-ai-1',
+                    sender: 'ai',
+                    isThinking: true
+                };
+                setMessages(prev => [...prev, thinkingMsg]);
+
+                // Step 3: Replace with Transactions Report after delay
+                setTimeout(() => {
+                    setMessages(prev => prev.map(msg =>
+                        msg.id === 'maya-ai-1' ? {
+                            ...mayaScript.maya_step_1,
+                            id: 'maya-ai-1',
+                            sender: 'ai' as const
+                        } : msg
+                    ));
+                }, 2000); // 2s thinking time
+            }, 600);
+        }, 600);
+    }
+  }, [currentPersona.id, messages.length, mayaScript]);
 
   // Auto-scroll: user messages to top of viewport, AI messages show start
   useEffect(() => {
@@ -317,6 +356,31 @@ export const RayChatInterface = () => {
         return;
       }
     }
+
+    // Handle Maya's flow transitions
+    if (currentPersona.id === 'maya') {
+      // Step 1 → Step 2: "He claims double debit"
+      if (mayaFlowStep === 1 && suggestion.toLowerCase().includes('double debit')) {
+        handleMayaFlowAdvance(suggestion, mayaScript.maya_step_2, 2);
+        return;
+      }
+
+      // Step 2 → Step 3: "Draft explanation for Arvind"
+      if (mayaFlowStep === 2 && suggestion.toLowerCase().includes('draft')) {
+        handleMayaFlowAdvance(suggestion, mayaScript.maya_step_3, 3);
+        return;
+      }
+
+      // Step 3: Handle draft message actions
+      if (mayaFlowStep === 3) {
+        if (suggestion.toLowerCase().includes('copy')) {
+          // Copy the draft message to clipboard
+          const draftMessage = mayaScript.maya_step_3.artifact.data.draftMessage;
+          navigator.clipboard.writeText(draftMessage);
+          return;
+        }
+      }
+    }
   };
 
   // Helper function to advance Sarah's flow
@@ -348,6 +412,39 @@ export const RayChatInterface = () => {
           }];
         });
         setSarahFlowStep(nextFlowStep);
+      }, 1500);
+    }, 600);
+  };
+
+  // Helper function to advance Maya's flow
+  const handleMayaFlowAdvance = (userMessage: string, nextStep: any, nextFlowStep: number) => {
+    // Add user message
+    setMessages(prev => [...prev, {
+      id: `maya-u-${Date.now()}`,
+      sender: 'user',
+      blocks: [{ type: 'text', content: userMessage }]
+    }]);
+
+    // Show thinking state
+    setTimeout(() => {
+      const thinkingId = `maya-ai-thinking-${Date.now()}`;
+      setMessages(prev => [...prev, {
+        id: thinkingId,
+        sender: 'ai',
+        isThinking: true
+      }]);
+
+      // Replace with next step response
+      setTimeout(() => {
+        setMessages(prev => {
+          const withoutThinking = prev.filter(m => !m.isThinking);
+          return [...withoutThinking, {
+            ...nextStep,
+            id: `maya-ai-${Date.now()}`,
+            sender: 'ai' as const
+          }];
+        });
+        setMayaFlowStep(nextFlowStep);
       }, 1500);
     }, 600);
   };

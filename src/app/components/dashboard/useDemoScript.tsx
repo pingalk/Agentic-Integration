@@ -35,33 +35,70 @@ export const useDemoScript = () => {
     };
 
     // Maya's Journey (Double Debit)
-    const scriptData = {
-        0: {
-            input: "Show recent transactions from arvind@gmail.com",
+    const mayaScript = {
+        maya_step_0: {
+            input: "Show me recent payments from arvind@gmail.com",
             response: null,
             suggestions: []
         },
-        1: {
-            headline: "Recent payments from arvind@gmail.com",
-            subtext: "Arvind has 3 recent payments totalling ₹22,000. His most recent transaction was for 15,000 successfully captured. Recently one of his payments failed due to insufficient funds.",
-            tableData: [
-                { id: 'pay_arvind_1', amount: '15,000.00', status: 'Captured', method: 'UPI', date: 'Jan 23', rrn: '6482937429', paymentMethod: 'UPI' },
-                { id: 'pay_arvind_2', amount: '5,000.00', status: 'Failed', method: 'Netbanking', date: 'Insufficient Funds', rrn: '9876543210', paymentMethod: 'Netbanking' },
-                { id: 'pay_arvind_3', amount: '2,000.00', status: 'Captured', method: 'Card', date: 'Jan 21', rrn: '1242940202', paymentMethod: 'Card' }
-            ],
-            suggestions: ["He claims double debit", "Download Statement", "View Customer Profile"]
+        maya_step_1: {
+            artifact: {
+                type: 'maya_transactions_report',
+                data: {
+                    headline: "Recent payments from arvind@gmail.com",
+                    subtext: "Arvind has **3 recent payments** totalling **₹26,000**. His most recent transaction was for **₹20,000** which is currently **pending**.",
+                    table: {
+                        rows: [
+                            { id: 'pay_arvind_1', amount: '₹20,000.00', status: 'Pending', method: 'UPI', date: getDateWithDayOffset(0, 14, 22), rrn: '648293742901' },
+                            { id: 'pay_arvind_2', amount: '₹2,000.00', status: 'Captured', method: 'Card', date: getDateWithDayOffset(1, 11, 8), rrn: '987654321012' },
+                            { id: 'pay_arvind_3', amount: '₹4,000.00', status: 'Captured', method: 'UPI', date: getDateWithDayOffset(2, 16, 45), rrn: '124294020234' }
+                        ]
+                    },
+                    insight: {
+                        text: "There doesn't seem to be any double debit on this account. There's **1 pending payment (₹20,000)**. The other 2 payments have been captured successfully."
+                    },
+                    suggestions: ["He claims double debit", "Download Statement", "View Customer Profile"]
+                }
+            }
         },
-        2: {
-            headline: "Diagnosis: Payment not processed by customer's bank",
-            subtext: "It is likely that the customer attempted a payment but it failed at their bank's end and wasn't collected by Razorpay. Such transactions are not visible on the dashboard. This will be auto-refunded by Jan 30, 2026.",
-            suggestions: ["Draft explanation for Arvind", "Check Gateway Health", "Raise Support Ticket"]
+        maya_step_2: {
+            artifact: {
+                type: 'maya_diagnosis',
+                data: {
+                    headline: "Double debit diagnosis: Payment stuck with customer's bank",
+                    subtext: "It's likely the customer attempted a payment, but it **failed at their bank's end** and was never collected by Razorpay. Such failed transactions are not visible on the Razorpay dashboard.",
+                    resolution: {
+                        title: "What will happen:",
+                        content: `The money will be **automatically refunded** to Arvind's account by **${getFutureDate(7)}** (within 5-7 working days). No action is required from your side.`
+                    },
+                    suggestions: ["Draft explanation for Arvind", "Check Gateway Health", "Raise Support Ticket"]
+                }
+            }
         },
-        3: {
-            headline: "Draft Message for Arvind",
-            subtext: "Hi Arvind, we see one successful payment of ₹15,000. The second attempted payment likely failed at your bank's end and did not reach us. This typically auto-reverses within 5-7 working days (by Jan 30).",
-            suggestions: ["Copy Message", "Send Email", "Edit Draft"]
+        maya_step_3: {
+            artifact: {
+                type: 'maya_draft_message',
+                data: {
+                    headline: "Draft message for Arvind",
+                    subtext: "Here's a message you can share with Arvind explaining the situation:",
+                    draftMessage: `Hi Arvind,
+
+Thank you for reaching out. We've checked your account and can confirm we received only one successful payment of ₹20,000 (currently pending).
+
+The second charge you're seeing is likely a temporary hold by your bank that failed to reach us. Such transactions are automatically reversed within 5-7 working days.
+
+If the amount isn't credited back by ${getFutureDate(7)}, please share your bank statement and we'll help resolve this immediately.
+
+Best regards,
+Maya`,
+                    suggestions: ["Copy Message", "Send via Email", "Edit Draft"]
+                }
+            }
         }
     };
+
+    // Keep scriptData for backward compatibility but redirect to mayaScript
+    const scriptData = mayaScript;
 
     // Arjun's Journey (Negative Balance Investigation)
     const arjunScript = {
@@ -251,6 +288,7 @@ export const useDemoScript = () => {
         setStep,
         processInput,
         scriptData,
+        mayaScript,
         arjunScript,
         sarahScript,
         getFutureDate
