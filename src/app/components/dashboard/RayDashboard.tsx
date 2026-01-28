@@ -102,7 +102,9 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
   
   // Theme Logic
   const isNegative = currentPersona.theme === 'negative';
-  
+  const isNeutral = currentPersona.theme === 'neutral'; // Sarah
+  const isPositive = currentPersona.theme === 'positive'; // Maya
+
   // Dynamic Styles
   const greetingColor = isNegative ? 'text-[#0e1c2a]' : 'text-[#094c85]';
   
@@ -438,7 +440,9 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                               <p className="font-['TASA_Orbiter_Display',sans-serif] font-normal leading-[24px] not-italic relative shrink-0 text-[#fdfdfd] text-[18px] tracking-[-0.234px]">
                                 {isNegative
                                   ? <>Your refund volume for last<br />3 days was unusually high</>
-                                  : <>No refunds or disputes so far<br />today</>
+                                  : isNeutral
+                                    ? <>Your refund volumes are<br />unusually high</>
+                                    : <>No refunds or disputes so far<br />today</>
                                 }
                               </p>
                             </div>
@@ -476,7 +480,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                         <motion.div
                           className={clsx(
                             "bg-white border border-solid overflow-clip rounded-[10px] h-[201px] w-full relative",
-                            isNegative ? "border-[#fee4e2]" : "border-[#d1fae5]"
+                            isNegative ? "border-[#fee4e2]" : isNeutral ? "border-[#fed7aa]" : "border-[#d1fae5]"
                           )}
                           initial={{ opacity: 0, y: 26 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -491,7 +495,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                             <div className="absolute inset-[-21.21%_-12.12%]">
                               <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 520.69 341.067">
                                 <g filter="url(#filter0_f_stats_bg1)">
-                                  <path d={svgPathsStats.pd204a80} fill={isNegative ? "#FA8282" : "#6EE7B7"} />
+                                  <path d={svgPathsStats.pd204a80} fill={isNegative ? "#FA8282" : isNeutral ? "#FDBA74" : "#6EE7B7"} />
                                 </g>
                                 <defs>
                                   <filter colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse" height="341.067" id="filter0_f_stats_bg1" width="520.691" x="0" y="0">
@@ -507,7 +511,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                             <div className="absolute inset-[-21.21%_-12.12%]">
                               <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 520.69 341.067">
                                 <g filter="url(#filter0_f_stats_bg2)">
-                                  <path d={svgPathsStats.pd204a80} fill={isNegative ? "#FA8282" : "#6EE7B7"} />
+                                  <path d={svgPathsStats.pd204a80} fill={isNegative ? "#FA8282" : isNeutral ? "#FDBA74" : "#6EE7B7"} />
                                 </g>
                                 <defs>
                                   <filter colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse" height="341.067" id="filter0_f_stats_bg2" width="520.691" x="0" y="0">
@@ -553,7 +557,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                               </>
                             ) : (
                               <>
-                                {/* Maya: Payments Collected Row */}
+                                {/* Maya/Sarah: Payments Collected Row */}
                                 <div className="content-stretch flex items-center justify-between relative shrink-0 w-full">
                                   <p className="font-['Inter',sans-serif] font-medium leading-[16px] not-italic relative shrink-0 text-[#768ea7] text-[12px] tracking-[0.24px]">PAYMENTS COLLECTED</p>
                                   <div className="content-stretch flex items-end justify-end relative shrink-0">
@@ -566,7 +570,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                                     </div>
                                   </div>
                                 </div>
-                                {/* Maya: Available Balance Row */}
+                                {/* Maya/Sarah: Available Balance Row */}
                                 <div className="content-stretch flex items-end justify-between relative shrink-0 w-full">
                                   <p className="font-['Inter',sans-serif] font-medium leading-[16px] not-italic relative shrink-0 text-[#768ea7] text-[12px] tracking-[0.24px]">AVAILABLE BALANCE</p>
                                   <div className="content-stretch flex items-end justify-end relative shrink-0">
@@ -589,6 +593,12 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                               <>
                                 <span className="text-black">Your account balance </span>
                                 <span className="font-['TASA_Orbiter_Display',sans-serif] font-bold text-[#d92d20]">is negative</span>
+                              </>
+                            ) : isNeutral ? (
+                              <>
+                                <span className="text-black">Payment volumes </span>
+                                <span className="font-['TASA_Orbiter_Display',sans-serif] font-bold text-[#ea580c]">low</span>
+                                <span className="text-black"> than usual today</span>
                               </>
                             ) : (
                               <>
