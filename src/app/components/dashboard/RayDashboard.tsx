@@ -813,8 +813,8 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                             <p className="leading-[38px]">98%</p>
                           </div>
 
-                          {/* EXPERIMENTAL: Hover affordance */}
-                          <div className="absolute bottom-[12px] right-[12px]">
+                          {/* EXPERIMENTAL: Hover affordance - below headline */}
+                          <div className="absolute top-[48px] left-[12px]">
                             <HoverAffordance
                               isVisible={hoveredCard === 'success'}
                               onClick={() => handleCardReviewClick('success')}
@@ -857,11 +857,11 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
 
                           {/* Title - Dynamic based on theme */}
                           <p className="absolute font-['TASA_Orbiter_Display',sans-serif] leading-[28px] left-[13px] not-italic text-[20px] top-[15px] tracking-[-0.26px]">
-                            <span className="text-black text-[18px]">Your settlements are</span><br />
+                            <span className="text-[#40566d]">Your settlements are </span>
                             {isNegative ? (
-                              <span className="font-['TASA_Orbiter_Display',sans-serif] font-bold text-[#d92d20] text-[18px]">paused</span>
+                              <span className="font-['TASA_Orbiter_Display',sans-serif] font-bold text-[#d92d20]">paused</span>
                             ) : (
-                              <span className="font-['TASA_Orbiter_Display',sans-serif] font-bold text-[#00a251] text-[18px]">on track</span>
+                              <span className="font-['TASA_Orbiter_Display',sans-serif] font-bold text-[#00a251]">on track</span>
                             )}
                           </p>
 
@@ -878,8 +878,8 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                           {/* Label */}
                           <p className="absolute font-['Inter',sans-serif] font-medium leading-[16px] left-[15px] not-italic text-[#768ea7] text-[10px] top-[111px] tracking-[0.3px]">NEXT SETTLEMENT</p>
 
-                          {/* EXPERIMENTAL: Hover affordance */}
-                          <div className="absolute bottom-[12px] right-[12px]">
+                          {/* EXPERIMENTAL: Hover affordance - below headline */}
+                          <div className="absolute top-[48px] left-[13px]">
                             <HoverAffordance
                               isVisible={hoveredCard === 'settlement'}
                               onClick={() => handleCardReviewClick('settlement')}
@@ -888,7 +888,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                             />
                           </div>
                         </motion.div>
-                        
+
                         </div>
                         </div>
 
