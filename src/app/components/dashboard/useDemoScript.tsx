@@ -163,12 +163,13 @@ export const useDemoScript = () => {
         },
         sarah_step_2: {
             artifact: {
-                type: 'bullet_list_with_buttons',
+                type: 'setting_updated_with_bullets',
                 data: {
+                    headline: "Setting updated — Payment capture setting updated to auto capture",
+                    body: "Your payments are now set to Auto-Capture. Going forward all your payments will be automatically captured within 15 mins. Once captured they will be settled within 2 days (as per your current settlement cycle \"T+2\").",
                     bullets: [
-                        { bold: "Payment Capture setting updated to auto-capture:", text: "All your payments are now set to Auto-Capture." },
-                        { bold: "", text: "However, **the 5 orders listed earlier above were already refunded** to the customers..." },
-                        { bold: "My recommendation:", text: "To save these sales, I can **instantly generate Payment Links to these 5 customers** for the exact amounts they attempted to pay?" }
+                        { text: "However, **the 5 orders listed earlier above were already refunded** to the customers..." },
+                        { text: "**My recommendation:** To save these sales, I can **instantly generate Payment Links to these 5 customers** for the exact amounts they attempted to pay?" }
                     ],
                     buttons: [
                         { label: "Yes", variant: "primary" },

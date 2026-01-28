@@ -121,6 +121,14 @@ export interface RayResponseData {
       buttons: Array<{ label: string; variant: 'primary' | 'secondary' }>;
     };
   } | {
+    type: 'setting_updated_with_bullets';
+    data: {
+      headline: string;
+      body: string;
+      bullets: Array<{ text: string }>;
+      buttons: Array<{ label: string; variant: 'primary' | 'secondary' }>;
+    };
+  } | {
     type: 'payment_links_created';
     data: {
       headline: string;
@@ -147,6 +155,45 @@ export interface RayResponseData {
 // --- Animation Primitives ---
 const containerVar = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } };
 const itemVar = { hidden: { opacity: 0, y: 5, filter: 'blur(4px)' }, visible: { opacity: 1, y: 0, filter: 'blur(0)' } };
+
+// --- Copyable Text Component (for links, IDs, emails, RRNs) ---
+const CopyableText = ({
+  text,
+  className = "",
+  isLink = false
+}: {
+  text: string;
+  className?: string;
+  isLink?: boolean;
+}) => {
+  const [copied, setCopied] = React.useState(false);
+
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  return (
+    <div className="inline-flex items-center gap-[6px] group/copyable">
+      <span className={clsx(
+        className,
+        isLink && "text-[#2563EB] underline decoration-blue-300 underline-offset-2 hover:text-blue-700 cursor-pointer"
+      )}>
+        {text}
+      </span>
+      <Tooltip text={copied ? "Copied!" : "Copy"} position="top">
+        <button
+          onClick={handleCopy}
+          className="size-[16px] shrink-0 opacity-0 group-hover/copyable:opacity-100 transition-all duration-200 transform -translate-x-1 group-hover/copyable:translate-x-0 hover:scale-110"
+        >
+          <Copy />
+        </button>
+      </Tooltip>
+    </div>
+  );
+};
 
 // --- Markdown Bold Parser for Static Text ---
 const parseMarkdownBold = (content: string): React.ReactNode[] => {
@@ -280,25 +327,12 @@ const InvestigationReportArtifact = ({ data, onRowClick, onSuggestionClick, isLa
                           </span>
                         </div>
                         <div className="w-[160px] text-[#5D6B82] text-[14px] font-normal">{row.date}</div>
-                        <div className="w-[140px] text-[#5D6B82] font-mono text-[14px] font-normal group/cell overflow-visible">
-                          <div className="flex items-center gap-[8px]">
-                            <span>{row.rrn}</span>
-                            <Tooltip text="Copy RRN" position="top">
-                              <button
-                                className="size-[16px] shrink-0 opacity-0 group-hover/cell:opacity-100 transition-all duration-300 ease-out transform -translate-x-2 group-hover/cell:translate-x-0 hover:scale-110"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigator.clipboard.writeText(row.rrn);
-                                }}
-                              >
-                                <Copy />
-                              </button>
-                            </Tooltip>
-                          </div>
+                        <div className="w-[140px] text-[#5D6B82] font-mono text-[14px] font-normal">
+                          <CopyableText text={row.rrn} className="text-[#5D6B82]" />
                         </div>
-                        <Tooltip text={row.email} position="top">
-                          <div className="flex-1 text-[#5D6B82] text-[14px] font-normal underline decoration-slate-300 underline-offset-2 hover:text-blue-600 truncate">{row.email}</div>
-                        </Tooltip>
+                        <div className="flex-1 text-[14px] font-normal truncate">
+                          <CopyableText text={row.email} className="text-[#5D6B82] underline decoration-slate-300 underline-offset-2" />
+                        </div>
                       </motion.div>
                     ))}
                   </div>
@@ -861,6 +895,171 @@ const BulletListWithButtonsArtifact = ({
   );
 };
 
+// --- Setting Updated with Bullets Artifact Component ---
+const SettingUpdatedWithBulletsArtifact = ({
+  data,
+  isLast,
+  onButtonClick
+}: {
+  data: {
+    headline: string;
+    body: string;
+    bullets: Array<{ text: string }>;
+    buttons: Array<{ label: string; variant: 'primary' | 'secondary' }>;
+  };
+  isLast: boolean;
+  onButtonClick?: (label: string) => void;
+}) => {
+  const [bodyStarted, setBodyStarted] = useState(false);
+  const [showBullets, setShowBullets] = useState(false);
+
+  const { phase, onNarrativeComplete } = useStreamSequencer({
+    hasDataAsset: true,   // buttons count as data asset
+    hasInsight: false,
+    hasSuggestions: false,
+    thinkingDuration: 1500
+  });
+
+  // Start body after 1s cognitive pause following headline
+  const handleHeadlineComplete = React.useCallback(() => {
+    setTimeout(() => setBodyStarted(true), 1000);
+  }, []);
+
+  // Show bullets after body completes
+  const handleBodyComplete = React.useCallback(() => {
+    setShowBullets(true);
+    onNarrativeComplete();
+  }, [onNarrativeComplete]);
+
+  return (
+    <>
+      {/* Phase 0: Thinking */}
+      {phase === 0 && <RayThinking />}
+
+      {/* Phase 1+: Content */}
+      {phase >= 1 && (
+        <motion.div
+          className="flex flex-col gap-[16px] w-full mt-2"
+          initial="hidden"
+          animate="visible"
+          variants={containerVar}
+        >
+          {/* Headline (streamed) */}
+          <motion.div variants={itemVar} className="flex gap-[6px] items-center">
+            <div className="shrink-0 size-[20px] bg-[#10B981] rounded-[3.33px] flex items-center justify-center shadow-sm">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <h3 className="text-[18px] leading-[24px] font-semibold text-[#020202]">
+              <PerplexityStreamText
+                content={data.headline}
+                speed={15}
+                onComplete={handleHeadlineComplete}
+                inheritStyles
+              />
+            </h3>
+          </motion.div>
+
+          {/* Body text (streamed after pause) */}
+          {bodyStarted && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-[16px] text-[#40566d] leading-[26px] tracking-[0.16px]"
+            >
+              <PerplexityStreamText
+                content={data.body}
+                speed={10}
+                onComplete={handleBodyComplete}
+              />
+            </motion.div>
+          )}
+
+          {/* Bullet Points */}
+          {showBullets && (
+            <motion.ul
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex flex-col gap-[8px] list-disc pl-[20px]"
+            >
+              {data.bullets.map((bullet, i) => (
+                <motion.li
+                  key={i}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.15, duration: 0.3 }}
+                  className="text-[16px] leading-[26px] text-[#40566d] tracking-[0.16px]"
+                >
+                  {parseMarkdownBold(bullet.text)}
+                </motion.li>
+              ))}
+            </motion.ul>
+          )}
+
+          {/* Action Buttons (Phase 2+) */}
+          {phase >= 2 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="flex gap-3 mt-2 pl-[24px]"
+            >
+              {data.buttons.map((button, i) => (
+                <button
+                  key={i}
+                  onClick={() => onButtonClick?.(button.label)}
+                  className={clsx(
+                    'px-4 py-2 rounded-lg font-medium text-[14px] transition-all duration-200',
+                    button.variant === 'primary'
+                      ? 'bg-[#2563EB] text-white hover:bg-[#1d4ed8] shadow-sm'
+                      : 'bg-[#f1f5fa] text-[#40566d] hover:bg-[#e2e8f0] border border-[#e2e8f0]'
+                  )}
+                >
+                  {button.label}
+                </button>
+              ))}
+            </motion.div>
+          )}
+
+          {/* Phase 4+: Footer Actions Strip - Only visible for last message */}
+          {phase >= 4 && isLast && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2 }}
+              className="flex gap-[8px] items-center mt-2"
+            >
+              <Tooltip text="Good response" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <ThumbsUp size={16} className="text-[#40566D]" strokeWidth={2} />
+                </button>
+              </Tooltip>
+              <Tooltip text="Bad response" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <ThumbsDown size={16} className="text-[#40566D]" strokeWidth={2} />
+                </button>
+              </Tooltip>
+              <Tooltip text="Copy to clipboard" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <div className="size-[16px]">
+                    <Copy />
+                  </div>
+                </button>
+              </Tooltip>
+              <Tooltip text="Share" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <Share2 size={16} className="text-[#40566D]" strokeWidth={2} />
+                </button>
+              </Tooltip>
+            </motion.div>
+          )}
+        </motion.div>
+      )}
+    </>
+  );
+};
+
 // --- Payment Links Created Artifact Component ---
 const PaymentLinksCreatedArtifact = ({
   data,
@@ -967,7 +1166,9 @@ const PaymentLinksCreatedArtifact = ({
                         transition={{ delay: rowIndex * 0.1, duration: 0.3 }}
                         className="relative flex h-[56px] items-center px-[16px] border-b border-[#E4E7EC] last:border-b-0 hover:bg-[#F9FAFB] transition-colors group/row"
                       >
-                        <div className="w-[260px] text-[#2563EB] text-[14px] font-normal pl-[20px] truncate underline decoration-blue-300 underline-offset-2 hover:text-blue-700 cursor-pointer">{row.linkUrl}</div>
+                        <div className="w-[260px] text-[14px] font-normal pl-[20px]">
+                          <CopyableText text={row.linkUrl} isLink />
+                        </div>
                         <div className="w-[120px] font-semibold text-[#1D2939] text-[14px]">{row.amount}</div>
                         <div className="w-[80px]">
                           <span className="inline-flex items-center h-[20px] px-[8px] bg-[rgba(16,185,129,0.1)] text-[#059669] text-[12px] font-medium leading-[18px] rounded-[1000px]">
@@ -1329,6 +1530,19 @@ export const RayMessageRenderer = ({ data, onSuggestionClick, isLast = true }: {
     return (
       <div className="w-full animate-fade-in-up">
         <BulletListWithButtonsArtifact
+          data={data.artifact.data}
+          isLast={isLast}
+          onButtonClick={onSuggestionClick}
+        />
+      </div>
+    );
+  }
+
+  // 8. Ray AI Message with Setting Updated + Bullets
+  if (data.artifact?.type === 'setting_updated_with_bullets') {
+    return (
+      <div className="w-full animate-fade-in-up">
+        <SettingUpdatedWithBulletsArtifact
           data={data.artifact.data}
           isLast={isLast}
           onButtonClick={onSuggestionClick}
