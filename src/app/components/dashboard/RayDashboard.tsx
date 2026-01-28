@@ -349,7 +349,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
         <div className="flex-1 relative overflow-hidden dashboard-bg transition-[background] duration-700">
             {/* Background Effects */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[800px] opacity-30">
+               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] md:w-[1200px] h-[400px] md:h-[800px] opacity-30">
                   <div className={`absolute inset-0 bg-gradient-to-tr ${isNegative ? 'from-red-100 via-transparent to-orange-100' : 'from-blue-100 via-transparent to-green-100'} blur-3xl rounded-full mix-blend-multiply transition-colors duration-1000`} />
                </div>
             </div>
@@ -367,7 +367,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                         }}
                     />
                 ) : (
-                <div className="relative z-10 h-full overflow-y-auto flex flex-col items-center justify-start p-8 px-[32px] pt-[48px] pb-[100px] scrollbar-hide">
+                <div className="relative z-10 h-full overflow-y-auto flex flex-col items-center justify-start p-4 md:p-8 px-4 md:px-[32px] pt-6 md:pt-[48px] pb-[100px] scrollbar-hide">
                      {/* Greeting Section */}
                      <div 
                          className="flex items-center gap-[12px] mb-8 group cursor-default" 
@@ -376,7 +376,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                         <div className="relative shrink-0 size-[32px]">
                             <Ray trigger={waveTrigger} />
                         </div>
-                        <h1 className={`font-sans font-medium text-[30px] leading-[34px] tracking-[-0.39px] transition-colors duration-300 ${greetingColor}`}>
+                        <h1 className={`font-sans font-medium text-[22px] md:text-[30px] leading-[28px] md:leading-[34px] tracking-[-0.39px] transition-colors duration-300 ${greetingColor}`}>
                             {currentPersona.landing.greeting}
                         </h1>
                      </div>
@@ -489,13 +489,13 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                      </div>
 
                      {/* Dynamic Cards Grid */}
-                     <div className="w-full max-w-[850px]">
+                     <div className="w-full max-w-full md:max-w-[850px]">
                         {/* Responsive Grid Layout with Equal Spacing */}
-                        <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-4 auto-rows-min">
+                        <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-3 md:gap-4 auto-rows-min">
                         
                         {/* 1. TODAY'S BRIEFING CARD (Left) - Blue gradient background - Spans 2 rows on desktop */}
-                        <motion.div 
-                          className="bg-white h-[390px] md:row-span-2 overflow-clip rounded-[10px] w-full relative"
+                        <motion.div
+                          className="bg-white h-auto md:h-[390px] md:row-span-2 overflow-clip rounded-[10px] w-full relative"
                           initial={{ opacity: 0, y: 26 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ 

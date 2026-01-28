@@ -58,7 +58,7 @@ export const RaySidePanel: React.FC<RaySidePanelProps> = ({ isOpen, onClose, mod
                overflow-hidden
             `}
           >
-             <div className="h-full w-[420px]"> {/* Wrapper to maintain width during resize animation */}
+             <div className="h-full w-full md:w-[420px] max-w-[calc(100vw-32px)] md:max-w-none"> {/* Wrapper to maintain width during resize animation */}
                 <LedContainer 
                     onClose={onClose} 
                     context={getContext()} 

@@ -376,7 +376,7 @@ const InvestigationReportArtifact = ({ data, onRowClick, onSuggestionClick, isLa
                 <h4 className="text-[15px] font-bold text-slate-900 mb-3">Your recent refunds:</h4>
 
                 <div className="w-full rounded-[12px] border border-[#E4E7EC] relative group/table overflow-x-auto">
-                  <div className="min-w-[700px]">
+                  <div className="min-w-[520px] md:min-w-[700px]">
                     {/* Table Header */}
                     <div className="flex h-[48px] text-[14px] font-semibold text-[#192839] bg-[rgba(108,132,157,0.06)] px-[16px] border-b border-[rgba(108,132,157,0.18)]">
                       <div className="w-[100px] shrink-0 flex items-center pl-[20px]">Amount</div>
@@ -1447,7 +1447,7 @@ const MayaTransactionsReportArtifact = ({ data, onRowClick, onSuggestionClick, i
                 className="pl-0 py-[12px]"
               >
                 <div className="w-full rounded-[12px] border border-[#E4E7EC] relative group/table overflow-x-auto">
-                  <div className="min-w-[700px]">
+                  <div className="min-w-[520px] md:min-w-[700px]">
                     {/* Table Header */}
                     <div className="flex h-[48px] text-[14px] font-semibold text-[#192839] bg-[rgba(108,132,157,0.06)] px-[16px] border-b border-[rgba(108,132,157,0.18)]">
                       <div className="w-[120px] shrink-0 flex items-center pl-[20px]">Amount</div>

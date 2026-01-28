@@ -665,9 +665,9 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
         <div
           ref={scrollContainerRef}
           onScroll={handleScroll}
-          className="flex-1 overflow-y-auto px-4 md:px-6 pt-6 pb-56 scrollbar-hide"
+          className="flex-1 overflow-y-auto px-3 md:px-6 pt-4 md:pt-6 pb-32 md:pb-56 scrollbar-hide"
         >
-           <div className={`flex flex-col gap-10 mx-auto transition-all duration-300 ${selectedTransaction ? 'max-w-[600px]' : 'max-w-[800px]'}`}>
+           <div className={`flex flex-col gap-6 md:gap-10 mx-auto transition-all duration-300 w-full ${selectedTransaction ? 'max-w-full md:max-w-[600px]' : 'max-w-full md:max-w-[800px]'}`}>
               {messages.map((msg, index) => (
                  <div key={msg.id} ref={el => { if (el) messageRefs.current.set(msg.id, el) }} className="w-full">
                     <RayMessageRenderer
@@ -753,17 +753,13 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
          {/* Top Fade Gradient */}
          <div className="h-16 w-full bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
          
-         <div className="bg-white/80 backdrop-blur-xl border-t border-slate-100 px-4 pb-6 pt-4">
-            <motion.div 
-               animate={{ 
-                 width: showAddFundsWidget 
-                   ? "398px" 
-                   : isInputExpanded 
-                     ? "100%" 
-                     : "480px" 
+         <div className="bg-white/80 backdrop-blur-xl border-t border-slate-100 px-3 md:px-4 pb-4 md:pb-6 pt-3 md:pt-4">
+            <motion.div
+               animate={{
+                 width: "100%"
                }}
                transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-               className="max-w-[700px] mx-auto relative group"
+               className="w-full max-w-full md:max-w-[700px] mx-auto relative group"
                onMouseEnter={() => setIsInputHovered(true)}
                onMouseLeave={() => setIsInputHovered(false)}
             >
