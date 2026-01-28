@@ -3,7 +3,7 @@ import { StoreProvider } from './StoreContext';
 import { FormProvider } from './FormStore';
 import { RayLayout } from './RayLayout';
 import clsx from "clsx";
-import { Menu, ChevronDown, Sparkles, Check, LayoutTemplate, ArrowUpRight, TrendingUp, AlertCircle, ArrowRight, CheckCircle2, ChevronRight } from 'lucide-react';
+import { Menu, ChevronDown, Sparkles, Check, LayoutTemplate, ArrowUpRight, TrendingUp, AlertCircle, ArrowRight } from 'lucide-react';
 import { RayInputBox } from './RayInputBox';
 import { RaySidebar } from './RaySidebar';
 import Ray from "../../../imports/Ray";
@@ -16,134 +16,6 @@ import svgPathsInput from "../../../imports/svg-h0tl9nb0vi";
 import svgPathsCards from "../../../imports/svg-9ik4xuwq12";
 import svgPathsStats from "../../../imports/svg-h6d9ul042g";
 import { motion } from 'motion/react';
-
-// --- Balance & Settlement Card Component ---
-// Matches the Figma design with blue header + two-panel white card
-
-interface BalanceSettlementCardProps {
-  greeting: string;
-  isNegative?: boolean;
-}
-
-const BalanceSettlementCard = ({ greeting, isNegative = false }: BalanceSettlementCardProps) => {
-  // Get current date formatted as "Tue, Jan 13"
-  const today = new Date();
-  const dateString = today.toLocaleDateString('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric'
-  });
-
-  return (
-    <motion.div
-      className="w-full overflow-hidden rounded-[16px]"
-      initial={{ opacity: 0, y: 26 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: 2.0,
-        delay: 0.3,
-        ease: [0.16, 1, 0.3, 1]
-      }}
-    >
-      {/* Blue Header Section */}
-      <div
-        className="relative px-8 pt-6 pb-24 overflow-hidden"
-        style={{
-          background: 'linear-gradient(135deg, #6B8DD6 0%, #8E9FE8 50%, #7B9CE0 100%)'
-        }}
-      >
-        {/* Decorative diagonal lines */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-0 right-0 w-full h-full opacity-20">
-            <div className="absolute top-[-50%] right-[-20%] w-[80%] h-[200%] border-l border-white/30 rotate-[20deg]" />
-            <div className="absolute top-[-50%] right-[-10%] w-[80%] h-[200%] border-l border-white/20 rotate-[20deg]" />
-            <div className="absolute top-[-50%] right-[0%] w-[80%] h-[200%] border-l border-white/10 rotate-[20deg]" />
-          </div>
-        </div>
-
-        {/* Greeting Text */}
-        <div className="relative text-center">
-          <h1 className="text-white text-[28px] font-medium italic mb-1" style={{ fontFamily: "'TASA Orbiter Display', sans-serif" }}>
-            {greeting}
-          </h1>
-          <p className="text-white/80 text-[14px]">{dateString}</p>
-        </div>
-      </div>
-
-      {/* White Card Section - overlaps the blue header */}
-      <div className="relative -mt-16 mx-4 mb-4">
-        <div className="bg-white rounded-[12px] shadow-lg overflow-hidden">
-          <div className="flex flex-col md:flex-row">
-            {/* Left Panel - Current Balance */}
-            <div className="flex-1 p-6 md:p-8 flex flex-col justify-center">
-              <p className="text-[#64748B] text-[14px] mb-3">Current balance</p>
-              <div className="flex items-baseline">
-                <span className="text-[#1E293B] text-[14px] opacity-60 mr-1">₹</span>
-                <span className="text-[#1E293B] text-[36px] font-bold tracking-tight" style={{ fontFamily: "'TASA Orbiter Display', sans-serif" }}>
-                  {isNegative ? '-46,000' : '10,13,000'}
-                </span>
-                <span className="text-[#1E293B] text-[20px] opacity-60">.00</span>
-              </div>
-            </div>
-
-            {/* Vertical Divider */}
-            <div className="hidden md:block w-px bg-slate-200 my-6" />
-
-            {/* Right Panel - Today's Settlement */}
-            <div className="flex-1 p-6 md:p-8 border-t md:border-t-0 border-slate-100">
-              {/* Header with blue dot */}
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-3 h-3 rounded-full bg-blue-500" />
-                <span className="text-[#1E293B] font-semibold text-[16px]">Today's settlement</span>
-              </div>
-
-              {/* Amount */}
-              <div className="flex items-baseline mb-3">
-                <span className="text-[#1E293B] text-[14px] opacity-60 mr-1">₹</span>
-                <span className="text-[#1E293B] text-[28px] font-bold tracking-tight" style={{ fontFamily: "'TASA Orbiter Display', sans-serif" }}>
-                  3,63,000
-                </span>
-                <span className="text-[#1E293B] text-[16px] opacity-60">.00</span>
-              </div>
-
-              {/* On Track Badge */}
-              <div className="inline-block mb-4">
-                <span className={`px-3 py-1 rounded-md text-[13px] font-medium ${
-                  isNegative
-                    ? 'bg-red-50 text-red-600'
-                    : 'bg-green-50 text-green-600'
-                }`}>
-                  {isNegative ? 'Paused' : 'On Track'}
-                </span>
-              </div>
-
-              {/* Deposit info */}
-              <p className="text-[#64748B] text-[14px] mb-6">
-                • To be deposited in your bank account by 9:00 am tomorrow
-              </p>
-
-              {/* Divider */}
-              <div className="border-t border-slate-100 pt-4">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                  {/* Yesterday's deposit */}
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 size={18} className="text-green-500" />
-                    <span className="text-[#1E293B] text-[14px]">₹5,11,256.00 deposited yesterday</span>
-                  </div>
-
-                  {/* View All Settlements link */}
-                  <button className="text-[#2563EB] text-[14px] font-medium flex items-center gap-1 hover:underline">
-                    View All Settlements <ArrowRight size={16} />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-};
 
 // --- Helper Components ---
 
@@ -622,16 +494,9 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                         </div>
                      </div>
 
-                     {/* Balance & Settlement Card */}
-                     <div className="w-full max-w-full md:max-w-[900px]">
-                       <BalanceSettlementCard
-                         greeting={currentPersona.landing.greeting}
-                         isNegative={isNegative}
-                       />
-                     </div>
-
-                     {/* OLD CARDS - HIDDEN */}
-                     <div className="hidden w-full max-w-full md:max-w-[850px]">
+                     {/* Dynamic Cards Grid */}
+                     <div className="w-full max-w-full md:max-w-[850px]">
+                        {/* Responsive Grid Layout with Equal Spacing */}
                         <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-3 md:gap-4 auto-rows-min">
                         
                         {/* 1. TODAY'S BRIEFING CARD (Left) - Blue gradient background - Spans 2 rows on desktop */}
@@ -919,7 +784,10 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                           </div>
                         </motion.div>
 
-                        {/* 3. SUCCESS RATE CARD (Bottom) - Full width */}
+                        {/* Bottom Row - Success Rate and Settlement Cards side by side */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                        
+                        {/* 3. SUCCESS RATE CARD (Bottom Left) */}
                         <motion.div
                           className="bg-[#fcfcfc] border border-[rgba(0,0,0,0.1)] border-solid not-italic overflow-clip rounded-[12px] h-[183px] w-full relative cursor-pointer"
                           initial={{ opacity: 0, y: 26 }}
@@ -956,10 +824,75 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                           </div>
                         </motion.div>
 
+                        {/* 4. SETTLEMENT CARD (Bottom Right) - Dynamic color based on theme */}
+                        <motion.div
+                          className="bg-[#fcfcfc] border border-[rgba(0,0,0,0.1)] border-solid h-[183px] overflow-clip rounded-[12px] w-full relative cursor-pointer"
+                          initial={{ opacity: 0, y: 26 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{
+                            duration: 2.0,
+                            delay: 0.9,
+                            ease: [0.16, 1, 0.3, 1]
+                          }}
+                          onMouseEnter={() => setHoveredCard('settlement')}
+                          onMouseLeave={() => setHoveredCard(null)}
+                        >
+                          {/* Ellipse gradient at bottom - dynamic color */}
+                          <div className="absolute h-[98px] left-[-27px] top-[173px] w-[275px]">
+                            <div className="absolute inset-[-61.22%_-21.82%]">
+                              <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 395 218">
+                                <g filter="url(#filter0_f_settlement_glow)" opacity="0.97">
+                                  <ellipse cx="197.5" cy="109" fill={isNegative ? "#D92D20" : "#10B981"} rx="137.5" ry="49" />
+                                </g>
+                                <defs>
+                                  <filter colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse" height="218" id="filter0_f_settlement_glow" width="395" x="0" y="0">
+                                    <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                                    <feBlend in="SourceGraphic" in2="BackgroundImageFix" mode="normal" result="shape" />
+                                    <feGaussianBlur result="effect1_foregroundBlur_settlement_glow" stdDeviation="30" />
+                                  </filter>
+                                </defs>
+                              </svg>
+                            </div>
+                          </div>
+
+                          {/* Title - Dynamic based on theme */}
+                          <p className="absolute font-['TASA_Orbiter_Display',sans-serif] leading-[28px] left-[13px] not-italic text-[20px] top-[15px] tracking-[-0.26px]">
+                            <span className="text-[#40566d]">Your settlements are </span>
+                            {isNegative ? (
+                              <span className="font-['TASA_Orbiter_Display',sans-serif] font-bold text-[#d92d20]">paused</span>
+                            ) : (
+                              <span className="font-['TASA_Orbiter_Display',sans-serif] font-bold text-[#00a251]">on track</span>
+                            )}
+                          </p>
+
+                          {/* Amount */}
+                          <div className="absolute content-stretch flex items-end justify-end left-[15px] top-[131px]">
+                            <div className="content-stretch flex items-baseline relative shrink-0">
+                              <div className="content-stretch flex gap-[2px] items-baseline relative shrink-0">
+                                <span className="font-['Inter',sans-serif] font-semibold leading-[26px] not-italic text-[#192839] text-[20px] opacity-64">₹</span>
+                                <span className="font-['TASA_Orbiter_Display',sans-serif] font-semibold leading-[38px] not-italic text-[#192839] text-[32px]">1.26L</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Label */}
+                          <p className="absolute font-['Inter',sans-serif] font-medium leading-[16px] left-[15px] not-italic text-[#768ea7] text-[10px] top-[111px] tracking-[0.3px]">NEXT SETTLEMENT</p>
+
+                          {/* EXPERIMENTAL: Hover affordance - below headline */}
+                          <div className="absolute top-[48px] left-[13px]">
+                            <HoverAffordance
+                              isVisible={hoveredCard === 'settlement'}
+                              onClick={() => handleCardReviewClick('settlement')}
+                              label={isNegative ? "Fix with Ray" : "Review with Ray"}
+                              variant="dark"
+                            />
+                          </div>
+                        </motion.div>
+
+                        </div>
                         </div>
 
                      </div>
-
                      </div>
                 </div>
                 )
