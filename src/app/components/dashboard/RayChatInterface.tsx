@@ -290,14 +290,23 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
   useEffect(() => {
     if (currentPersona.id === 'shyam' && messages.length === 0 && !demoFlowStartedRef.current) {
         demoFlowStartedRef.current = true;
-        // Step 1: User uploads screenshot (image only, no text)
+        // Step 1: User sends message with image attachment
+        // Use the actual user input (initialQuery) if provided
         setTimeout(() => {
+            const userText = initialQuery || '';
+            const blocks: { type: string; content: string }[] = [];
+
+            // Add text block if user typed something
+            if (userText.trim()) {
+              blocks.push({ type: 'text', content: userText });
+            }
+            // Add image attachment
+            blocks.push({ type: 'image', content: '/screenshot-failed-payment.png' });
+
             setMessages([{
                 id: 'shyam-u1',
                 sender: 'user',
-                blocks: [
-                    { type: 'image', content: '/screenshot-failed-payment.png' }
-                ]
+                blocks
             }]);
             setShyamFlowStep(1);
 
@@ -325,7 +334,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
             }, 600);
         }, 600);
     }
-  }, [currentPersona.id, messages.length, shyamScript]);
+  }, [currentPersona.id, messages.length, shyamScript, initialQuery]);
 
   // Triggers for briefing review queries (from "Review with Ray" click)
   useEffect(() => {
