@@ -181,23 +181,61 @@ export const TransactionPreviewPane: React.FC<TransactionPreviewPaneProps> = ({
     }
   };
 
+  // Stagger animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.06,
+        delayChildren: 0.1,
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 8, filter: 'blur(4px)' },
+    visible: {
+      opacity: 1,
+      y: 0,
+      filter: 'blur(0px)',
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+      }
+    }
+  };
+
+  const amountVariants = {
+    hidden: { opacity: 0, scale: 0.9, filter: 'blur(8px)' },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      filter: 'blur(0px)',
+      transition: {
+        type: "spring",
+        stiffness: 200,
+        damping: 24,
+        delay: 0.15,
+      }
+    }
+  };
+
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 20, scale: 0.98 }}
-      animate={{ opacity: 1, x: 0, scale: 1 }}
-      exit={{ opacity: 0, x: 20, scale: 0.98 }}
-      transition={{ type: "spring", stiffness: 350, damping: 30 }}
-      className="h-full w-full bg-white rounded-[8px] shadow-[0_16px_48px_-4px_rgba(25,40,57,0.18)] flex flex-col overflow-hidden"
-    >
+    <div className="h-full w-full bg-white rounded-[8px] shadow-[0_16px_48px_-4px_rgba(25,40,57,0.18)] flex flex-col overflow-hidden">
       {/* Header with gradient */}
-      <div
+      <motion.div
         className="flex flex-col gap-[20px] p-[20px] shrink-0"
         style={{
           background: 'radial-gradient(ellipse 100% 100% at 50% 100%, rgba(18,145,208,0.09) 0%, rgba(255,255,255,0) 70%)'
         }}
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
       >
         {/* Title bar */}
-        <div className="flex items-center justify-between">
+        <motion.div className="flex items-center justify-between" variants={itemVariants}>
           <h2 className="text-[18px] font-semibold text-[#40566d] leading-[24px]">
             {getTitle()}
           </h2>
@@ -212,103 +250,134 @@ export const TransactionPreviewPane: React.FC<TransactionPreviewPaneProps> = ({
               <X size={20} />
             </button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Amount display */}
         <div className="flex flex-col items-center gap-[8px] pt-[8px]">
-          <div className="flex items-baseline">
+          <motion.div className="flex items-baseline" variants={amountVariants}>
             <span className="text-[24px] font-semibold text-[#768ea7] leading-[28px]">₹</span>
             <span className="text-[40px] font-semibold text-[#192839] leading-[44px]">{mainAmount}</span>
             <span className="text-[24px] font-semibold text-[#768ea7] leading-[28px]">.{decimal.padEnd(2, '0')}</span>
-          </div>
+          </motion.div>
 
           {/* Status badge */}
-          <div className={clsx(
-            "flex items-center gap-[4px] px-[12px] h-[24px] rounded-full",
-            statusStyle.bg
-          )}>
+          <motion.div
+            className={clsx(
+              "flex items-center gap-[4px] px-[12px] h-[24px] rounded-full",
+              statusStyle.bg
+            )}
+            variants={itemVariants}
+          >
             {statusStyle.icon}
             <span className={clsx("text-[12px] font-medium", statusStyle.text)}>
               {transaction.status}
             </span>
-          </div>
+          </motion.div>
 
           {/* Description */}
-          <p className="text-[18px] text-[#40566d] text-center leading-[24px] mt-[12px]">
+          <motion.p
+            className="text-[18px] text-[#40566d] text-center leading-[24px] mt-[12px]"
+            variants={itemVariants}
+          >
             {getDescription()}
-          </p>
+          </motion.p>
 
           {/* Timestamps */}
-          <p className="text-[12px] font-medium text-[#768ea7]">
+          <motion.p
+            className="text-[12px] font-medium text-[#768ea7]"
+            variants={itemVariants}
+          >
             Created {getCurrentDate()}  •  Updated {getCurrentDate()}
-          </p>
+          </motion.p>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Body - scrollable */}
-      <div className="flex-1 overflow-y-auto p-[20px] flex flex-col gap-[20px]">
+      {/* Body - scrollable with staggered sections */}
+      <motion.div
+        className="flex-1 overflow-y-auto p-[20px] flex flex-col gap-[20px]"
+        initial="hidden"
+        animate="visible"
+        variants={{
+          hidden: { opacity: 0 },
+          visible: {
+            opacity: 1,
+            transition: {
+              staggerChildren: 0.08,
+              delayChildren: 0.25,
+            }
+          }
+        }}
+      >
         {/* Refund/Transaction Details Section */}
-        <Section title={transaction.type === 'refund' ? 'Refund Details' : 'Payment Details'}>
-          {transaction.rrn && (
-            <InfoRow label="Bank ARN/RRN" value={transaction.rrn} copyable />
-          )}
-          {transaction.type === 'refund' && (
-            <>
-              <InfoRow label="Refund Type" value="Full refund" />
-              <InfoRow label="Refund speed" value="Normal" />
-              <InfoRow label="Refund fee" value="-" />
-            </>
-          )}
-          {transaction.refundId && (
-            <InfoRow label="Refund ID" value={transaction.refundId} copyable />
-          )}
-          {transaction.paymentId && (
-            <InfoRow label="Payment ID" value={transaction.paymentId} copyable />
-          )}
-          <button className="text-[14px] font-medium text-[#2563EB] flex items-center gap-[4px] mt-[4px] hover:underline">
-            More details
-            <ExternalLink size={12} />
-          </button>
-        </Section>
+        <motion.div variants={itemVariants}>
+          <Section title={transaction.type === 'refund' ? 'Refund Details' : 'Payment Details'}>
+            {transaction.rrn && (
+              <InfoRow label="Bank ARN/RRN" value={transaction.rrn} copyable />
+            )}
+            {transaction.type === 'refund' && (
+              <>
+                <InfoRow label="Refund Type" value="Full refund" />
+                <InfoRow label="Refund speed" value="Normal" />
+                <InfoRow label="Refund fee" value="-" />
+              </>
+            )}
+            {transaction.refundId && (
+              <InfoRow label="Refund ID" value={transaction.refundId} copyable />
+            )}
+            {transaction.paymentId && (
+              <InfoRow label="Payment ID" value={transaction.paymentId} copyable />
+            )}
+            <button className="text-[14px] font-medium text-[#2563EB] flex items-center gap-[4px] mt-[4px] hover:underline">
+              More details
+              <ExternalLink size={12} />
+            </button>
+          </Section>
+        </motion.div>
 
         {/* Customer Details Section */}
         {(transaction.email || transaction.phone) && (
-          <Section
-            title="Customer Details"
-            action={
-              <button className="text-[14px] font-medium text-[#2563EB] hover:underline">
-                view more →
-              </button>
-            }
-          >
-            {transaction.email && (
-              <InfoRow label="Email" value={transaction.email} copyable />
-            )}
-            {transaction.phone && (
-              <InfoRow label="Phone" value={transaction.phone || '9882331122'} copyable />
-            )}
-          </Section>
+          <motion.div variants={itemVariants}>
+            <Section
+              title="Customer Details"
+              action={
+                <button className="text-[14px] font-medium text-[#2563EB] hover:underline">
+                  view more →
+                </button>
+              }
+            >
+              {transaction.email && (
+                <InfoRow label="Email" value={transaction.email} copyable />
+              )}
+              {transaction.phone && (
+                <InfoRow label="Phone" value={transaction.phone || '9882331122'} copyable />
+              )}
+            </Section>
+          </motion.div>
         )}
 
         {/* Transaction Details Section */}
-        <Section title="Transaction Details">
-          <InfoRow label="Transaction amount" value={`₹${mainAmount}.${decimal}`} />
-          {transaction.method && (
-            <InfoRow label="Paid via" value={transaction.method} />
-          )}
-          {transaction.paymentId && (
-            <InfoRow label="Payment ID" value={transaction.paymentId} copyable />
-          )}
-        </Section>
+        <motion.div variants={itemVariants}>
+          <Section title="Transaction Details">
+            <InfoRow label="Transaction amount" value={`₹${mainAmount}.${decimal}`} />
+            {transaction.method && (
+              <InfoRow label="Paid via" value={transaction.method} />
+            )}
+            {transaction.paymentId && (
+              <InfoRow label="Payment ID" value={transaction.paymentId} copyable />
+            )}
+          </Section>
+        </motion.div>
 
         {/* Other Details Section */}
-        <Section title="Other details">
-          <InfoRow label="Notes" value="-" />
-          <button className="text-[14px] font-medium text-[#2563EB] hover:underline">
-            Show more
-          </button>
-        </Section>
-      </div>
-    </motion.div>
+        <motion.div variants={itemVariants}>
+          <Section title="Other details">
+            <InfoRow label="Notes" value="-" />
+            <button className="text-[14px] font-medium text-[#2563EB] hover:underline">
+              Show more
+            </button>
+          </Section>
+        </motion.div>
+      </motion.div>
+    </div>
   );
 };

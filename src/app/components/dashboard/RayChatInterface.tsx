@@ -362,7 +362,12 @@ export const RayChatInterface = () => {
         animate={{
           width: selectedTransaction ? '60%' : '100%',
         }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        transition={{
+          type: "spring",
+          stiffness: 180,
+          damping: 28,
+          mass: 1,
+        }}
       >
         {/* 1. Scrollable Chat Area */}
         <div
@@ -508,19 +513,38 @@ export const RayChatInterface = () => {
       </motion.div>
 
       {/* Transaction Preview Pane - slides in from the right */}
-      <AnimatePresence>
+      <AnimatePresence mode="popLayout">
         {selectedTransaction && (
           <motion.div
-            className="h-full p-4 shrink-0"
-            initial={{ width: 0, opacity: 0 }}
-            animate={{ width: '40%', opacity: 1 }}
-            exit={{ width: 0, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="h-full p-4 shrink-0 overflow-hidden"
+            initial={{ width: 0 }}
+            animate={{ width: '40%' }}
+            exit={{ width: 0 }}
+            transition={{
+              type: "spring",
+              stiffness: 180,
+              damping: 28,
+              mass: 1,
+            }}
           >
-            <TransactionPreviewPane
-              transaction={selectedTransaction}
-              onClose={() => setSelectedTransaction(null)}
-            />
+            <motion.div
+              className="h-full"
+              initial={{ opacity: 0, scale: 0.96, x: 20, filter: 'blur(8px)' }}
+              animate={{ opacity: 1, scale: 1, x: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, scale: 0.96, x: 20, filter: 'blur(8px)' }}
+              transition={{
+                type: "spring",
+                stiffness: 260,
+                damping: 32,
+                mass: 0.8,
+                delay: 0.05,
+              }}
+            >
+              <TransactionPreviewPane
+                transaction={selectedTransaction}
+                onClose={() => setSelectedTransaction(null)}
+              />
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
