@@ -373,10 +373,10 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                         }}
                     />
                 ) : (
-                <div className="relative z-10 h-full overflow-y-auto flex flex-col items-center justify-start p-4 md:p-8 px-4 md:px-[32px] pt-6 md:pt-[48px] pb-[100px] scrollbar-hide">
-                     {/* Greeting Section */}
-                     <div 
-                         className="flex items-center gap-[12px] mb-8 group cursor-default" 
+                <div className="relative z-10 h-full overflow-y-auto flex flex-col items-center justify-center p-4 md:p-8 px-4 md:px-[32px] pb-[100px] scrollbar-hide">
+                     {/* Greeting Section - offset slightly above center */}
+                     <div
+                         className="flex items-center gap-[12px] mb-8 group cursor-default -mt-[15vh]"
                          onMouseEnter={() => setWaveTrigger(prev => prev + 1)}
                      >
                         <div className="relative shrink-0 size-[32px]">
@@ -397,12 +397,11 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                             placeholder="Ask me anything..."
                         />
                         
-                        {/* Suggestion Categories */}
+                        {/* Suggestion Categories - Commented out per request
                         <div className="content-stretch flex gap-[13px] items-center relative shrink-0 flex-wrap justify-center">
-                            {/* Recent transactions */}
-                            <div 
+                            <div
                                 onClick={() => setPrompt("Show me recent transactions")}
-                                className="h-[32px] relative rounded-[12px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity" 
+                                className="h-[32px] relative rounded-[12px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity"
                                 style={{ backgroundImage: "linear-gradient(189.448deg, rgba(255, 255, 255, 0) 10.211%, rgba(255, 255, 255, 0.8) 41.559%), linear-gradient(90deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.3) 100%)" }}
                             >
                                 <div className="content-stretch flex gap-[4px] h-full items-center overflow-clip pl-[12px] pr-[16px] py-[8px] relative rounded-[inherit]">
@@ -416,11 +415,9 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                                 <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_0px_15px_2px_rgba(255,255,255,0.6)]" />
                                 <div aria-hidden="true" className="absolute border border-[rgba(108,132,157,0.18)] border-solid inset-0 pointer-events-none rounded-[12px]" />
                             </div>
-                            
-                            {/* Summarize */}
-                            <div 
+                            <div
                                 onClick={() => setPrompt("Summarize my dashboard")}
-                                className="h-[32px] relative rounded-[12px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity" 
+                                className="h-[32px] relative rounded-[12px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity"
                                 style={{ backgroundImage: "linear-gradient(193.721deg, rgba(255, 255, 255, 0) 10.211%, rgba(255, 255, 255, 0.8) 41.559%), linear-gradient(90deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.3) 100%)" }}
                             >
                                 <div className="content-stretch flex gap-[4px] h-full items-center overflow-clip pl-[12px] pr-[16px] py-[8px] relative rounded-[inherit]">
@@ -437,11 +434,9 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                                 <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_0px_15px_2px_rgba(255,255,255,0.6)]" />
                                 <div aria-hidden="true" className="absolute border border-[rgba(108,132,157,0.18)] border-solid inset-0 pointer-events-none rounded-[12px]" />
                             </div>
-                            
-                            {/* Analyze */}
-                            <div 
+                            <div
                                 onClick={() => setPrompt("Analyze my payment volume")}
-                                className="h-[32px] relative rounded-[12px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity" 
+                                className="h-[32px] relative rounded-[12px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity"
                                 style={{ backgroundImage: "linear-gradient(196.433deg, rgba(255, 255, 255, 0) 10.211%, rgba(255, 255, 255, 0.8) 41.559%), linear-gradient(90deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.3) 100%)" }}
                             >
                                 <div className="content-stretch flex gap-[4px] h-full items-center overflow-clip pl-[12px] pr-[16px] py-[8px] relative rounded-[inherit]">
@@ -455,11 +450,9 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                                 <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_0px_15px_2px_rgba(255,255,255,0.6)]" />
                                 <div aria-hidden="true" className="absolute border border-[rgba(108,132,157,0.18)] border-solid inset-0 pointer-events-none rounded-[12px]" />
                             </div>
-                            
-                            {/* Troubleshoot */}
-                            <div 
+                            <div
                                 onClick={() => setPrompt("Why are payments failing?")}
-                                className="h-[32px] relative rounded-[12px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity" 
+                                className="h-[32px] relative rounded-[12px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity"
                                 style={{ backgroundImage: "linear-gradient(192.443deg, rgba(255, 255, 255, 0) 10.211%, rgba(255, 255, 255, 0.8) 41.559%), linear-gradient(90deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.3) 100%)" }}
                             >
                                 <div className="content-stretch flex gap-[4px] h-full items-center overflow-clip pl-[12px] pr-[16px] py-[8px] relative rounded-[inherit]">
@@ -473,11 +466,9 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                                 <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_0px_15px_2px_rgba(255,255,255,0.6)]" />
                                 <div aria-hidden="true" className="absolute border border-[rgba(108,132,157,0.18)] border-solid inset-0 pointer-events-none rounded-[12px]" />
                             </div>
-                            
-                            {/* Ray 101 */}
-                            <div 
+                            <div
                                 onClick={() => setPrompt("What can Ray do?")}
-                                className="h-[32px] relative rounded-[12px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity" 
+                                className="h-[32px] relative rounded-[12px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity"
                                 style={{ backgroundImage: "linear-gradient(196.908deg, rgba(255, 255, 255, 0) 10.211%, rgba(255, 255, 255, 0.8) 41.559%), linear-gradient(90deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.3) 100%)" }}
                             >
                                 <div className="content-stretch flex gap-[4px] h-full items-center overflow-clip pl-[12px] pr-[16px] py-[8px] relative rounded-[inherit]">
@@ -492,6 +483,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                                 <div aria-hidden="true" className="absolute border border-[rgba(108,132,157,0.18)] border-solid inset-0 pointer-events-none rounded-[12px]" />
                             </div>
                         </div>
+                        */}
                      </div>
 
                      {/* Dynamic Cards Grid */}
