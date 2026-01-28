@@ -161,14 +161,20 @@ export const RayDashboard: React.FC<RayDashboardProps> = (props) => {
 };
 
 const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNavigateToPayments, initialQuery, onLogout }) => {
-  const { currentPersona, setIsInChatView } = useDemo(); // <--- LISTENING TO CONTEXT
+  const { currentPersona, setIsInChatView, setIsOnRayLandingPage } = useDemo(); // <--- LISTENING TO CONTEXT
 
   const [view, setView] = useState<'landing' | 'chat'>('landing');
 
-  // Sync chat view state with context for DemoControls visibility
+  // Sync view state with context for DemoControls visibility
   React.useEffect(() => {
     setIsInChatView(view === 'chat');
-  }, [view, setIsInChatView]);
+    setIsOnRayLandingPage(view === 'landing');
+
+    // Cleanup: reset when unmounting
+    return () => {
+      setIsOnRayLandingPage(false);
+    };
+  }, [view, setIsInChatView, setIsOnRayLandingPage]);
   const [prompt, setPrompt] = useState(initialQuery || '');
   const [waveTrigger, setWaveTrigger] = useState(0);
   const [lastQuery, setLastQuery] = useState("");
@@ -767,8 +773,8 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                             )}
                           </p>
 
-                          {/* EXPERIMENTAL: Hover affordance */}
-                          <div className="absolute bottom-[12px] right-[12px]">
+                          {/* EXPERIMENTAL: Hover affordance - below headline */}
+                          <div className="absolute top-[48px] left-[19px]">
                             <HoverAffordance
                               isVisible={hoveredCard === 'stats'}
                               onClick={() => handleCardReviewClick('stats')}

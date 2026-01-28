@@ -9,6 +9,8 @@ interface DemoContextType {
   resetDemo: () => void;
   isInChatView: boolean;
   setIsInChatView: (value: boolean) => void;
+  isOnRayLandingPage: boolean;
+  setIsOnRayLandingPage: (value: boolean) => void;
 }
 
 const DemoContext = createContext<DemoContextType | undefined>(undefined);
@@ -16,6 +18,7 @@ const DemoContext = createContext<DemoContextType | undefined>(undefined);
 export const DemoProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentPersonaId, setCurrentPersonaId] = useState<PersonaId>('maya');
   const [isInChatView, setIsInChatView] = useState(false);
+  const [isOnRayLandingPage, setIsOnRayLandingPage] = useState(false);
 
   // Optional: Add a data-theme attribute to body for global CSS variables if needed later
   useEffect(() => {
@@ -34,7 +37,9 @@ export const DemoProvider = ({ children }: { children: React.ReactNode }) => {
       setPersona: setCurrentPersonaId,
       resetDemo,
       isInChatView,
-      setIsInChatView
+      setIsInChatView,
+      isOnRayLandingPage,
+      setIsOnRayLandingPage
     }}>
       {children}
     </DemoContext.Provider>

@@ -4,10 +4,10 @@ import { useDemo } from '../../context/DemoContext';
 import { RotateCcw } from 'lucide-react';
 
 export const DemoControls = () => {
-  const { currentPersonaId, setPersona, resetDemo, isInChatView } = useDemo();
+  const { currentPersonaId, setPersona, resetDemo, isOnRayLandingPage } = useDemo();
 
-  // Hide on chat view - only show on landing page
-  if (isInChatView) return null;
+  // Only show on Ray landing page
+  if (!isOnRayLandingPage) return null;
 
   return (
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-md text-white px-2 py-2 rounded-full flex gap-4 items-center z-[100] shadow-2xl border border-white/10 ring-1 ring-black/20">

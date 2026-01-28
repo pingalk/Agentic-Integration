@@ -189,32 +189,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ initialConfig, onLogout })
           />
         </div>
         
-        {/* Layout Toggle - Only shown on relevant pages */}
-        {showRayToggle && (
-            <>
-              {/* Floating Action Button Entry Point */}
-              {rayEntryPoint === 'floating' && !isRaySidePanelOpen && (
-                <RayFAB onClick={handleToggleRaySidePanel} />
-              )}
+        {/* Ray FAB Button - Always visible on relevant pages */}
+        {showRayToggle && !isRaySidePanelOpen && (
+          <RayFAB onClick={handleToggleRaySidePanel} />
+        )}
 
-              {/* Prototype Control Toggle Bar */}
-              <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-900/90 backdrop-blur-sm text-white px-1 py-1 rounded-full shadow-lg flex items-center gap-1">
-                 <button 
-                   onClick={() => setRayEntryPoint('header')}
-                   className={`px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${rayEntryPoint === 'header' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-white'}`}
-                 >
-                   Option 1: Header
-                 </button>
-                 <button 
-                   onClick={() => setRayEntryPoint('floating')}
-                   className={`px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${rayEntryPoint === 'floating' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-white'}`}
-                 >
-                   Option 2: Floating
-                 </button>
-              </div>
-
-              <RayLayoutToggle mode={rayLayoutMode} onChange={setRayLayoutMode} />
-            </>
+        {/* Layout Toggle - Only shown when Ray side panel is open */}
+        {showRayToggle && isRaySidePanelOpen && (
+          <RayLayoutToggle mode={rayLayoutMode} onChange={setRayLayoutMode} />
         )}
       </div>
     </div>
