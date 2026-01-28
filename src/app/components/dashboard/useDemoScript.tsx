@@ -330,7 +330,7 @@ Maya`,
                     ticket: {
                         id: '#4492',
                         status: 'Active',
-                        issue: 'Customer Refund - ₹5,000 not received',
+                        issue: 'Customer Refund: ₹5,000 not received',
                         raised: '5 days ago',
                         createdOn: 'Jan 23, 2026, 5 days ago',
                         eta: etaFormatted,
@@ -351,21 +351,19 @@ Maya`,
             artifact: {
                 type: 'support_ticket_status',
                 data: {
-                    headline: "Your ticket #4492 has been Escalated.",
+                    headline: "Your ticket #4492 has been escalated.",
                     subtext: "I've moved this ticket to our priority review team. A support manager will look into this by today.",
                     ticket: {
                         id: '#4492',
                         status: 'Escalated',
-                        issue: 'Customer Refund - ₹5,000 not received',
+                        issue: 'Customer Refund: ₹5,000 not received',
                         raised: '5 days ago',
                         createdOn: 'Jan 23, 2026, 5 days ago',
                         eta: 'Today',
                         isEscalated: true
                     },
                     explanation: null,
-                    buttons: [
-                        { label: "Need quicker resolution? Opt in for priority support", variant: "secondary" }
-                    ],
+                    buttons: [],
                     suggestions: [
                         "What is priority support?",
                         "View my other open tickets"
