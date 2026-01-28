@@ -21,6 +21,19 @@ export const useDemoScript = () => {
         return `${day} ${month} ${year}, ${hours}:${minutes}`;
     };
 
+    // Helper to get date with day offset for table rows
+    const getDateWithDayOffset = (dayOffset: number, hour: number = 8, minute: number = 53) => {
+        const date = new Date();
+        date.setDate(date.getDate() - dayOffset);
+        date.setHours(hour, minute);
+        const day = date.getDate();
+        const month = date.toLocaleDateString('en-GB', { month: 'short' });
+        const year = date.getFullYear();
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        return `${day} ${month} ${year}, ${hours}:${minutes}`;
+    };
+
     // Maya's Journey (Double Debit)
     const scriptData = {
         0: {
@@ -138,11 +151,11 @@ export const useDemoScript = () => {
                     ],
                     table: {
                         rows: [
-                            { id: '1', amount: '₹1,500', status: 'Refunded', date: '23 Jan 2026, 08:53', rrn: '514633500160', email: 'customer1@email.com' },
-                            { id: '2', amount: '₹1,500', status: 'Refunded', date: '23 Jan 2026, 08:53', rrn: '514633500161', email: 'customer2@email.com' },
-                            { id: '3', amount: '₹1,000', status: 'Refunded', date: '23 Jan 2026, 08:53', rrn: '514633500162', email: 'customer3@email.com' },
-                            { id: '4', amount: '₹1,000', status: 'Refunded', date: '23 Jan 2026, 08:53', rrn: '514633500163', email: 'customer4@email.com' },
-                            { id: '5', amount: '₹400', status: 'Refunded', date: '21 Jan 2026, 08:53', rrn: '514633500164', email: 'customer5@email.com' }
+                            { id: '1', amount: '₹1,500', status: 'Refunded', date: getDateWithDayOffset(0, 8, 53), rrn: '514633500160', email: 'customer1@email.com' },
+                            { id: '2', amount: '₹1,500', status: 'Refunded', date: getDateWithDayOffset(0, 8, 53), rrn: '514633500161', email: 'customer2@email.com' },
+                            { id: '3', amount: '₹1,000', status: 'Refunded', date: getDateWithDayOffset(0, 8, 53), rrn: '514633500162', email: 'customer3@email.com' },
+                            { id: '4', amount: '₹1,000', status: 'Refunded', date: getDateWithDayOffset(0, 8, 53), rrn: '514633500163', email: 'customer4@email.com' },
+                            { id: '5', amount: '₹400', status: 'Refunded', date: getDateWithDayOffset(2, 8, 53), rrn: '514633500164', email: 'customer5@email.com' }
                         ]
                     },
                     resolution: {

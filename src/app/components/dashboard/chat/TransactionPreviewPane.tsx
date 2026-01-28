@@ -193,7 +193,7 @@ export const TransactionPreviewPane: React.FC<TransactionPreviewPaneProps> = ({
       <div
         className="flex flex-col gap-[20px] p-[20px] shrink-0"
         style={{
-          background: 'radial-gradient(ellipse at center bottom, rgba(18,145,208,0.09) 0%, rgba(255,255,255,0) 70%)'
+          background: 'radial-gradient(ellipse 100% 100% at 50% 100%, rgba(18,145,208,0.09) 0%, rgba(255,255,255,0) 70%)'
         }}
       >
         {/* Title bar */}

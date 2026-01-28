@@ -301,41 +301,43 @@ const InvestigationReportArtifact = ({ data, onRowClick, onSuggestionClick, isLa
               >
                 <h4 className="text-[15px] font-bold text-slate-900 mb-3">Your recent refunds:</h4>
 
-                <div className="w-full rounded-[12px] overflow-hidden border border-[#E4E7EC] relative group/table">
-                  {/* Table Header */}
-                  <div className="flex h-[48px] text-[14px] font-semibold text-[#192839] bg-[rgba(108,132,157,0.06)] px-[16px] border-b border-[rgba(108,132,157,0.18)]">
-                    <div className="w-[140px] flex items-center pl-[20px]">Amount</div>
-                    <div className="w-[120px] flex items-center">Status</div>
-                    <div className="w-[160px] flex items-center">Issued On</div>
-                    <div className="w-[140px] flex items-center">Bank RRN</div>
-                    <div className="flex-1 flex items-center">Customer Email</div>
-                  </div>
-                  {/* Table Rows with staggered animation */}
-                  <div className="bg-white">
-                    {data.table.rows.map((row: any, rowIndex: number) => (
-                      <motion.div
-                        key={row.id}
-                        initial={{ opacity: 0, y: 5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: rowIndex * 0.1, duration: 0.3 }}
-                        className="relative flex h-[56px] items-center px-[16px] border-b border-[#E4E7EC] last:border-b-0 hover:bg-[#F9FAFB] transition-colors group/row cursor-pointer"
-                        onClick={() => onRowClick?.(row)}
-                      >
-                        <div className="w-[140px] font-semibold text-[#1D2939] text-[14px] pl-[20px]">{row.amount}</div>
-                        <div className="w-[120px]">
-                          <span className="inline-flex items-center h-[20px] px-[8px] bg-[rgba(18,145,208,0.09)] text-[#0f78ad] text-[12px] font-medium leading-[18px] rounded-[1000px]">
-                            {row.status}
-                          </span>
-                        </div>
-                        <div className="w-[160px] text-[#5D6B82] text-[14px] font-normal">{row.date}</div>
-                        <div className="w-[140px] text-[#5D6B82] font-mono text-[14px] font-normal">
-                          <CopyableText text={row.rrn} className="text-[#5D6B82]" />
-                        </div>
-                        <div className="flex-1 text-[14px] font-normal truncate">
-                          <CopyableText text={row.email} className="text-[#5D6B82] underline decoration-slate-300 underline-offset-2" />
-                        </div>
-                      </motion.div>
-                    ))}
+                <div className="w-full rounded-[12px] border border-[#E4E7EC] relative group/table overflow-x-auto">
+                  <div className="min-w-[700px]">
+                    {/* Table Header */}
+                    <div className="flex h-[48px] text-[14px] font-semibold text-[#192839] bg-[rgba(108,132,157,0.06)] px-[16px] border-b border-[rgba(108,132,157,0.18)]">
+                      <div className="w-[100px] shrink-0 flex items-center pl-[20px]">Amount</div>
+                      <div className="w-[90px] shrink-0 flex items-center">Status</div>
+                      <div className="w-[160px] shrink-0 flex items-center">Issued On</div>
+                      <div className="w-[130px] shrink-0 flex items-center">Bank RRN</div>
+                      <div className="min-w-[160px] flex-1 flex items-center">Customer Email</div>
+                    </div>
+                    {/* Table Rows with staggered animation */}
+                    <div className="bg-white">
+                      {data.table.rows.map((row: any, rowIndex: number) => (
+                        <motion.div
+                          key={row.id}
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: rowIndex * 0.1, duration: 0.3 }}
+                          className="relative flex h-[56px] items-center px-[16px] border-b border-[#E4E7EC] last:border-b-0 hover:bg-[#F9FAFB] transition-colors group/row cursor-pointer"
+                          onClick={() => onRowClick?.(row)}
+                        >
+                          <div className="w-[100px] shrink-0 font-semibold text-[#1D2939] text-[14px] pl-[20px]">{row.amount}</div>
+                          <div className="w-[90px] shrink-0">
+                            <span className="inline-flex items-center h-[20px] px-[8px] bg-[rgba(18,145,208,0.09)] text-[#0f78ad] text-[12px] font-medium leading-[18px] rounded-[1000px]">
+                              {row.status}
+                            </span>
+                          </div>
+                          <div className="w-[160px] shrink-0 text-[#5D6B82] text-[14px] font-normal">{row.date}</div>
+                          <div className="w-[130px] shrink-0 text-[#5D6B82] font-mono text-[14px] font-normal">
+                            <CopyableText text={row.rrn} className="text-[#5D6B82]" />
+                          </div>
+                          <div className="min-w-[160px] flex-1 text-[14px] font-normal truncate">
+                            <CopyableText text={row.email} className="text-[#5D6B82] underline decoration-slate-300 underline-offset-2" />
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
                   </div>
 
                   {/* Table-level hover actions - bottom right */}
