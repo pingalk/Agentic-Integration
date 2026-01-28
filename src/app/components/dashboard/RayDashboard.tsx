@@ -52,14 +52,15 @@ interface BriefingItemProps {
   isHovered: boolean;
   hoveredIndex: number | null;
   onHover: (index: number | null) => void;
+  onReviewClick?: () => void;
 }
 
-const BriefingItem = ({ index, children, isHovered, hoveredIndex, onHover }: BriefingItemProps) => {
+const BriefingItem = ({ index, children, isHovered, hoveredIndex, onHover, onReviewClick }: BriefingItemProps) => {
   const isOtherHovered = hoveredIndex !== null && hoveredIndex !== index;
 
   return (
     <motion.div
-      className="content-stretch flex flex-col gap-[8px] items-start relative shrink-0 w-full cursor-pointer"
+      className="content-stretch flex flex-col gap-[8px] items-start relative shrink-0 w-full"
       onMouseEnter={() => onHover(index)}
       onMouseLeave={() => onHover(null)}
       animate={{
@@ -78,14 +79,15 @@ const BriefingItem = ({ index, children, isHovered, hoveredIndex, onHover }: Bri
             <p className="font-['Inter',sans-serif] font-medium leading-[14px] not-italic relative shrink-0 text-[#2980e1] text-[10px]">{index}</p>
           </div>
         </div>
-        <p className="font-['TASA_Orbiter_Display',sans-serif] font-normal leading-[24px] not-italic relative shrink-0 text-[#fdfdfd] text-[18px] tracking-[-0.234px]">
+        <p className="font-['TASA_Orbiter_Display',sans-serif] font-normal leading-[24px] not-italic text-[#fdfdfd] text-[18px] tracking-[-0.234px] flex-1">
           {children}
         </p>
       </div>
 
       {/* "Review with Ray" affordance - appears on hover */}
       <motion.div
-        className="flex items-center gap-[6px] pl-[26px] overflow-hidden"
+        className="flex items-center gap-[6px] pl-[26px] overflow-hidden cursor-pointer"
+        onClick={onReviewClick}
         initial={false}
         animate={{
           height: isHovered ? 24 : 0,
@@ -174,6 +176,37 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
 
   // EXPERIMENTAL: Track which briefing item is hovered (null = none)
   const [hoveredBriefingItem, setHoveredBriefingItem] = useState<number | null>(null);
+
+  // EXPERIMENTAL: Briefing review prompts based on item index and persona
+  const getBriefingReviewPrompt = (index: number): string => {
+    if (index === 1) {
+      if (isNegative) return "Why was my refund volume high in the last 3 days?";
+      if (isNeutral) return "Why are my refund volumes unusually high?";
+      return "Give me a summary of today's refunds and disputes";
+    }
+    if (index === 2) {
+      return "Tell me more about payment timeouts and how to reduce them";
+    }
+    if (index === 3) {
+      return "Break down my payment methods - Cards vs UPI performance";
+    }
+    return "";
+  };
+
+  // EXPERIMENTAL: Handle "Review with Ray" click
+  const handleBriefingReviewClick = (index: number) => {
+    const reviewPrompt = getBriefingReviewPrompt(index);
+    setPrompt(reviewPrompt);
+    setHoveredBriefingItem(null);
+
+    // Brief pause to show the prompt, then transition to chat
+    setTimeout(() => {
+      setLastQuery(reviewPrompt);
+      setPrompt('');
+      setView('chat');
+      setIsSidebarCollapsed(true);
+    }, 800);
+  };
 
   // Sync prompt with persona when on landing page
   useEffect(() => {
@@ -531,19 +564,20 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                           
                           {/* Content List - Dynamic based on persona */}
                           {/* EXPERIMENTAL: Using BriefingItem with hover affordance */}
-                          <div className="absolute content-stretch flex flex-col gap-[16px] items-start left-[19px] top-[79px] w-[239px]">
+                          <div className="absolute content-stretch flex flex-col gap-[16px] items-start left-[19px] top-[79px] right-[16px]">
                             {/* Item 1 */}
                             <BriefingItem
                               index={1}
                               isHovered={hoveredBriefingItem === 1}
                               hoveredIndex={hoveredBriefingItem}
                               onHover={setHoveredBriefingItem}
+                              onReviewClick={() => handleBriefingReviewClick(1)}
                             >
                               {isNegative
-                                ? <>Your refund volume for last<br />3 days was unusually high</>
+                                ? <>Your refund volume for last 3 days was unusually high</>
                                 : isNeutral
-                                  ? <>Your refund volumes are<br />unusually high</>
-                                  : <>No refunds or disputes so far<br />today</>
+                                  ? <>Your refund volumes are unusually high</>
+                                  : <>No refunds or disputes so far today</>
                               }
                             </BriefingItem>
 
@@ -553,6 +587,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                               isHovered={hoveredBriefingItem === 2}
                               hoveredIndex={hoveredBriefingItem}
                               onHover={setHoveredBriefingItem}
+                              onReviewClick={() => handleBriefingReviewClick(2)}
                             >
                               Payment timeouts are the most common failure reason (2%)
                             </BriefingItem>
@@ -563,8 +598,9 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                               isHovered={hoveredBriefingItem === 3}
                               hoveredIndex={hoveredBriefingItem}
                               onHover={setHoveredBriefingItem}
+                              onReviewClick={() => handleBriefingReviewClick(3)}
                             >
-                              Cards & UPI payments<br />account for 96% of this<br />week's payment volume<br />(₹7.1 lakh)
+                              Cards & UPI payments account for 96% of this week's payment volume (₹7.1 lakh)
                             </BriefingItem>
                           </div>
                         </motion.div>

@@ -21,7 +21,10 @@
       "Bash(/opt/homebrew/bin/agent-browser open:*)",
       "Bash(/opt/homebrew/bin/agent-browser:*)",
       "Bash(npm root:*)",
-      "Bash(export AGENT_BROWSER_HOME=\"/opt/homebrew/lib/node_modules/agent-browser\")"
+      "Bash(export AGENT_BROWSER_HOME=\"/opt/homebrew/lib/node_modules/agent-browser\")",
+      "Bash(curl:*)",
+      "Bash(npx tsc:*)",
+      "Bash(./node_modules/.bin/tsc:*)"
     ]
   }
 }

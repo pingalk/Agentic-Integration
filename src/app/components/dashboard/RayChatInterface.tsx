@@ -58,9 +58,14 @@ const generateArjunData = (): RayResponseData => {
   };
 };
 
-export const RayChatInterface = () => {
+interface RayChatInterfaceProps {
+  initialQuery?: string;
+  isSplit?: boolean;
+}
+
+export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProps) => {
   const { currentPersona } = useDemo();
-  const { arjunScript, sarahScript, mayaScript, samScript } = useDemoScript();
+  const { arjunScript, sarahScript, mayaScript, samScript, briefingReviewResponses } = useDemoScript();
   const [messages, setMessages] = useState<RayResponseData[]>([]);
   const [inputValue, setInputValue] = useState("");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -85,6 +90,9 @@ export const RayChatInterface = () => {
 
   // Sam Flow State
   const [samFlowStep, setSamFlowStep] = useState(0);
+
+  // Briefing Review Flow State
+  const [briefingReviewHandled, setBriefingReviewHandled] = useState(false);
 
   // Transaction Preview State
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionData | null>(null);
@@ -245,6 +253,70 @@ export const RayChatInterface = () => {
         }, 600);
     }
   }, [currentPersona.id, messages.length, samScript]);
+
+  // Triggers for briefing review queries (from "Review with Ray" click)
+  useEffect(() => {
+    if (!initialQuery || briefingReviewHandled || messages.length > 0) return;
+
+    // Check if this is a briefing review query
+    const isBriefingReview =
+      initialQuery.includes("refunds and disputes") ||
+      initialQuery.includes("refund volume") ||
+      initialQuery.includes("refund volumes") ||
+      initialQuery.includes("payment timeouts") ||
+      initialQuery.includes("payment methods") ||
+      initialQuery.includes("Cards vs UPI");
+
+    if (!isBriefingReview) return;
+
+    setBriefingReviewHandled(true);
+
+    // Determine which response to show based on query
+    let response: any;
+    if (initialQuery.includes("summary") || initialQuery.includes("so far today")) {
+      response = briefingReviewResponses.refunds_summary;
+    } else if (initialQuery.includes("refund volume") || initialQuery.includes("refund volumes")) {
+      response = currentPersona.theme === 'positive'
+        ? briefingReviewResponses.refunds_summary
+        : briefingReviewResponses.refunds_high;
+    } else if (initialQuery.includes("payment timeouts")) {
+      response = briefingReviewResponses.payment_timeouts;
+    } else if (initialQuery.includes("payment methods") || initialQuery.includes("Cards vs UPI")) {
+      response = briefingReviewResponses.payment_methods;
+    }
+
+    if (!response) return;
+
+    // Step 1: Show user message
+    setTimeout(() => {
+      setMessages([{
+        id: 'briefing-u1',
+        sender: 'user',
+        blocks: [{ type: 'text', content: initialQuery }]
+      }]);
+
+      // Step 2: Show thinking state
+      setTimeout(() => {
+        const thinkingMsg: RayResponseData = {
+          id: 'briefing-ai-1',
+          sender: 'ai',
+          isThinking: true
+        };
+        setMessages(prev => [...prev, thinkingMsg]);
+
+        // Step 3: Replace with response
+        setTimeout(() => {
+          setMessages(prev => prev.map(msg =>
+            msg.id === 'briefing-ai-1' ? {
+              ...response,
+              id: 'briefing-ai-1',
+              sender: 'ai' as const
+            } : msg
+          ));
+        }, 2000);
+      }, 600);
+    }, 400);
+  }, [initialQuery, briefingReviewHandled, messages.length, currentPersona.theme, briefingReviewResponses]);
 
   // Auto-scroll: user messages to top of viewport, AI messages show start
   useEffect(() => {

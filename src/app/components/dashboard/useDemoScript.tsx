@@ -264,6 +264,50 @@ Maya`,
         }
     };
 
+    // Briefing Review Responses (for "Review with Ray" hover affordance)
+    const briefingReviewResponses = {
+        refunds_summary: {
+            artifact: {
+                type: 'simple_text',
+                data: {
+                    headline: "Today's refund and dispute summary",
+                    body: "Great news! You have **zero refunds** and **zero disputes** so far today. This is consistent with your excellent track record.\n\n**Your refund rate** over the last 30 days is just **0.3%**, which is well below the industry average of 2-3%. Keep up the good work!",
+                    suggestions: ["Show me last week's refund trends", "What's my dispute resolution rate?"]
+                }
+            }
+        },
+        refunds_high: {
+            artifact: {
+                type: 'simple_text',
+                data: {
+                    headline: "Refund volume analysis for the last 3 days",
+                    body: "Your refund volume increased by **43%** compared to the previous week. Here's the breakdown:\n\n• **Monday:** ₹1,85,000 (3 refunds)\n• **Tuesday:** ₹1,20,000 (2 refunds)\n• **Wednesday:** ₹95,000 (1 refund)\n\nThe primary reason appears to be **product returns** from a promotional campaign. Consider reviewing your return policy for promotional items.",
+                    suggestions: ["Show me the refund details", "How do I reduce refund rates?"]
+                }
+            }
+        },
+        payment_timeouts: {
+            artifact: {
+                type: 'simple_text',
+                data: {
+                    headline: "Payment timeouts analysis",
+                    body: "Payment timeouts account for **2%** of your failed transactions. Here's what's happening:\n\n• **Root cause:** Most timeouts occur during peak hours (12-2 PM) when bank servers are under load.\n• **Affected methods:** Netbanking has the highest timeout rate at 4.2%.\n\n**Recommendations:**\n1. Enable **auto-retry** for failed transactions\n2. Consider adding UPI as a preferred option (0.3% timeout rate)\n3. Set up **smart routing** to route away from slow banks",
+                    suggestions: ["Enable auto-retry for timeouts", "Show me bank-wise success rates"]
+                }
+            }
+        },
+        payment_methods: {
+            artifact: {
+                type: 'simple_text',
+                data: {
+                    headline: "Payment methods breakdown",
+                    body: "Here's your payment mix for this week (₹7.1 lakh total):\n\n• **UPI:** ₹4.26 lakh (60%) – Highest success rate at 99.2%\n• **Cards:** ₹2.56 lakh (36%) – Success rate 96.8%\n• **Netbanking:** ₹28,400 (4%) – Success rate 94.1%\n\n**Insight:** UPI dominance is growing. Consider promoting UPI with small incentives to improve your overall success rate.",
+                    suggestions: ["Show me daily trends", "Compare with last month"]
+                }
+            }
+        }
+    };
+
     // Sam's Journey (Support Ticket Escalation)
     const samScript = {
         sam_step_0: {
@@ -354,6 +398,7 @@ Maya`,
         arjunScript,
         sarahScript,
         samScript,
+        briefingReviewResponses,
         getFutureDate
     };
 };
