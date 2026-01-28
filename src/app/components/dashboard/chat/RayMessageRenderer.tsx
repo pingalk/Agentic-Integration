@@ -198,6 +198,10 @@ export interface RayResponseData {
         status: string;
         issue: string;
         raised: string;
+        createdOn?: string;
+        eta?: string;
+        isOverdue?: boolean;
+        isEscalated?: boolean;
       };
       explanation: {
         title: string;
@@ -1974,7 +1978,7 @@ const SupportTicketStatusArtifact = ({ data, onButtonClick, onSuggestionClick, i
               </h3>
             </motion.div>
 
-            {subtextStarted && (
+            {subtextStarted && data.subtext && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -1987,6 +1991,7 @@ const SupportTicketStatusArtifact = ({ data, onButtonClick, onSuggestionClick, i
                 />
               </motion.div>
             )}
+            {subtextStarted && !data.subtext && (() => { onNarrativeComplete(); return null; })()}
           </div>
 
           {/* Support Ticket Card (Phase 2+) - New Figma Design */}
@@ -2024,8 +2029,12 @@ const SupportTicketStatusArtifact = ({ data, onButtonClick, onSuggestionClick, i
                       </span>
                     </div>
                   </div>
-                  {/* ETA Badge */}
-                  <span className="px-[8px] py-[4px] bg-[#E3F6FF] text-[#0284c7] text-[12px] font-medium rounded-[4px]">
+                  {/* ETA Badge - Red for overdue, Blue for normal */}
+                  <span className={`px-[8px] py-[4px] text-[12px] font-medium rounded-[4px] ${
+                    data.ticket.isOverdue
+                      ? 'bg-[#FEE2E2] text-[#DC2626]'
+                      : 'bg-[#E3F6FF] text-[#0284c7]'
+                  }`}>
                     ETA: {data.ticket.eta || 'Jan 31'}
                   </span>
                 </div>
@@ -2034,7 +2043,9 @@ const SupportTicketStatusArtifact = ({ data, onButtonClick, onSuggestionClick, i
                 <div className="flex flex-col gap-[12px]">
                   <div className="flex items-center justify-between">
                     <span className="text-[12px] font-medium text-[#768ea7] leading-[18px]">Status</span>
-                    <span className="text-[14px] font-medium text-[#40566d] leading-[20px]">
+                    <span className={`text-[14px] font-medium leading-[20px] ${
+                      data.ticket.isEscalated ? 'text-[#2563EB]' : 'text-[#40566d]'
+                    }`}>
                       {data.ticket.status}
                     </span>
                   </div>
@@ -2048,23 +2059,40 @@ const SupportTicketStatusArtifact = ({ data, onButtonClick, onSuggestionClick, i
 
                 {/* Action Buttons */}
                 <div className="flex gap-[12px]">
-                  {/* Primary Button - Gradient */}
-                  <button
-                    onClick={() => onButtonClick?.('Escalate')}
-                    className="flex-1 h-[36px] rounded-[8px] text-white text-[12px] font-semibold tracking-[-0.156px] relative overflow-hidden shadow-[0px_1px_1px_0px_rgba(0,0,0,0.06)]"
-                    style={{ background: 'linear-gradient(-25deg, #1566F1 55%, #4793FD 99%)' }}
-                  >
-                    <span className="relative z-10">Escalate this Ticket</span>
-                    <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_2px_0px_0px_rgba(255,255,255,0.2),inset_0px_-2px_0px_0px_rgba(255,255,255,0.2)]" />
-                  </button>
-                  {/* Secondary Button */}
-                  <button
-                    onClick={() => onButtonClick?.('Priority Support')}
-                    className="flex-1 h-[36px] bg-white rounded-[8px] text-[#050505] text-[12px] font-semibold tracking-[-0.156px] relative"
-                  >
-                    <span className="relative z-10">Pay ₹99 for Priority Support</span>
-                    <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_-1px_0.5px_0px_rgba(0,0,0,0.2),inset_0px_0px_0px_1px_#d1d8db]" />
-                  </button>
+                  {/* Escalated State - Show checkmark button */}
+                  {data.ticket.isEscalated ? (
+                    <>
+                      {/* Escalated Confirmation Button */}
+                      <div
+                        className="flex-1 h-[36px] rounded-[8px] text-white text-[12px] font-semibold tracking-[-0.156px] relative overflow-hidden flex items-center justify-center gap-[4px]"
+                        style={{ background: 'linear-gradient(-27deg, rgba(7, 51, 128, 0.5) 55%, rgba(71, 147, 253, 0.5) 99%)' }}
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        <span className="relative z-10">Ticket escalated</span>
+                        <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_2px_0px_0px_rgba(255,255,255,0.2),inset_0px_-2px_0px_0px_rgba(255,255,255,0.2)]" />
+                      </div>
+                      {/* Priority Support Button */}
+                      <button
+                        onClick={() => onButtonClick?.('Priority Support')}
+                        className="flex-1 h-[36px] bg-white rounded-[8px] text-[#050505] text-[12px] font-semibold tracking-[-0.156px] relative"
+                      >
+                        <span className="relative z-10">Get Priority Support for ₹99</span>
+                        <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_-1px_0.5px_0px_rgba(0,0,0,0.2),inset_0px_0px_0px_1px_#d1d8db]" />
+                      </button>
+                    </>
+                  ) : (
+                    /* Non-escalated State - Show only Escalate button */
+                    <button
+                      onClick={() => onButtonClick?.('Escalate')}
+                      className="flex-1 h-[36px] rounded-[8px] text-white text-[12px] font-semibold tracking-[-0.156px] relative overflow-hidden shadow-[0px_1px_1px_0px_rgba(0,0,0,0.06)]"
+                      style={{ background: 'linear-gradient(-25deg, #1566F1 55%, #4793FD 99%)' }}
+                    >
+                      <span className="relative z-10">Escalate this Ticket</span>
+                      <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_2px_0px_0px_rgba(255,255,255,0.2),inset_0px_-2px_0px_0px_rgba(255,255,255,0.2)]" />
+                    </button>
+                  )}
                 </div>
               </div>
             </motion.div>

@@ -309,9 +309,15 @@ Maya`,
     };
 
     // Sam's Journey (Support Ticket Escalation)
+    // Calculate ETA as 2 days ago (SLA breach)
+    const today = new Date();
+    const etaDate = new Date(today);
+    etaDate.setDate(today.getDate() - 2);
+    const etaFormatted = etaDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
     const samScript = {
         sam_step_0: {
-            input: "What is the status of my ticket #4492?",
+            input: "What's the status of my last ticket",
             response: null,
             suggestions: []
         },
@@ -319,23 +325,23 @@ Maya`,
             artifact: {
                 type: 'support_ticket_status',
                 data: {
-                    headline: "Ticket #4492 is currently Open and under review.",
-                    subtext: "Here is the latest update on your request regarding the customer refund:",
+                    headline: "Your last ticket #4492 is still under review",
+                    subtext: "", // Empty - removed per requirement
                     ticket: {
                         id: '#4492',
                         status: 'Active',
                         issue: 'Customer Refund - ₹5,000 not received',
-                        raised: '3 days ago',
+                        raised: '5 days ago',
                         createdOn: 'Jan 23, 2026, 5 days ago',
-                        eta: 'Jan 31'
+                        eta: etaFormatted, // SLA breach - 2 days overdue
+                        isOverdue: true
                     },
                     explanation: {
                         title: "Why is this taking longer?",
                         content: "Your request involves a bank-side verification to track exactly why the ₹5,000 hasn't hit your customer's account yet. We usually resolve these within 5 business days."
                     },
                     buttons: [
-                        { label: "Escalate", variant: "primary" },
-                        { label: "Pay ₹99 for Priority Support", variant: "secondary" }
+                        { label: "Escalate", variant: "primary" }
                     ],
                     suggestions: [
                         "Escalate this to a senior specialist right now?",
@@ -346,23 +352,26 @@ Maya`,
         },
         sam_step_2: {
             artifact: {
-                type: 'ticket_escalated',
+                type: 'support_ticket_status',
                 data: {
                     headline: "Success! Your ticket has been Escalated.",
                     subtext: "I have moved Ticket #4492 to our priority queue. A senior specialist is now personally overseeing this to ensure the refund status is cleared up as quickly as possible.",
                     ticket: {
                         id: '#4492',
-                        status: 'ESCALATED',
-                        newStatus: 'High Priority',
-                        nextUpdate: 'Within 24 hours'
+                        status: 'Escalated',
+                        issue: 'Customer Refund - ₹5,000 not received',
+                        raised: '5 days ago',
+                        createdOn: 'Jan 23, 2026, 5 days ago',
+                        eta: 'Today',
+                        isEscalated: true
                     },
-                    whatNext: {
+                    explanation: {
                         title: "What happens next?",
-                        items: [
-                            { bold: "Email Confirmation:", text: "I've sent a confirmation of this escalation to your registered email address." },
-                            { bold: "Direct Monitoring:", text: "I will keep a close watch on this ticket and notify you the moment there is a breakthrough." }
-                        ]
+                        content: "A senior specialist is now personally overseeing this ticket. You'll receive an update within 24 hours."
                     },
+                    buttons: [
+                        { label: "Get Priority Support for ₹99", variant: "secondary" }
+                    ],
                     suggestions: [
                         "Show you other active tickets?",
                         "Help you with anything else regarding your payments?"
