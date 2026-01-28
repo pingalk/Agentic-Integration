@@ -318,7 +318,8 @@ const InvestigationReportArtifact = ({ data, onRowClick, onSuggestionClick, isLa
                         initial={{ opacity: 0, y: 5 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: rowIndex * 0.1, duration: 0.3 }}
-                        className="relative flex h-[56px] items-center px-[16px] border-b border-[#E4E7EC] last:border-b-0 hover:bg-[#F9FAFB] transition-colors group/row"
+                        className="relative flex h-[56px] items-center px-[16px] border-b border-[#E4E7EC] last:border-b-0 hover:bg-[#F9FAFB] transition-colors group/row cursor-pointer"
+                        onClick={() => onRowClick?.(row)}
                       >
                         <div className="w-[140px] font-semibold text-[#1D2939] text-[14px] pl-[20px]">{row.amount}</div>
                         <div className="w-[120px]">
@@ -1064,7 +1065,8 @@ const SettingUpdatedWithBulletsArtifact = ({
 const PaymentLinksCreatedArtifact = ({
   data,
   isLast,
-  onButtonClick
+  onButtonClick,
+  onRowClick
 }: {
   data: {
     headline: string;
@@ -1074,6 +1076,7 @@ const PaymentLinksCreatedArtifact = ({
   };
   isLast: boolean;
   onButtonClick?: (label: string) => void;
+  onRowClick?: (rowData: any) => void;
 }) => {
   const [bodyStarted, setBodyStarted] = useState(false);
 
@@ -1164,7 +1167,8 @@ const PaymentLinksCreatedArtifact = ({
                         initial={{ opacity: 0, y: 5 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: rowIndex * 0.1, duration: 0.3 }}
-                        className="relative flex h-[56px] items-center px-[16px] border-b border-[#E4E7EC] last:border-b-0 hover:bg-[#F9FAFB] transition-colors group/row"
+                        className="relative flex h-[56px] items-center px-[16px] border-b border-[#E4E7EC] last:border-b-0 hover:bg-[#F9FAFB] transition-colors group/row cursor-pointer"
+                        onClick={() => onRowClick?.({ ...row, type: 'payment', amount: row.amount, status: 'Active', date: row.createdOn })}
                       >
                         <div className="w-[260px] text-[14px] font-normal pl-[20px]">
                           <CopyableText text={row.linkUrl} isLink />
@@ -1465,7 +1469,7 @@ const FundsAddedMessage = ({ data, isLast, onSuggestionClick }: { data: RayRespo
   );
 };
 
-export const RayMessageRenderer = ({ data, onSuggestionClick, isLast = true }: { data: RayResponseData; onSuggestionClick?: (suggestion: string) => void, isLast?: boolean }) => {
+export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast = true }: { data: RayResponseData; onSuggestionClick?: (suggestion: string) => void; onRowClick?: (rowData: any) => void; isLast?: boolean }) => {
   // 1. User Message (Right Aligned)
   if (data.sender === 'user') {
     return (
@@ -1489,7 +1493,7 @@ export const RayMessageRenderer = ({ data, onSuggestionClick, isLast = true }: {
   if (data.artifact?.type === 'investigation_report') {
     return (
       <div className="w-full animate-fade-in-up">
-        <InvestigationReportArtifact data={data.artifact.data} onSuggestionClick={onSuggestionClick} isLast={isLast} />
+        <InvestigationReportArtifact data={data.artifact.data} onSuggestionClick={onSuggestionClick} onRowClick={onRowClick} isLast={isLast} />
       </div>
     );
   }
@@ -1559,6 +1563,7 @@ export const RayMessageRenderer = ({ data, onSuggestionClick, isLast = true }: {
           data={data.artifact.data}
           isLast={isLast}
           onButtonClick={onSuggestionClick}
+          onRowClick={onRowClick}
         />
       </div>
     );

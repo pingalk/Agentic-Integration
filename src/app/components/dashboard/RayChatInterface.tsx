@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { RayMessageRenderer, RayResponseData } from './chat/RayMessageRenderer';
 import { AddFundsWidget } from './chat/AddFundsWidget';
+import { TransactionPreviewPane, TransactionData } from './chat/TransactionPreviewPane';
 import { ArrowDown, ArrowUp, Mic, Plus, Sparkles } from 'lucide-react';
 import { useDemo } from '@/context/DemoContext';
 import { useDemoScript } from './useDemoScript';
@@ -78,7 +79,28 @@ export const RayChatInterface = () => {
 
   // Sarah Flow State
   const [sarahFlowStep, setSarahFlowStep] = useState(0);
-  
+
+  // Transaction Preview State
+  const [selectedTransaction, setSelectedTransaction] = useState<TransactionData | null>(null);
+
+  // Handler for table row clicks
+  const handleRowClick = (rowData: any) => {
+    // Transform row data to TransactionData format
+    const transaction: TransactionData = {
+      id: rowData.id || `txn-${Date.now()}`,
+      type: rowData.status?.toLowerCase() === 'refunded' ? 'refund' : 'payment',
+      amount: rowData.amount || '₹0',
+      status: rowData.status || 'Unknown',
+      date: rowData.date || rowData.createdOn || new Date().toLocaleDateString(),
+      email: rowData.email,
+      rrn: rowData.rrn,
+      method: rowData.method || rowData.paymentMethod,
+      paymentId: `pay_${Math.random().toString(36).substr(2, 12)}`,
+      refundId: rowData.status?.toLowerCase() === 'refunded' ? `rfnd_${Math.random().toString(36).substr(2, 12)}` : undefined,
+    };
+    setSelectedTransaction(transaction);
+  };
+
   // Triggers for demo flow - Arjun
   useEffect(() => {
     if (currentPersona.id === 'arjun' && messages.length === 0) {
@@ -331,26 +353,36 @@ export const RayChatInterface = () => {
   };
 
   return (
-    <div className="flex flex-col h-full relative bg-white font-sans">
-      
-      {/* 1. Scrollable Chat Area */}
-      <div 
-        ref={scrollContainerRef}
-        onScroll={handleScroll}
-        className="flex-1 overflow-y-auto px-4 md:px-6 pt-6 pb-56 scrollbar-hide"
+    <div className="flex h-full relative bg-white font-sans overflow-hidden">
+
+      {/* Main Chat Container - animates width when preview is open */}
+      <motion.div
+        className="flex flex-col h-full relative"
+        initial={false}
+        animate={{
+          width: selectedTransaction ? '60%' : '100%',
+        }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
-         <div className="flex flex-col gap-10 max-w-[800px] mx-auto">
-            {messages.map((msg, index) => (
-               <div key={msg.id} ref={el => { if (el) messageRefs.current.set(msg.id, el) }} className="w-full">
-                  <RayMessageRenderer 
-                    data={msg} 
-                    isLast={index === messages.length - 1}
-                    onSuggestionClick={handleSuggestionClick}
-                  />
-               </div>
-            ))}
-         </div>
-      </div>
+        {/* 1. Scrollable Chat Area */}
+        <div
+          ref={scrollContainerRef}
+          onScroll={handleScroll}
+          className="flex-1 overflow-y-auto px-4 md:px-6 pt-6 pb-56 scrollbar-hide"
+        >
+           <div className={`flex flex-col gap-10 mx-auto transition-all duration-300 ${selectedTransaction ? 'max-w-[600px]' : 'max-w-[800px]'}`}>
+              {messages.map((msg, index) => (
+                 <div key={msg.id} ref={el => { if (el) messageRefs.current.set(msg.id, el) }} className="w-full">
+                    <RayMessageRenderer
+                      data={msg}
+                      isLast={index === messages.length - 1}
+                      onSuggestionClick={handleSuggestionClick}
+                      onRowClick={handleRowClick}
+                    />
+                 </div>
+              ))}
+           </div>
+        </div>
 
       {/* Floating Scroll Button */}
       <AnimatePresence>
@@ -472,7 +504,26 @@ export const RayChatInterface = () => {
                 </p>
             </div>
          </div>
-      </div>
+        </div>
+      </motion.div>
+
+      {/* Transaction Preview Pane - slides in from the right */}
+      <AnimatePresence>
+        {selectedTransaction && (
+          <motion.div
+            className="h-full p-4 shrink-0"
+            initial={{ width: 0, opacity: 0 }}
+            animate={{ width: '40%', opacity: 1 }}
+            exit={{ width: 0, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          >
+            <TransactionPreviewPane
+              transaction={selectedTransaction}
+              onClose={() => setSelectedTransaction(null)}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
