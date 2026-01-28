@@ -1995,7 +1995,7 @@ const SupportTicketStatusArtifact = ({ data, onButtonClick, onSuggestionClick, i
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
-              className="relative rounded-[12px] overflow-hidden shadow-[0px_6px_32px_4px_rgba(184,196,214,0.06)]"
+              className="relative rounded-[12px] overflow-hidden shadow-[0px_6px_32px_4px_rgba(184,196,214,0.06)] border border-[#e2e8f0] max-w-[500px]"
               style={{ background: 'linear-gradient(180deg, #ffffff 0%, #ffffff 72%, #E3F6FF 100%)' }}
             >
               {/* Inner border effect */}
