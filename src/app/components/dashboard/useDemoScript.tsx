@@ -375,6 +375,67 @@ Maya`,
         }
     };
 
+    // Shyam's Journey (Failed Payment - Screenshot Upload)
+    const shyamScript = {
+        shyam_step_0: {
+            input: "[Screenshot uploaded]",
+            response: null,
+            suggestions: []
+        },
+        shyam_step_1: {
+            artifact: {
+                type: 'failed_payment_diagnosis',
+                data: {
+                    headline: "Rahul's ₹15,000 payment didn't go through due to a bank connection issue.",
+                    subtext: "Rahul's bank took too long to respond. If the money left Rahul's account, it will be automatically reversed by his bank within 2 business days. There is no problem with your Razorpay account.",
+                    resolution: {
+                        title: "How to resolve this",
+                        steps: [
+                            {
+                                label: "Ask for a Retry",
+                                content: "Please ask Rahul to attempt the payment again, ideally using a different network or payment method if the issue persists."
+                            },
+                            {
+                                label: "My recommendation",
+                                content: "Create a fresh payment link and ask Rahul to make a payment."
+                            }
+                        ]
+                    },
+                    suggestions: [
+                        "Show me how to send a fresh Payment Link to Rahul.",
+                        "Check if there are other failed payments from today.",
+                        "How do I track if the money is returned to the customer?"
+                    ]
+                }
+            }
+        },
+        shyam_step_2: {
+            artifact: {
+                type: 'payment_link_created',
+                data: {
+                    headline: "Here's your payment link for Rahul",
+                    subtext: "I've created a fresh payment link for ₹15,000. Share this with Rahul to collect the payment.",
+                    paymentLink: {
+                        id: 'plink_Rhl15kJan28',
+                        amount: '15,000',
+                        url: 'https://rzp.io/rzp/rahul15k',
+                        status: 'Active',
+                        createdOn: 'Jan 28, 2026, just now',
+                        customer: {
+                            name: 'Rahul',
+                            email: 'rahul@gmail.com'
+                        }
+                    },
+                    suggestions: [
+                        "Send this link via WhatsApp",
+                        "Send this link via Email",
+                        "View all payment links"
+                    ]
+                }
+            }
+        }
+    };
+
     const processInput = (text: string) => {
         const lowerText = text.toLowerCase();
         let nextStep = step;
@@ -403,6 +464,7 @@ Maya`,
         arjunScript,
         sarahScript,
         samScript,
+        shyamScript,
         briefingReviewResponses,
         getFutureDate
     };

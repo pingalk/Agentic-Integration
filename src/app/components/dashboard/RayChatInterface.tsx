@@ -66,7 +66,7 @@ interface RayChatInterfaceProps {
 
 export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProps) => {
   const { currentPersona } = useDemo();
-  const { arjunScript, sarahScript, mayaScript, samScript, briefingReviewResponses } = useDemoScript();
+  const { arjunScript, sarahScript, mayaScript, samScript, shyamScript, briefingReviewResponses } = useDemoScript();
   const [messages, setMessages] = useState<RayResponseData[]>([]);
   const [inputValue, setInputValue] = useState("");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -95,6 +95,9 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
 
   // Sam Flow State
   const [samFlowStep, setSamFlowStep] = useState(0);
+
+  // Shyam Flow State
+  const [shyamFlowStep, setShyamFlowStep] = useState(0);
 
   // Briefing Review Flow State
   const [briefingReviewHandled, setBriefingReviewHandled] = useState(false);
@@ -282,6 +285,48 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
         }, 600);
     }
   }, [currentPersona.id, messages.length, samScript]);
+
+  // Triggers for demo flow - Shyam
+  useEffect(() => {
+    if (currentPersona.id === 'shyam' && messages.length === 0 && !demoFlowStartedRef.current) {
+        demoFlowStartedRef.current = true;
+        // Step 1: User uploads screenshot
+        setTimeout(() => {
+            setMessages([{
+                id: 'shyam-u1',
+                sender: 'user',
+                blocks: [
+                    { type: 'text', content: "Customer complaint - payment failed" },
+                    { type: 'image', content: '/screenshot-failed-payment.png' }
+                ]
+            }]);
+            setShyamFlowStep(1);
+
+            // Step 2: Show Thinking State
+            setTimeout(() => {
+                setIsStreaming(true);
+                const thinkingMsg: RayResponseData = {
+                    id: 'shyam-ai-1',
+                    sender: 'ai',
+                    isThinking: true
+                };
+                setMessages(prev => [...prev, thinkingMsg]);
+
+                // Step 3: Replace with Failed Payment Diagnosis after delay
+                setTimeout(() => {
+                    setMessages(prev => prev.map(msg =>
+                        msg.id === 'shyam-ai-1' ? {
+                            ...shyamScript.shyam_step_1,
+                            id: 'shyam-ai-1',
+                            sender: 'ai' as const
+                        } : msg
+                    ));
+                    setTimeout(() => setIsStreaming(false), 3000);
+                }, 2000);
+            }, 600);
+        }, 600);
+    }
+  }, [currentPersona.id, messages.length, shyamScript]);
 
   // Triggers for briefing review queries (from "Review with Ray" click)
   useEffect(() => {
@@ -534,6 +579,21 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
       // Handle suggestion clicks that trigger escalation
       if (samFlowStep === 1 && suggestion.toLowerCase().includes('escalate')) {
         handleSamFlowAdvance(suggestion, samScript.sam_step_2, 2);
+        return;
+      }
+    }
+
+    // Handle Shyam's flow transitions
+    if (currentPersona.id === 'shyam') {
+      // Handle "create payment link" suggestion
+      if (shyamFlowStep === 1 && suggestion.toLowerCase().includes('payment link')) {
+        // Open payment link widget with prefilled data for Rahul
+        setPaymentLinkPrefill({
+          amount: '15000',
+          purpose: 'Payment retry for failed transaction',
+          email: 'rahul@gmail.com'
+        });
+        setShowPaymentLinkWidget(true);
         return;
       }
     }
@@ -798,16 +858,29 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
 
                  // 2. Thinking State
                  setTimeout(() => {
+                   setIsStreaming(true);
                    setMessages(prev => [...prev, {
                      id: `ai-think-${Date.now()}`,
                      sender: 'ai',
                      isThinking: true
                    }]);
 
-                   // 3. Success Response
+                   // 3. Success Response - Special handling for Shyam
                    setTimeout(() => {
                      setMessages(prev => {
                        const withoutThinking = prev.filter(m => !m.isThinking);
+
+                       if (currentPersona.id === 'shyam') {
+                         // Show Shyam's payment link created card
+                         setShyamFlowStep(2);
+                         return [...withoutThinking, {
+                           ...shyamScript.shyam_step_2,
+                           id: `ai-${Date.now()}`,
+                           sender: 'ai' as const
+                         }];
+                       }
+
+                       // Default response for other personas
                        return [...withoutThinking, {
                          id: `ai-${Date.now()}`,
                          sender: 'ai',
@@ -821,6 +894,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
                          }
                        }];
                      });
+                     setTimeout(() => setIsStreaming(false), 3000);
                    }, 1500);
                  }, 600);
                }}

@@ -2397,6 +2397,387 @@ const TicketEscalatedArtifact = ({ data, onSuggestionClick, isLast }: any) => {
   );
 };
 
+// --- Shyam's Failed Payment Diagnosis Artifact ---
+const FailedPaymentDiagnosisArtifact = ({ data, onSuggestionClick, isLast }: any) => {
+  const [subtextStarted, setSubtextStarted] = useState(false);
+  const narrativeCompleteCalledRef = React.useRef(false);
+
+  const { phase, onNarrativeComplete } = useStreamSequencer({
+    hasDataAsset: false,
+    hasInsight: true,
+    hasSuggestions: data.suggestions?.length > 0,
+    thinkingDuration: 3000
+  });
+
+  const handleHeadlineComplete = React.useCallback(() => {
+    setTimeout(() => setSubtextStarted(true), 800);
+  }, []);
+
+  // Handle subtext complete
+  const handleSubtextComplete = React.useCallback(() => {
+    if (!narrativeCompleteCalledRef.current) {
+      narrativeCompleteCalledRef.current = true;
+      onNarrativeComplete();
+    }
+  }, [onNarrativeComplete]);
+
+  return (
+    <>
+      {phase === 0 && <RayThinking />}
+
+      {phase >= 1 && (
+        <motion.div
+          className="flex flex-col gap-[24px] w-full mt-2"
+          initial="hidden"
+          animate="visible"
+          variants={containerVar}
+        >
+          <div className="flex flex-col gap-[16px]">
+            {/* Header */}
+            <motion.div variants={itemVar} className="flex gap-[6px] items-center">
+              <div className="shrink-0 size-[20px] bg-[#10B981] rounded-[3.33px] flex items-center justify-center shadow-sm">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              <h3 className="text-[18px] leading-[24px] font-semibold text-[#020202]">
+                <PerplexityStreamText
+                  content={data.headline}
+                  speed={15}
+                  onComplete={handleHeadlineComplete}
+                  inheritStyles
+                />
+              </h3>
+            </motion.div>
+
+            {subtextStarted && data.subtext && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-[16px] text-[#40566d] leading-[26px] tracking-[0.16px]"
+              >
+                <PerplexityStreamText
+                  content={data.subtext}
+                  speed={10}
+                  onComplete={handleSubtextComplete}
+                />
+              </motion.div>
+            )}
+          </div>
+
+          {/* Resolution Section (Phase 3+) */}
+          {phase >= 3 && data.resolution && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="flex flex-col gap-[16px]"
+            >
+              <h4 className="text-[16px] font-semibold text-[#192839]">{data.resolution.title}</h4>
+              <div className="flex flex-col gap-[12px]">
+                {data.resolution.steps?.map((step: any, i: number) => (
+                  <div key={i} className="flex flex-col gap-[4px]">
+                    <p className="text-[14px] font-semibold text-[#192839]">{step.label}:</p>
+                    <p className="text-[14px] text-[#40566d] leading-[22px]">{step.content}</p>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Footer Actions (Phase 4+) */}
+          {phase >= 4 && isLast && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex gap-[8px] items-center"
+            >
+              <Tooltip text="Good response" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <ThumbsUp size={16} className="text-[#40566D]" strokeWidth={2} />
+                </button>
+              </Tooltip>
+              <Tooltip text="Bad response" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <ThumbsDown size={16} className="text-[#40566D]" strokeWidth={2} />
+                </button>
+              </Tooltip>
+              <Tooltip text="Copy to clipboard" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <div className="size-[16px]"><Copy /></div>
+                </button>
+              </Tooltip>
+              <Tooltip text="Share" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <Share2 size={16} className="text-[#40566D]" strokeWidth={2} />
+                </button>
+              </Tooltip>
+            </motion.div>
+          )}
+
+          {/* Divider */}
+          {phase >= 5 && isLast && data.suggestions && (
+            <motion.div
+              initial={{ opacity: 0, scaleX: 0 }}
+              animate={{ opacity: 1, scaleX: 1 }}
+              className="w-full h-[0.5px] bg-[#CBD5E2] origin-left"
+            />
+          )}
+
+          {/* Suggestions */}
+          {phase >= 5 && isLast && data.suggestions && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex flex-col gap-[12px] mb-[30px]"
+            >
+              <h3 className="text-[18px] leading-[26px] font-semibold text-[#193f47]">Suggestions</h3>
+              <div className="flex flex-col gap-[2px]">
+                {data.suggestions.map((sug: string, i: number) => (
+                  <motion.button
+                    key={i}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    onClick={() => onSuggestionClick?.(sug)}
+                    className="flex items-center gap-[4px] p-[4px] text-left w-full rounded-[4px] hover:bg-[#f1f5fa] group"
+                  >
+                    <div className="shrink-0 size-[20px] rounded-full flex items-center justify-center bg-[#f1f5fa] group-hover:bg-white">
+                      <span className="text-[10px] font-medium text-[#40566d] group-hover:text-[#2980e1]">{i + 1}</span>
+                    </div>
+                    <p className="text-[16px] leading-[26px] tracking-[0.16px] font-medium text-[#40566d] group-hover:text-[#2980e1]">{sug}</p>
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </motion.div>
+      )}
+    </>
+  );
+};
+
+// --- Shyam's Payment Link Created Artifact ---
+const PaymentLinkCreatedArtifact = ({ data, onSuggestionClick, isLast }: any) => {
+  const [subtextStarted, setSubtextStarted] = useState(false);
+  const narrativeCompleteCalledRef = React.useRef(false);
+  const [copied, setCopied] = useState(false);
+
+  const { phase, onNarrativeComplete } = useStreamSequencer({
+    hasDataAsset: true,
+    hasInsight: false,
+    hasSuggestions: data.suggestions?.length > 0,
+    thinkingDuration: 3000
+  });
+
+  const handleHeadlineComplete = React.useCallback(() => {
+    setTimeout(() => setSubtextStarted(true), 800);
+  }, []);
+
+  // Handle subtext complete
+  const handleSubtextComplete = React.useCallback(() => {
+    if (!narrativeCompleteCalledRef.current) {
+      narrativeCompleteCalledRef.current = true;
+      onNarrativeComplete();
+    }
+  }, [onNarrativeComplete]);
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(data.paymentLink.url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <>
+      {phase === 0 && <RayThinking />}
+
+      {phase >= 1 && (
+        <motion.div
+          className="flex flex-col gap-[24px] w-full mt-2"
+          initial="hidden"
+          animate="visible"
+          variants={containerVar}
+        >
+          <div className="flex flex-col gap-[16px]">
+            {/* Header */}
+            <motion.div variants={itemVar} className="flex gap-[6px] items-center">
+              <div className="shrink-0 size-[20px] bg-[#10B981] rounded-[3.33px] flex items-center justify-center shadow-sm">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              <h3 className="text-[18px] leading-[24px] font-semibold text-[#020202]">
+                <PerplexityStreamText
+                  content={data.headline}
+                  speed={15}
+                  onComplete={handleHeadlineComplete}
+                  inheritStyles
+                />
+              </h3>
+            </motion.div>
+
+            {subtextStarted && data.subtext && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-[16px] text-[#40566d] leading-[26px] tracking-[0.16px]"
+              >
+                <PerplexityStreamText
+                  content={data.subtext}
+                  speed={10}
+                  onComplete={handleSubtextComplete}
+                />
+              </motion.div>
+            )}
+          </div>
+
+          {/* Payment Link Card (Phase 2+) */}
+          {phase >= 2 && data.paymentLink && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              className="relative rounded-[12px] overflow-hidden shadow-[0px_6px_32px_4px_rgba(184,196,214,0.06)] border border-[#e2e8f0] max-w-[500px]"
+              style={{ background: 'linear-gradient(180deg, #ffffff 0%, #ffffff 72%, #E3F6FF 100%)' }}
+            >
+              <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_-1.5px_0px_1px_white,inset_0px_1.5px_0px_1px_white]" />
+
+              <div className="flex flex-col gap-[19px] px-[15px] py-[12px]">
+                {/* Header Row */}
+                <div className="flex items-center justify-between pt-[8px]">
+                  <div className="flex gap-[16px] items-center">
+                    {/* Link Icon */}
+                    <div className="bg-[rgba(108,132,157,0.06)] flex items-center justify-center rounded-[4px] w-[40px] h-[40px]">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                      </svg>
+                    </div>
+                    {/* Title & ID */}
+                    <div className="flex flex-col">
+                      <span className="font-['TASA_Orbiter_Display',sans-serif] font-semibold text-[18px] leading-[24px] text-[#3a4755]">
+                        Payment link
+                      </span>
+                      <span className="font-['TASA_Orbiter_Display',sans-serif] text-[18px] leading-[24px] text-[#768ea7]">
+                        {data.paymentLink.id}
+                      </span>
+                    </div>
+                  </div>
+                  {/* Amount */}
+                  <div className="flex items-baseline">
+                    <span className="font-['Inter',sans-serif] font-semibold text-[24px] text-[#192839]">₹</span>
+                    <span className="font-['TASA_Orbiter_Display',sans-serif] font-semibold text-[32px] text-[#192839]">
+                      {data.paymentLink.amount}
+                    </span>
+                    <span className="font-['TASA_Orbiter_Display',sans-serif] font-semibold text-[24px] text-[#192839]">.00</span>
+                  </div>
+                </div>
+
+                {/* Link URL Bar */}
+                <div className="bg-[rgba(108,132,157,0.06)] flex items-center justify-between px-[12px] py-[8px] rounded-[4px]">
+                  <p className="font-medium text-[16px] text-black">{data.paymentLink.url}</p>
+                  <button onClick={handleCopyLink} className="shrink-0">
+                    {copied ? (
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    ) : (
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#40566d" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+
+                {/* Status Rows */}
+                <div className="flex flex-col gap-[12px]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[12px] font-medium text-[#768ea7] leading-[18px]">Status</span>
+                    <span className="text-[14px] font-medium text-[#40566d] leading-[20px]">{data.paymentLink.status}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[12px] font-medium text-[#768ea7] leading-[18px]">Created On</span>
+                    <span className="text-[14px] font-medium text-[#40566d] leading-[20px]">{data.paymentLink.createdOn}</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Footer Actions (Phase 4+) */}
+          {phase >= 4 && isLast && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex gap-[8px] items-center"
+            >
+              <Tooltip text="Good response" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <ThumbsUp size={16} className="text-[#40566D]" strokeWidth={2} />
+                </button>
+              </Tooltip>
+              <Tooltip text="Bad response" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <ThumbsDown size={16} className="text-[#40566D]" strokeWidth={2} />
+                </button>
+              </Tooltip>
+              <Tooltip text="Copy to clipboard" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <div className="size-[16px]"><Copy /></div>
+                </button>
+              </Tooltip>
+              <Tooltip text="Share" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <Share2 size={16} className="text-[#40566D]" strokeWidth={2} />
+                </button>
+              </Tooltip>
+            </motion.div>
+          )}
+
+          {/* Divider */}
+          {phase >= 5 && isLast && data.suggestions && (
+            <motion.div
+              initial={{ opacity: 0, scaleX: 0 }}
+              animate={{ opacity: 1, scaleX: 1 }}
+              className="w-full h-[0.5px] bg-[#CBD5E2] origin-left"
+            />
+          )}
+
+          {/* Suggestions */}
+          {phase >= 5 && isLast && data.suggestions && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex flex-col gap-[12px] mb-[30px]"
+            >
+              <h3 className="text-[18px] leading-[26px] font-semibold text-[#193f47]">Suggestions</h3>
+              <div className="flex flex-col gap-[2px]">
+                {data.suggestions.map((sug: string, i: number) => (
+                  <motion.button
+                    key={i}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    onClick={() => onSuggestionClick?.(sug)}
+                    className="flex items-center gap-[4px] p-[4px] text-left w-full rounded-[4px] hover:bg-[#f1f5fa] group"
+                  >
+                    <div className="shrink-0 size-[20px] rounded-full flex items-center justify-center bg-[#f1f5fa] group-hover:bg-white">
+                      <span className="text-[10px] font-medium text-[#40566d] group-hover:text-[#2980e1]">{i + 1}</span>
+                    </div>
+                    <p className="text-[16px] leading-[26px] tracking-[0.16px] font-medium text-[#40566d] group-hover:text-[#2980e1]">{sug}</p>
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </motion.div>
+      )}
+    </>
+  );
+};
+
 // --- Block Sequencer ---
 const BlockSequencer = ({ blocks, onComplete }: { blocks: ContentBlock[], onComplete?: () => void }) => {
   const [visibleIndex, setVisibleIndex] = useState(0);
@@ -2752,7 +3133,33 @@ export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast
     );
   }
 
-  // 14. Ray AI Message (Standard Blocks, Max Width 398px)
+  // 14. Shyam's Failed Payment Diagnosis
+  if (data.artifact?.type === 'failed_payment_diagnosis') {
+    return (
+      <div className="w-full animate-fade-in-up">
+        <FailedPaymentDiagnosisArtifact
+          data={data.artifact.data}
+          isLast={isLast}
+          onSuggestionClick={onSuggestionClick}
+        />
+      </div>
+    );
+  }
+
+  // 15. Shyam's Payment Link Created
+  if (data.artifact?.type === 'payment_link_created') {
+    return (
+      <div className="w-full animate-fade-in-up">
+        <PaymentLinkCreatedArtifact
+          data={data.artifact.data}
+          isLast={isLast}
+          onSuggestionClick={onSuggestionClick}
+        />
+      </div>
+    );
+  }
+
+  // 16. Ray AI Message (Standard Blocks, Max Width 398px)
   return (
     <div className="flex gap-4 items-start w-full max-w-[398px] animate-fade-in-up">
         {/* Content Container - No Avatar */}
