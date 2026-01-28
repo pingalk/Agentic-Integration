@@ -283,7 +283,7 @@ export const PaymentLinkWidget: React.FC<PaymentLinkWidgetProps> = ({
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.98 }}
       transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-      className="absolute bottom-[130px] left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-[#edece8] rounded-[12px] p-[4px] shadow-2xl z-50 border border-white/50"
+      className="absolute bottom-[130px] left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-[#EAEEFF] rounded-[12px] p-[4px] shadow-2xl z-50 border border-white/50"
     >
       {/* Close Button */}
       <button

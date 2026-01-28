@@ -816,7 +816,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
          <div className="bg-white/80 backdrop-blur-xl border-t border-slate-100 px-3 md:px-4 pb-4 md:pb-6 pt-3 md:pt-4">
             <motion.div
                animate={{
-                 width: "100%"
+                 width: isInputExpanded ? "100%" : "280px"
                }}
                transition={{ type: "spring", bounce: 0, duration: 0.4 }}
                className="w-full max-w-full md:max-w-[700px] mx-auto relative group"
