@@ -346,12 +346,21 @@ export const PaymentLinkWidget: React.FC<PaymentLinkWidgetProps> = ({
                 </div>
                 <div className="flex-1 flex flex-col gap-3 pb-6">
                   <div
-                    className="flex flex-col justify-center min-h-[24px] cursor-pointer"
-                    onClick={getStepState(0) === 'completed' ? () => handleEdit(0) : undefined}
+                    className="flex flex-col justify-center min-h-[24px]"
                   >
-                    <p className={`font-['Inter',sans-serif] font-semibold text-[14px] transition-colors ${getStepState(0) === 'pending' ? 'text-slate-400' : 'text-[#192839]'}`}>
-                      Payment link Details
-                    </p>
+                    <div className="flex items-center justify-between">
+                      <p className={`font-['Inter',sans-serif] font-semibold text-[14px] transition-colors ${getStepState(0) === 'pending' ? 'text-slate-400' : 'text-[#192839]'}`}>
+                        Payment link Details
+                      </p>
+                      {getStepState(0) === 'completed' && (
+                        <button
+                          onClick={() => handleEdit(0)}
+                          className="font-['Inter',sans-serif] text-[13px] font-medium text-[#305EFF] hover:text-[#1a4cd6] transition-colors"
+                        >
+                          Change
+                        </button>
+                      )}
+                    </div>
                     {getStepState(0) === 'completed' && (
                       <p className="text-[13px] text-gray-500 mt-1">{renderSummary(0)}</p>
                     )}
@@ -407,11 +416,15 @@ export const PaymentLinkWidget: React.FC<PaymentLinkWidgetProps> = ({
                           <button
                             onClick={() => handleNextStep(0)}
                             disabled={!isStep0Valid}
-                            className={`mt-3 h-[36px] w-full rounded-[4px] font-['Inter',sans-serif] font-semibold text-[14px] transition-all duration-200
+                            className={`mt-3 h-[36px] w-full rounded-[6px] font-['Inter',sans-serif] font-semibold text-[14px] transition-all duration-200 relative overflow-hidden
                               ${isStep0Valid
-                                ? 'bg-[#18181b] hover:bg-[#2e2e33] text-white cursor-pointer'
+                                ? 'text-white cursor-pointer shadow-[0px_2px_4px_0px_rgba(0,0,0,0.1)] active:scale-[0.98]'
                                 : 'bg-slate-200 text-slate-400 cursor-not-allowed'
                               }`}
+                            style={isStep0Valid ? {
+                              background: 'linear-gradient(-73deg, #1566f1 54.84%, #4793fd 98.57%)',
+                              boxShadow: 'inset 0px 2px 0px 0px rgba(255,255,255,0.2)'
+                            } : undefined}
                           >
                             Proceed
                           </button>
@@ -429,12 +442,21 @@ export const PaymentLinkWidget: React.FC<PaymentLinkWidgetProps> = ({
                 </div>
                 <div className="flex-1 flex flex-col gap-3 pb-6">
                   <div
-                    className="flex flex-col justify-center min-h-[24px] cursor-pointer"
-                    onClick={getStepState(1) === 'completed' ? () => handleEdit(1) : undefined}
+                    className="flex flex-col justify-center min-h-[24px]"
                   >
-                    <p className={`font-['Inter',sans-serif] font-semibold text-[14px] transition-colors ${getStepState(1) === 'pending' ? 'text-slate-400' : 'text-[#192839]'}`}>
-                      Customer Details
-                    </p>
+                    <div className="flex items-center justify-between">
+                      <p className={`font-['Inter',sans-serif] font-semibold text-[14px] transition-colors ${getStepState(1) === 'pending' ? 'text-slate-400' : 'text-[#192839]'}`}>
+                        Customer Details
+                      </p>
+                      {getStepState(1) === 'completed' && (
+                        <button
+                          onClick={() => handleEdit(1)}
+                          className="font-['Inter',sans-serif] text-[13px] font-medium text-[#305EFF] hover:text-[#1a4cd6] transition-colors"
+                        >
+                          Change
+                        </button>
+                      )}
+                    </div>
                     {getStepState(1) === 'completed' && (
                       <p className="text-[13px] text-gray-500 mt-1">{renderSummary(1)}</p>
                     )}
@@ -490,7 +512,11 @@ export const PaymentLinkWidget: React.FC<PaymentLinkWidgetProps> = ({
                           <div className="flex flex-col gap-1 mt-3">
                             <button
                               onClick={() => handleNextStep(1)}
-                              className="h-[36px] w-full rounded-[4px] bg-[#18181b] hover:bg-[#2e2e33] text-white font-['Inter',sans-serif] font-semibold text-[14px] transition-colors"
+                              className="h-[36px] w-full rounded-[6px] text-white font-['Inter',sans-serif] font-semibold text-[14px] transition-all shadow-[0px_2px_4px_0px_rgba(0,0,0,0.1)] active:scale-[0.98]"
+                              style={{
+                                background: 'linear-gradient(-73deg, #1566f1 54.84%, #4793fd 98.57%)',
+                                boxShadow: 'inset 0px 2px 0px 0px rgba(255,255,255,0.2)'
+                              }}
                             >
                               Proceed
                             </button>
@@ -515,12 +541,21 @@ export const PaymentLinkWidget: React.FC<PaymentLinkWidgetProps> = ({
                 </div>
                 <div className="flex-1 flex flex-col gap-3">
                   <div
-                    className="flex flex-col justify-center min-h-[24px] cursor-pointer"
-                    onClick={getStepState(2) === 'completed' ? () => handleEdit(2) : undefined}
+                    className="flex flex-col justify-center min-h-[24px]"
                   >
-                    <p className={`font-['Inter',sans-serif] font-semibold text-[14px] transition-colors ${getStepState(2) === 'pending' ? 'text-slate-400' : 'text-[#192839]'}`}>
-                      Other Details
-                    </p>
+                    <div className="flex items-center justify-between">
+                      <p className={`font-['Inter',sans-serif] font-semibold text-[14px] transition-colors ${getStepState(2) === 'pending' ? 'text-slate-400' : 'text-[#192839]'}`}>
+                        Other Details
+                      </p>
+                      {getStepState(2) === 'completed' && (
+                        <button
+                          onClick={() => handleEdit(2)}
+                          className="font-['Inter',sans-serif] text-[13px] font-medium text-[#305EFF] hover:text-[#1a4cd6] transition-colors"
+                        >
+                          Change
+                        </button>
+                      )}
+                    </div>
                     {getStepState(2) === 'completed' && (
                       <p className="text-[13px] text-gray-500 mt-1">{renderSummary(2)}</p>
                     )}
@@ -586,7 +621,11 @@ export const PaymentLinkWidget: React.FC<PaymentLinkWidgetProps> = ({
                           <div className="flex flex-col gap-1">
                             <button
                               onClick={() => handleNextStep(2)}
-                              className="h-[36px] w-full rounded-[4px] bg-[#18181b] hover:bg-[#2e2e33] text-white font-['Inter',sans-serif] font-semibold text-[14px] transition-colors"
+                              className="h-[36px] w-full rounded-[6px] text-white font-['Inter',sans-serif] font-semibold text-[14px] transition-all shadow-[0px_2px_4px_0px_rgba(0,0,0,0.1)] active:scale-[0.98]"
+                              style={{
+                                background: 'linear-gradient(-73deg, #1566f1 54.84%, #4793fd 98.57%)',
+                                boxShadow: 'inset 0px 2px 0px 0px rgba(255,255,255,0.2)'
+                              }}
                             >
                               Proceed
                             </button>

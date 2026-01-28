@@ -235,10 +235,20 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
   // EXPERIMENTAL: Track which card is hovered
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
+  // State for Shyam's image attachment
+  const [shyamAttachment, setShyamAttachment] = useState<{ filename: string; filesize: string } | null>(null);
+
   // Sync prompt with persona when on landing page
   useEffect(() => {
     if (view === 'landing' && !initialQuery) {
+      // Special handling for Shyam - show attachment chip instead of text
+      if (currentPersona.id === 'shyam') {
+        setPrompt(''); // Clear text, show chip instead
+        setShyamAttachment({ filename: 'Image1.png', filesize: '13.9 KB' });
+      } else {
         setPrompt(currentPersona.landing.initialPrompt);
+        setShyamAttachment(null);
+      }
     }
   }, [currentPersona, view, initialQuery]);
 
@@ -389,12 +399,14 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
 
                      {/* Input Box */}
                      <div className="w-full max-w-2xl relative mb-8 flex flex-col gap-[32px] items-center">
-                        <RayInputBox 
+                        <RayInputBox
                             value={prompt}
                             onChange={setPrompt}
                             onSend={handleSend}
                             variant="hero"
                             placeholder="Ask me anything..."
+                            attachmentChip={shyamAttachment}
+                            onRemoveAttachment={() => setShyamAttachment(null)}
                         />
                         
                         {/* Suggestion Categories - Commented out per request

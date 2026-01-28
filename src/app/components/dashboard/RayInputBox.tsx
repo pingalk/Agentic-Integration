@@ -1,7 +1,45 @@
 import React, { useRef, useLayoutEffect, useState } from 'react';
-import { ArrowUp, Mic, Plus } from 'lucide-react';
-import { motion } from 'motion/react';
+import { ArrowUp, Mic, Plus, X, Image as ImageIcon } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import clsx from 'clsx';
+
+// Image Attachment Chip Component
+interface ImageAttachmentChipProps {
+  filename: string;
+  filesize: string;
+  onRemove?: () => void;
+}
+
+export const ImageAttachmentChip: React.FC<ImageAttachmentChipProps> = ({
+  filename,
+  filesize,
+  onRemove
+}) => {
+  return (
+    <div className="inline-flex items-center gap-[8px] h-[36px] px-[8px] py-[6px] bg-white border border-[#E3EAF3] rounded-[8px] shrink-0">
+      {/* Image thumbnail placeholder */}
+      <div className="w-[24px] h-[24px] bg-[#F1F5F9] rounded-[4px] flex items-center justify-center overflow-hidden">
+        <ImageIcon size={14} className="text-[#94A3B8]" />
+      </div>
+
+      {/* File info */}
+      <div className="flex flex-col justify-center">
+        <span className="font-['Inter',sans-serif] text-[13px] font-medium text-[#192839] leading-[16px]">{filename}</span>
+        <span className="font-['Inter',sans-serif] text-[11px] text-[#768EA7] leading-[14px]">{filesize}</span>
+      </div>
+
+      {/* Close button */}
+      {onRemove && (
+        <button
+          onClick={onRemove}
+          className="w-[20px] h-[20px] flex items-center justify-center rounded-full hover:bg-[#F1F5F9] transition-colors ml-[4px]"
+        >
+          <X size={12} className="text-[#768EA7]" />
+        </button>
+      )}
+    </div>
+  );
+};
 
 interface RayInputBoxProps {
   value: string;
@@ -10,6 +48,11 @@ interface RayInputBoxProps {
   variant?: 'hero' | 'compact';
   placeholder?: string;
   autoFocus?: boolean;
+  attachmentChip?: {
+    filename: string;
+    filesize: string;
+  } | null;
+  onRemoveAttachment?: () => void;
 }
 
 export const RayInputBox: React.FC<RayInputBoxProps> = ({
@@ -18,7 +61,9 @@ export const RayInputBox: React.FC<RayInputBoxProps> = ({
   onSend,
   variant = 'hero',
   placeholder = "Ask anything...",
-  autoFocus = false
+  autoFocus = false,
+  attachmentChip = null,
+  onRemoveAttachment
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isFocused, setIsFocused] = useState(false);
@@ -58,6 +103,24 @@ export const RayInputBox: React.FC<RayInputBoxProps> = ({
       className="bg-[#f8fafc] relative rounded-[26px] w-full"
     >
       <div className="content-stretch flex flex-col gap-[4px] items-end justify-end overflow-clip px-[20px] py-[16px] relative rounded-[inherit] size-full">
+        {/* Attachment Chip - displayed above the textarea */}
+        <AnimatePresence>
+          {attachmentChip && (
+            <motion.div
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.95 }}
+              className="w-full flex items-center mb-[8px]"
+            >
+              <ImageAttachmentChip
+                filename={attachmentChip.filename}
+                filesize={attachmentChip.filesize}
+                onRemove={onRemoveAttachment}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <textarea
           ref={textareaRef}
           value={value}
@@ -68,7 +131,7 @@ export const RayInputBox: React.FC<RayInputBoxProps> = ({
           autoFocus={autoFocus}
           placeholder={placeholder}
           className="content-stretch flex gap-[8px] items-center relative shrink-0 w-full bg-transparent border-none outline-none resize-none font-['TASA_Orbiter_Display',sans-serif] leading-[24px] text-[#40566d] text-[18px] tracking-[0.36px] placeholder:text-[#768ea7]"
-          style={{ 
+          style={{
             minHeight: '48px',
             height: '48px'
           }}
