@@ -66,7 +66,7 @@ interface RayChatInterfaceProps {
 
 export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProps) => {
   const { currentPersona } = useDemo();
-  const { arjunScript, sarahScript, mayaScript, samScript, shyamScript, briefingReviewResponses } = useDemoScript();
+  const { arjunScript, sarahScript, mayaScript, samScript, shyamScript, kiaraScript, briefingReviewResponses } = useDemoScript();
   const [messages, setMessages] = useState<RayResponseData[]>([]);
   const [inputValue, setInputValue] = useState("");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -98,6 +98,9 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
 
   // Shyam Flow State
   const [shyamFlowStep, setShyamFlowStep] = useState(0);
+
+  // Kiara Flow State
+  const [kiaraFlowStep, setKiaraFlowStep] = useState(0);
 
   // Briefing Review Flow State
   const [briefingReviewHandled, setBriefingReviewHandled] = useState(false);
@@ -335,6 +338,46 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
         }, 600);
     }
   }, [currentPersona.id, messages.length, shyamScript, initialQuery]);
+
+  // Triggers for demo flow - Kiara
+  useEffect(() => {
+    if (currentPersona.id === 'kiara' && messages.length === 0 && !demoFlowStartedRef.current) {
+        demoFlowStartedRef.current = true;
+        // Step 1: User asks about Rohan's transaction
+        setTimeout(() => {
+            const userText = initialQuery || "Check the status of Rohan's last transaction";
+            setMessages([{
+                id: 'kiara-u1',
+                sender: 'user',
+                blocks: [{ type: 'text', content: userText }]
+            }]);
+            setKiaraFlowStep(1);
+
+            // Step 2: Show Thinking State
+            setTimeout(() => {
+                setIsStreaming(true);
+                const thinkingMsg: RayResponseData = {
+                    id: 'kiara-ai-1',
+                    sender: 'ai',
+                    isThinking: true
+                };
+                setMessages(prev => [...prev, thinkingMsg]);
+
+                // Step 3: Replace with Refund Status Report after delay
+                setTimeout(() => {
+                    setMessages(prev => prev.map(msg =>
+                        msg.id === 'kiara-ai-1' ? {
+                            ...kiaraScript.kiara_step_1,
+                            id: 'kiara-ai-1',
+                            sender: 'ai' as const
+                        } : msg
+                    ));
+                    setTimeout(() => setIsStreaming(false), 3000);
+                }, 2000);
+            }, 600);
+        }, 600);
+    }
+  }, [currentPersona.id, messages.length, kiaraScript, initialQuery]);
 
   // Triggers for briefing review queries (from "Review with Ray" click)
   useEffect(() => {

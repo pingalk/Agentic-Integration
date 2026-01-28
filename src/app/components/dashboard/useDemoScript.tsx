@@ -436,6 +436,43 @@ Maya`,
         }
     };
 
+    // Kiara's Journey (Refund Status Check)
+    const kiaraScript = {
+        kiara_step_0: {
+            input: "Check the status of Rohan's last transaction",
+            response: null,
+            suggestions: []
+        },
+        kiara_step_1: {
+            artifact: {
+                type: 'refund_status_report',
+                data: {
+                    headline: "A full refund of ₹10,000 was processed by Razorpay on Jan 24.",
+                    subtext: "Everything looks solid on our end, Kiara. Banks typically take 5–7 business days to reflect that amount in a customer's account (ETA: Feb 4).",
+                    transaction: {
+                        id: 'pay_rohan_10k',
+                        amount: '₹10,000',
+                        status: 'Refunded',
+                        refundDate: 'Jan 24, 2026',
+                        rrn: '402418976234',
+                        customer: {
+                            name: 'Rohan',
+                            email: 'rohan@email.com'
+                        }
+                    },
+                    nextSteps: {
+                        title: "What you could do next:",
+                        content: "Share the Bank Reference Number (RRN) with Rohan for him to track the refund and follow up with his bank."
+                    },
+                    suggestions: [
+                        "Draft an email to Rohan with Bank RRN?",
+                        "See a list of other pending refunds for this week?"
+                    ]
+                }
+            }
+        }
+    };
+
     const processInput = (text: string) => {
         const lowerText = text.toLowerCase();
         let nextStep = step;
@@ -465,6 +502,7 @@ Maya`,
         sarahScript,
         samScript,
         shyamScript,
+        kiaraScript,
         briefingReviewResponses,
         getFutureDate
     };

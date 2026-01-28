@@ -227,6 +227,28 @@ export interface RayResponseData {
       };
       suggestions: string[];
     };
+  } | {
+    type: 'refund_status_report';
+    data: {
+      headline: string;
+      subtext: string;
+      transaction: {
+        id: string;
+        amount: string;
+        status: string;
+        refundDate: string;
+        rrn: string;
+        customer: {
+          name: string;
+          email: string;
+        };
+      };
+      nextSteps: {
+        title: string;
+        content: string;
+      };
+      suggestions: string[];
+    };
   };
 }
 
@@ -2778,6 +2800,159 @@ const PaymentLinkCreatedArtifact = ({ data, onSuggestionClick, isLast }: any) =>
   );
 };
 
+// --- Kiara's Refund Status Report Artifact ---
+const RefundStatusReportArtifact = ({ data, onSuggestionClick, isLast }: any) => {
+  const [subtextStarted, setSubtextStarted] = useState(false);
+  const narrativeCompleteCalledRef = React.useRef(false);
+
+  const { phase, onNarrativeComplete } = useStreamSequencer({
+    hasDataAsset: false,
+    hasInsight: true,
+    hasSuggestions: data.suggestions?.length > 0,
+    thinkingDuration: 3000
+  });
+
+  const handleHeadlineComplete = React.useCallback(() => {
+    setTimeout(() => setSubtextStarted(true), 800);
+  }, []);
+
+  // Handle subtext complete
+  const handleSubtextComplete = React.useCallback(() => {
+    if (!narrativeCompleteCalledRef.current) {
+      narrativeCompleteCalledRef.current = true;
+      onNarrativeComplete();
+    }
+  }, [onNarrativeComplete]);
+
+  return (
+    <>
+      {phase === 0 && <RayThinking />}
+
+      {phase >= 1 && (
+        <motion.div
+          className="flex flex-col gap-[24px] w-full mt-2"
+          initial="hidden"
+          animate="visible"
+          variants={containerVar}
+        >
+          <div className="flex flex-col gap-[16px]">
+            {/* Header */}
+            <motion.div variants={itemVar} className="flex gap-[6px] items-center">
+              <div className="shrink-0 size-[20px] bg-[#10B981] rounded-[3.33px] flex items-center justify-center shadow-sm">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              <h3 className="text-[18px] leading-[24px] font-semibold text-[#020202]">
+                <PerplexityStreamText
+                  content={data.headline}
+                  speed={15}
+                  onComplete={handleHeadlineComplete}
+                  inheritStyles
+                />
+              </h3>
+            </motion.div>
+
+            {subtextStarted && data.subtext && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-[16px] text-[#40566d] leading-[26px] tracking-[0.16px]"
+              >
+                <PerplexityStreamText
+                  content={data.subtext}
+                  speed={10}
+                  onComplete={handleSubtextComplete}
+                />
+              </motion.div>
+            )}
+          </div>
+
+          {/* Next Steps Section (Phase 3+) */}
+          {phase >= 3 && data.nextSteps && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="flex flex-col gap-[8px]"
+            >
+              <h4 className="text-[16px] font-bold text-[#192839]">{data.nextSteps.title}</h4>
+              <p className="text-[16px] text-[#40566d] leading-[26px]">{data.nextSteps.content}</p>
+            </motion.div>
+          )}
+
+          {/* Footer Actions (Phase 4+) */}
+          {phase >= 4 && isLast && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex gap-[8px] items-center"
+            >
+              <Tooltip text="Good response" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <ThumbsUp size={16} className="text-[#40566D]" strokeWidth={2} />
+                </button>
+              </Tooltip>
+              <Tooltip text="Bad response" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <ThumbsDown size={16} className="text-[#40566D]" strokeWidth={2} />
+                </button>
+              </Tooltip>
+              <Tooltip text="Copy to clipboard" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <div className="size-[16px]"><Copy /></div>
+                </button>
+              </Tooltip>
+              <Tooltip text="Share" position="bottom">
+                <button className="group relative size-[32px] bg-white hover:bg-[#f1f5fa] rounded-full flex items-center justify-center transition-colors">
+                  <Share2 size={16} className="text-[#40566D]" strokeWidth={2} />
+                </button>
+              </Tooltip>
+            </motion.div>
+          )}
+
+          {/* Divider */}
+          {phase >= 5 && isLast && data.suggestions && (
+            <motion.div
+              initial={{ opacity: 0, scaleX: 0 }}
+              animate={{ opacity: 1, scaleX: 1 }}
+              className="w-full h-[0.5px] bg-[#CBD5E2] origin-left"
+            />
+          )}
+
+          {/* Suggestions */}
+          {phase >= 5 && isLast && data.suggestions && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex flex-col gap-[12px] mb-[30px]"
+            >
+              <h3 className="text-[18px] leading-[26px] font-semibold text-[#193f47]">Suggestions</h3>
+              <div className="flex flex-col gap-[2px]">
+                {data.suggestions.map((sug: string, i: number) => (
+                  <motion.button
+                    key={i}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    onClick={() => onSuggestionClick?.(sug)}
+                    className="flex items-center gap-[4px] p-[4px] text-left w-full rounded-[4px] hover:bg-[#f1f5fa] group"
+                  >
+                    <div className="shrink-0 size-[20px] rounded-full flex items-center justify-center bg-[#f1f5fa] group-hover:bg-white">
+                      <span className="text-[10px] font-medium text-[#40566d] group-hover:text-[#2980e1]">{i + 1}</span>
+                    </div>
+                    <p className="text-[16px] leading-[26px] tracking-[0.16px] font-medium text-[#40566d] group-hover:text-[#2980e1]">{sug}</p>
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </motion.div>
+      )}
+    </>
+  );
+};
+
 // --- Block Sequencer ---
 const BlockSequencer = ({ blocks, onComplete }: { blocks: ContentBlock[], onComplete?: () => void }) => {
   const [visibleIndex, setVisibleIndex] = useState(0);
@@ -3159,7 +3334,20 @@ export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast
     );
   }
 
-  // 16. Ray AI Message (Standard Blocks, Max Width 398px)
+  // 16. Kiara's Refund Status Report
+  if (data.artifact?.type === 'refund_status_report') {
+    return (
+      <div className="w-full animate-fade-in-up">
+        <RefundStatusReportArtifact
+          data={data.artifact.data}
+          isLast={isLast}
+          onSuggestionClick={onSuggestionClick}
+        />
+      </div>
+    );
+  }
+
+  // 17. Ray AI Message (Standard Blocks, Max Width 398px)
   return (
     <div className="flex gap-4 items-start w-full max-w-[398px] animate-fade-in-up">
         {/* Content Container - No Avatar */}
