@@ -343,7 +343,10 @@ Maya`,
                     buttons: [
                         { label: "Escalate this Ticket", variant: "primary" }
                     ],
-                    suggestions: []
+                    suggestions: [
+                        "Why is this taking so long?",
+                        "Are there any other open tickets"
+                    ]
                 }
             }
         },
@@ -366,7 +369,10 @@ Maya`,
                     buttons: [
                         { label: "Need quicker resolution? Opt in for priority support", variant: "secondary" }
                     ],
-                    suggestions: []
+                    suggestions: [
+                        "What is priority support?",
+                        "View my other open tickets"
+                    ]
                 }
             }
         }

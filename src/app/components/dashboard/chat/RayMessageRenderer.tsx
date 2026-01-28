@@ -1937,6 +1937,8 @@ const MayaDraftMessageArtifact = ({ data, onSuggestionClick, isLast }: any) => {
 // --- Sam's Support Ticket Status Artifact ---
 const SupportTicketStatusArtifact = ({ data, onButtonClick, onSuggestionClick, isLast }: any) => {
   const [subtextStarted, setSubtextStarted] = useState(false);
+  // Local state for immediate in-place button change
+  const [isLocallyEscalated, setIsLocallyEscalated] = useState(false);
 
   const { phase, onNarrativeComplete } = useStreamSequencer({
     hasDataAsset: true,
@@ -1949,13 +1951,14 @@ const SupportTicketStatusArtifact = ({ data, onButtonClick, onSuggestionClick, i
     setTimeout(() => setSubtextStarted(true), 800);
   }, []);
 
-  // Handle escalate click - flow as user message via onButtonClick
+  // Handle escalate click - immediately update button in-place AND trigger flow advance
   const handleEscalateClick = () => {
+    setIsLocallyEscalated(true);
     onButtonClick?.('Escalate this Ticket');
   };
 
-  // Determine if escalated from data
-  const isEscalated = data.ticket.isEscalated;
+  // Determine if escalated (from data OR local state for in-place update)
+  const isEscalated = data.ticket.isEscalated || isLocallyEscalated;
 
   return (
     <>
@@ -2068,7 +2071,8 @@ const SupportTicketStatusArtifact = ({ data, onButtonClick, onSuggestionClick, i
                 {/* Action Buttons */}
                 <div className="flex gap-[12px]">
                   <AnimatePresence mode="wait">
-                    {isEscalated ? (
+                    {data.ticket.isEscalated ? (
+                      // Second response: Show priority support button
                       <motion.button
                         key="priority"
                         initial={{ opacity: 0, scale: 0.95 }}
@@ -2079,7 +2083,23 @@ const SupportTicketStatusArtifact = ({ data, onButtonClick, onSuggestionClick, i
                         <span className="relative z-10">Need quicker resolution? Opt in for priority support</span>
                         <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_-1px_0.5px_0px_rgba(0,0,0,0.2),inset_0px_0px_0px_1px_#d1d8db]" />
                       </motion.button>
+                    ) : isLocallyEscalated ? (
+                      // First response after click: Show "Ticket escalated" confirmation
+                      <motion.div
+                        key="escalated-confirm"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="flex-1 h-[36px] rounded-[8px] text-white text-[12px] font-semibold tracking-[-0.156px] relative overflow-hidden flex items-center justify-center gap-[6px]"
+                        style={{ background: 'linear-gradient(-27deg, rgba(7, 51, 128, 0.7) 55%, rgba(71, 147, 253, 0.7) 99%)' }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        <span className="relative z-10">Ticket escalated</span>
+                        <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_2px_0px_0px_rgba(255,255,255,0.2),inset_0px_-2px_0px_0px_rgba(255,255,255,0.2)]" />
+                      </motion.div>
                     ) : (
+                      // First response initial: Show "Escalate this Ticket" button
                       <motion.button
                         key="escalate"
                         initial={{ opacity: 1 }}
