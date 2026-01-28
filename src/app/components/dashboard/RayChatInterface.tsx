@@ -94,6 +94,14 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
   // Briefing Review Flow State
   const [briefingReviewHandled, setBriefingReviewHandled] = useState(false);
 
+  // Refs to prevent double execution in React StrictMode
+  const demoFlowStartedRef = useRef(false);
+
+  // Reset demo flow ref when persona changes
+  useEffect(() => {
+    demoFlowStartedRef.current = false;
+  }, [currentPersona.id]);
+
   // Transaction Preview State
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionData | null>(null);
 
@@ -117,7 +125,8 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
 
   // Triggers for demo flow - Arjun
   useEffect(() => {
-    if (currentPersona.id === 'arjun' && messages.length === 0) {
+    if (currentPersona.id === 'arjun' && messages.length === 0 && !demoFlowStartedRef.current) {
+        demoFlowStartedRef.current = true;
         // Step 1: User asks question
         setTimeout(() => {
             setMessages([{
@@ -148,7 +157,8 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
 
   // Triggers for demo flow - Sarah
   useEffect(() => {
-    if (currentPersona.id === 'sarah' && messages.length === 0) {
+    if (currentPersona.id === 'sarah' && messages.length === 0 && !demoFlowStartedRef.current) {
+        demoFlowStartedRef.current = true;
         // Step 1: User asks question
         setTimeout(() => {
             setMessages([{
@@ -184,7 +194,8 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
 
   // Triggers for demo flow - Maya
   useEffect(() => {
-    if (currentPersona.id === 'maya' && messages.length === 0) {
+    if (currentPersona.id === 'maya' && messages.length === 0 && !demoFlowStartedRef.current) {
+        demoFlowStartedRef.current = true;
         // Step 1: User asks for Arvind's transactions
         setTimeout(() => {
             setMessages([{
@@ -220,7 +231,8 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
 
   // Triggers for demo flow - Sam
   useEffect(() => {
-    if (currentPersona.id === 'sam' && messages.length === 0) {
+    if (currentPersona.id === 'sam' && messages.length === 0 && !demoFlowStartedRef.current) {
+        demoFlowStartedRef.current = true;
         // Step 1: User asks about ticket status
         setTimeout(() => {
             setMessages([{
