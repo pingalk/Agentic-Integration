@@ -13,6 +13,7 @@ import { TransactionDetails } from './TransactionDetails';
 import { RaySidePanel } from './RaySidePanel';
 import { RayLayoutToggle } from './RayLayoutToggle';
 import { VariantSwitcher } from './VariantSwitcher';
+import { RayFAB } from './RayFAB';
 import Link from '../../../imports/Link-51-1889';
 import Ray from '../../../imports/Ray';
 import { Toaster } from "@/app/components/ui/sonner";
@@ -78,7 +79,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ initialConfig, onLogout })
   };
 
   const isRayActive = currentView === 'home' && (variants.home === 'B' || variants.home === 'B_DEEP_LINK' || variants.home === 'DOUBLE_DEBIT');
-  const showRayToggle = currentView === 'transactions' || currentView === 'transaction-details';
+  const isPaymentsDashboard = currentView === 'home' && variants.home === 'A';
+  const showRayToggle = currentView === 'transactions' || currentView === 'transaction-details' || isPaymentsDashboard;
 
   const renderContent = () => {
     switch (currentView) {
@@ -192,14 +194,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ initialConfig, onLogout })
             <>
               {/* Floating Action Button Entry Point */}
               {rayEntryPoint === 'floating' && !isRaySidePanelOpen && (
-                <button
-                  onClick={handleToggleRaySidePanel}
-                  className="absolute bottom-8 right-8 z-30 size-14 bg-white rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.15)] flex items-center justify-center hover:scale-105 transition-transform duration-200 border border-slate-100"
-                >
-                  <div className="size-6">
-                    <Ray />
-                  </div>
-                </button>
+                <RayFAB onClick={handleToggleRaySidePanel} />
               )}
 
               {/* Prototype Control Toggle Bar */}
