@@ -11,20 +11,36 @@ interface RaySidePanelProps {
   transactionStatus?: string;
 }
 
+// Floating panel heights
+const COMPACT_HEIGHT = 200;
+const FULL_HEIGHT = 'calc(100vh - 6rem)';
+
 export const RaySidePanel: React.FC<RaySidePanelProps> = ({ isOpen, onClose, mode, onModeChange, currentView, transactionStatus }) => {
-  // We use a key to force re-animation when mode changes if needed, 
-  // but to preserve state we should try to keep the same component tree.
-  // Ideally, LedContainer handles its own state persistence or we lift it.
-  // Assuming LedContainer state is transient, we try to keep it mounted.
-  
-  // To keep state, we render the container always when open.
-  // We change the class names based on mode.
+  // Track if floating panel should be expanded (when chat/thinking starts)
+  const [isFloatingExpanded, setIsFloatingExpanded] = useState(false);
+
+  // Reset expanded state when panel closes
+  useEffect(() => {
+    if (!isOpen) {
+      setIsFloatingExpanded(false);
+    }
+  }, [isOpen]);
 
   // Map currentView to LedContainer context
   const getContext = () => {
     if (currentView === 'transaction-details') return 'transaction-details';
     return 'transactions-list';
   };
+
+  // Handler to expand floating panel
+  const handleExpand = () => {
+    if (mode === 'floating') {
+      setIsFloatingExpanded(true);
+    }
+  };
+
+  // Determine panel height for floating mode
+  const floatingHeight = isFloatingExpanded ? FULL_HEIGHT : `${COMPACT_HEIGHT}px`;
 
   return (
     <AnimatePresence>
@@ -57,15 +73,17 @@ export const RaySidePanel: React.FC<RaySidePanelProps> = ({ isOpen, onClose, mod
               }
                overflow-hidden
             `}
-            style={mode === 'floating' ? { height: '200px' } : undefined}
+            style={mode === 'floating' ? { height: floatingHeight } : undefined}
           >
              <div className="h-full w-full md:w-[420px] max-w-[calc(100vw-32px)] md:max-w-none"> {/* Wrapper to maintain width during resize animation */}
-                <LedContainer 
-                    onClose={onClose} 
-                    context={getContext()} 
+                <LedContainer
+                    onClose={onClose}
+                    context={getContext()}
                     transactionStatus={transactionStatus}
                     mode={mode}
                     onModeChange={onModeChange}
+                    onExpand={handleExpand}
+                    isExpanded={isFloatingExpanded}
                 />
              </div>
           </motion.div>

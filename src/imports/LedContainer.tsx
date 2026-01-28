@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { MoreHorizontal, Check, PanelRight, Layers, LayoutTemplate } from 'lucide-react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import Variant2Landing from "@/app/components/Variant2Landing";
+import { RayMessageRenderer, RayResponseData } from "@/app/components/dashboard/chat/RayMessageRenderer";
 
 function BackgroundImage1({ children }: React.PropsWithChildren<{}>) {
   return (
@@ -75,12 +76,8 @@ function SuggestionChip({ label, onClick }: { label: string, onClick?: () => voi
   );
 }
 
-interface Message {
-  id: string;
-  role: 'user' | 'ray';
-  text: string;
-  suggestions?: string[];
-}
+// Use RayResponseData as the message format for consistency
+type Message = RayResponseData;
 
 interface LedContainerProps {
   onClose?: () => void;
@@ -88,6 +85,8 @@ interface LedContainerProps {
   transactionStatus?: string;
   mode?: 'floating' | 'native';
   onModeChange?: (mode: 'floating' | 'native') => void;
+  onExpand?: () => void;
+  isExpanded?: boolean;
 }
 
 const SUGGESTIONS_MAP = {
@@ -108,71 +107,20 @@ const SUGGESTIONS_MAP = {
   ]
 };
 
-// Helper to parse and format text
-const parseBold = (text: string) => {
-    const parts = text.split(/(\*\*.*?\*\*|`.*?`)/g);
-    return parts.map((part, index) => {
-        if (part.startsWith('**') && part.endsWith('**')) {
-            return <span key={index} className="font-['Inter:SemiBold',sans-serif] font-semibold text-[#40566d]">{part.slice(2, -2)}</span>;
-        }
-        if (part.startsWith('`') && part.endsWith('`')) {
-            return <code key={index} className="bg-slate-100 px-1 rounded text-sm font-mono text-slate-800">{part.slice(1, -1)}</code>;
-        }
-        return part;
-    });
-};
-
-const RayMessageContent = ({ text }: { text: string }) => {
-    // If text contains newlines, treat as potentially structured content
-    const blocks = text.split('\n\n');
-    
-    return (
-        <div className="flex flex-col gap-[8px] items-start w-full">
-            {blocks.map((block, idx) => {
-                // Check if block contains list items (starts with bullet or has internal newlines with bullets)
-                if (block.includes('\n•') || block.trim().startsWith('•') || block.trim().startsWith('-')) {
-                    const items = block.split('\n').filter(line => line.trim().length > 0);
-                    return (
-                        <ul key={idx} className="list-disc pl-[24px] space-y-0 w-full marker:text-[#40566d]">
-                            {items.map((item, itemIdx) => {
-                                const cleanItem = item.replace(/^[•-]\s*/, '');
-                                return (
-                                    <li key={itemIdx} className="font-['Inter:Regular',sans-serif] text-[16px] leading-[28px] text-[#40566d] pl-0.5">
-                                        {parseBold(cleanItem)}
-                                    </li>
-                                );
-                            })}
-                        </ul>
-                    );
-                }
-                
-                // Check for potential headers (e.g. "Status of payment:") - simple heuristic
-                if (block.includes(':') && block.length < 50 && !block.includes('\n')) {
-                     return (
-                        <h3 key={idx} className="font-['Inter:SemiBold',sans-serif] font-semibold text-[20px] leading-[26px] text-[#40566d]">
-                            {parseBold(block)}
-                        </h3>
-                     );
-                }
-
-                // Standard paragraph
-                return (
-                    <p key={idx} className="font-['Inter:Regular',sans-serif] text-[16px] leading-[28px] text-[#40566d]">
-                        {parseBold(block)}
-                    </p>
-                );
-            })}
-        </div>
-    );
-};
-
-export default function LedContainer({ onClose, context = 'transactions-list', transactionStatus, mode, onModeChange }: LedContainerProps) {
+export default function LedContainer({ onClose, context = 'transactions-list', transactionStatus, mode, onModeChange, onExpand, isExpanded }: LedContainerProps) {
   const [prompt, setPrompt] = useState('');
   const [view, setView] = useState<'landing' | 'chat'>('landing');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [landingVariant, setLandingVariant] = useState<'v1' | 'v2'>('v1');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Expand panel when entering chat mode or when typing starts
+  useEffect(() => {
+    if ((view === 'chat' || isTyping) && onExpand) {
+      onExpand();
+    }
+  }, [view, isTyping, onExpand]);
 
   // Determine active suggestions based on context
   const getSuggestions = () => {
@@ -195,17 +143,25 @@ export default function LedContainer({ onClose, context = 'transactions-list', t
   }, [messages, isTyping]);
 
   const processResponse = async (userQuery: string) => {
+    // First add thinking state message
+    const thinkingId = `thinking-${Date.now()}`;
+    const thinkingMessage: Message = {
+      id: thinkingId,
+      sender: 'ai',
+      isThinking: true
+    };
+    setMessages(prev => [...prev, thinkingMessage]);
     setIsTyping(true);
-    
+
     // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
+    await new Promise(resolve => setTimeout(resolve, 100)); // Short delay, thinking animation handles timing
+
     let responseText = "I can help you with that. Could you provide more details?";
     let matchedQuestion = "";
-    
+
     // Updated logic for specific user questions
     const lowerQuery = userQuery.toLowerCase();
-    
+
     // Default response based on context
     responseText = "I'm analyzing the data. Could you be more specific about what you need?";
 
@@ -249,39 +205,48 @@ export default function LedContainer({ onClose, context = 'transactions-list', t
 
     const relevantSuggestions = activeSuggestions.filter(s => s !== matchedQuestion);
 
+    // Create response using simple_text artifact format
     const rayMessage: Message = {
         id: Date.now().toString(),
-        role: 'ray',
-        text: responseText,
-        suggestions: relevantSuggestions
+        sender: 'ai',
+        artifact: {
+          type: 'simple_text',
+          data: {
+            body: responseText,
+            suggestions: relevantSuggestions
+          }
+        }
     };
 
-    setMessages(prev => [...prev, rayMessage]);
+    // Replace thinking message with actual response
+    setMessages(prev => prev.map(msg =>
+      msg.id === thinkingId ? rayMessage : msg
+    ));
     setIsTyping(false);
   };
 
   const handleSend = () => {
     if (!prompt.trim()) return;
-    
+
     const userMessage: Message = {
         id: Date.now().toString(),
-        role: 'user',
-        text: prompt
+        sender: 'user',
+        blocks: [{ type: 'text', content: prompt }]
     };
 
     setMessages(prev => [...prev, userMessage]);
     setView('chat');
     const currentPrompt = prompt;
     setPrompt('');
-    
+
     processResponse(currentPrompt);
   };
 
   const handleChipClick = (label: string) => {
       const userMessage: Message = {
         id: Date.now().toString(),
-        role: 'user',
-        text: label
+        sender: 'user',
+        blocks: [{ type: 'text', content: label }]
     };
     setMessages(prev => [...prev, userMessage]);
     setView('chat');
@@ -578,68 +543,20 @@ export default function LedContainer({ onClose, context = 'transactions-list', t
             </div>
             )
         ) : (
-            <div className="p-4 flex flex-col gap-6 min-h-full pb-32">
-                {messages.map((msg, index) => (
-                    <motion.div 
-                        key={msg.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                    >
-                        {msg.role === 'user' ? (
-                            <div className="max-w-[85%] bg-[#F1F5FA] text-[#090e13] px-4 py-3 rounded-2xl rounded-tr-sm text-[15px] leading-relaxed whitespace-pre-line">
-                                {msg.text}
-                            </div>
-                        ) : (
-                            <div className="flex gap-3 max-w-[90%]">
-                                {/* Ray logo removed */}
-                                <div className="flex flex-col gap-1 w-full pt-1">
-                                    <RayMessageContent text={msg.text} />
-                                    {index === messages.length - 1 && (
-                                        <>
-                                            <div className="flex gap-2 mt-1">
-                                                {/* Simple feedback actions */}
-                                                <button className="text-slate-400 hover:text-slate-600 p-1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg></button>
-                                                <button className="text-slate-400 hover:text-slate-600 p-1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg></button>
-                                            </div>
-                                            
-                                            {/* Follow-up suggestions */}
-                                            {msg.suggestions && msg.suggestions.length > 0 && (
-                                                <div className="flex flex-col items-start gap-2 mt-2">
-                                                    {msg.suggestions.map((suggestion, idx) => (
-                                                        <SuggestionChip 
-                                                            key={idx}
-                                                            label={suggestion}
-                                                            onClick={() => handleChipClick(suggestion)}
-                                                        />
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-                    </motion.div>
-                ))}
-                
-                {isTyping && (
-                    <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="flex w-full justify-start"
-                    >
-                         <div className="flex gap-3 max-w-[90%]">
-                            
-                            <div className="flex items-center gap-1 h-[28px] pl-2">
-                                <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                                <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                                <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></span>
-                            </div>
+            // Chat view - use RayMessageRenderer for consistent styling with agentic interface
+            <div className="flex-1 overflow-y-auto px-4 pt-4 pb-32">
+                <div className="flex flex-col gap-6 w-full">
+                    {messages.map((msg, index) => (
+                        <div key={msg.id} className="w-full">
+                            <RayMessageRenderer
+                                data={msg}
+                                isLast={index === messages.length - 1}
+                                onSuggestionClick={handleChipClick}
+                            />
                         </div>
-                    </motion.div>
-                )}
-                <div ref={messagesEndRef} />
+                    ))}
+                    <div ref={messagesEndRef} />
+                </div>
             </div>
         )}
       </div>
