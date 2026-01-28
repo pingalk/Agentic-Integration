@@ -173,9 +173,9 @@ export const useDemoScript = () => {
                     body: "I've generated these links to help you get paid for those 5 auto-refunded orders. These are now Active and ready to be shared with your customers via WhatsApp, email, or SMS.",
                     table: {
                         rows: [
-                            { id: '1', email: 'customer1@email.com', amount: '₹1,500', status: 'Active', createdOn: '23 Jan 2026', linkUrl: 'rzp.io/i/abc123' },
-                            { id: '2', email: 'customer2@email.com', amount: '₹1,500', status: 'Active', createdOn: '23 Jan 2026', linkUrl: 'rzp.io/i/def456' },
-                            { id: '3', email: 'customer3@email.com', amount: '₹1,000', status: 'Active', createdOn: '23 Jan 2026', linkUrl: 'rzp.io/i/ghi789' }
+                            { id: '1', linkUrl: 'https://rzp.io/rzp/zrcAOUD', amount: '₹ 1500.00', status: 'Active', createdOn: '23 Jan 2026, 08:53', expiry: '-' },
+                            { id: '2', linkUrl: 'https://rzp.io/rzp/iascAOCE', amount: '₹ 1000.00', status: 'Active', createdOn: '23 Jan 2026, 08:54', expiry: '-' },
+                            { id: '3', linkUrl: 'https://rzp.io/rzp/jcasuCHS', amount: '₹ 500.00', status: 'Active', createdOn: '23 Jan 2026, 08:55', expiry: '-' }
                         ]
                     },
                     followup: {

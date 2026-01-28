@@ -128,11 +128,11 @@ export interface RayResponseData {
       table: {
         rows: Array<{
           id: string;
-          email: string;
+          linkUrl: string;
           amount: string;
           status: string;
           createdOn: string;
-          linkUrl: string;
+          expiry: string;
         }>;
       };
       followup: {
@@ -870,7 +870,7 @@ const PaymentLinksCreatedArtifact = ({
   data: {
     headline: string;
     body: string;
-    table: { rows: Array<{ id: string; email: string; amount: string; status: string; createdOn: string; linkUrl: string }> };
+    table: { rows: Array<{ id: string; linkUrl: string; amount: string; status: string; createdOn: string; expiry: string }> };
     followup: { title: string; body: string; buttons: Array<{ label: string; variant: 'primary' | 'secondary' }> };
   };
   isLast: boolean;
@@ -951,11 +951,11 @@ const PaymentLinksCreatedArtifact = ({
                 <div className="w-full rounded-[12px] overflow-hidden border border-[#E4E7EC] relative group/table">
                   {/* Table Header */}
                   <div className="flex h-[48px] text-[14px] font-semibold text-[#192839] bg-[rgba(108,132,157,0.06)] px-[16px] border-b border-[rgba(108,132,157,0.18)]">
-                    <div className="w-[200px] flex items-center pl-[20px]">Customer Email</div>
-                    <div className="w-[100px] flex items-center">Amount</div>
+                    <div className="w-[260px] flex items-center pl-[20px]">Payment Link</div>
+                    <div className="w-[120px] flex items-center">Amount</div>
                     <div className="w-[80px] flex items-center">Status</div>
-                    <div className="w-[120px] flex items-center">Created On</div>
-                    <div className="flex-1 flex items-center">Payment Link</div>
+                    <div className="w-[180px] flex items-center">Created On</div>
+                    <div className="flex-1 flex items-center">Expiry</div>
                   </div>
                   {/* Table Rows with staggered animation */}
                   <div className="bg-white">
@@ -967,18 +967,15 @@ const PaymentLinksCreatedArtifact = ({
                         transition={{ delay: rowIndex * 0.1, duration: 0.3 }}
                         className="relative flex h-[56px] items-center px-[16px] border-b border-[#E4E7EC] last:border-b-0 hover:bg-[#F9FAFB] transition-colors group/row"
                       >
-                        <div className="w-[200px] text-[#5D6B82] text-[14px] font-normal pl-[20px] truncate">{row.email}</div>
-                        <div className="w-[100px] font-semibold text-[#1D2939] text-[14px]">{row.amount}</div>
+                        <div className="w-[260px] text-[#2563EB] text-[14px] font-normal pl-[20px] truncate underline decoration-blue-300 underline-offset-2 hover:text-blue-700 cursor-pointer">{row.linkUrl}</div>
+                        <div className="w-[120px] font-semibold text-[#1D2939] text-[14px]">{row.amount}</div>
                         <div className="w-[80px]">
                           <span className="inline-flex items-center h-[20px] px-[8px] bg-[rgba(16,185,129,0.1)] text-[#059669] text-[12px] font-medium leading-[18px] rounded-[1000px]">
                             {row.status}
                           </span>
                         </div>
-                        <div className="w-[120px] text-[#5D6B82] text-[14px] font-normal">{row.createdOn}</div>
-                        <div className="flex-1 text-[#2563EB] text-[14px] font-normal underline decoration-blue-300 underline-offset-2 hover:text-blue-700 cursor-pointer flex items-center gap-1">
-                          {row.linkUrl}
-                          <ExternalLink size={12} className="opacity-60" />
-                        </div>
+                        <div className="w-[180px] text-[#5D6B82] text-[14px] font-normal">{row.createdOn}</div>
+                        <div className="flex-1 text-[#5D6B82] text-[14px] font-normal">{row.expiry}</div>
                       </motion.div>
                     ))}
                   </div>
