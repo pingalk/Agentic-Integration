@@ -16,110 +16,130 @@ import svgPathsInput from "../../../imports/svg-h0tl9nb0vi";
 import svgPathsCards from "../../../imports/svg-9ik4xuwq12";
 import svgPathsStats from "../../../imports/svg-h6d9ul042g";
 import { motion } from 'motion/react';
-import { Calendar, CheckCircle2, ChevronRight, Info, Plus } from 'lucide-react';
+import { CheckCircle2, ChevronRight, ArrowRight } from 'lucide-react';
 
-// --- Settlement Overview Component ---
+// --- Balance & Settlement Card Component ---
+// Matches the Figma design with blue header + two-panel white card
 
-const SettlementOverview = () => {
+interface BalanceSettlementCardProps {
+  greeting: string;
+  isNegative?: boolean;
+}
+
+const BalanceSettlementCard = ({ greeting, isNegative = false }: BalanceSettlementCardProps) => {
+  // Get current date formatted as "Tue, Jan 13"
+  const today = new Date();
+  const dateString = today.toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric'
+  });
+
   return (
     <motion.div
-      className="bg-white rounded-[12px] overflow-hidden w-full shadow-sm"
+      className="w-full overflow-hidden rounded-[16px]"
       initial={{ opacity: 0, y: 26 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{
         duration: 2.0,
-        delay: 0.6,
+        delay: 0.3,
         ease: [0.16, 1, 0.3, 1]
       }}
     >
-      {/* Blue Header Bar */}
-      <div className="bg-[#0D4EA6] px-5 py-3 flex items-center justify-between">
-        <span className="text-white font-medium text-[15px]">Settlement Overview</span>
-        <button className="text-[#60A5FA] hover:text-white text-[13px] font-medium flex items-center gap-1 transition-colors">
-          View all settlements <ChevronRight size={14} />
-        </button>
-      </div>
-
-      {/* Card Body */}
-      <div className="p-5 flex flex-col md:flex-row gap-6">
-        {/* Settlement Columns */}
-        <div className="flex flex-1 flex-col md:flex-row gap-6 md:gap-10">
-          {/* Yesterday's Settlements */}
-          <div className="flex-1">
-            <div className="flex items-start gap-3 mb-3">
-              <div className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                <CheckCircle2 size={16} className="text-green-600" />
-              </div>
-            </div>
-            <button className="flex items-center gap-1 text-[#1E293B] font-medium text-[14px] hover:text-blue-600 transition-colors mb-1">
-              Yesterday's settlements (3) <ChevronRight size={14} />
-            </button>
-            <p className="text-[#64748B] text-[13px] mb-4">Deposited yesterday</p>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-[#1E293B] font-semibold text-[18px]">₹28k</span>
-              <Plus size={12} className="text-slate-400" />
-              <div className="flex -space-x-1">
-                <div className="w-5 h-5 rounded-full bg-gradient-to-b from-[#FF9933] via-white to-[#138808] border border-white" title="INR" />
-                <div className="w-5 h-5 rounded-full bg-gradient-to-r from-[#BF0A30] via-white to-[#BF0A30] border border-white" title="USD" />
-              </div>
-            </div>
-            <button className="text-[#2563EB] text-[13px] font-medium hover:underline">View breakup</button>
-          </div>
-
-          {/* Today's Settlements */}
-          <div className="flex-1">
-            <div className="flex items-start gap-3 mb-3">
-              <div className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                <CheckCircle2 size={16} className="text-green-600" />
-              </div>
-            </div>
-            <button className="flex items-center gap-1 text-[#1E293B] font-medium text-[14px] hover:text-blue-600 transition-colors mb-1">
-              Today's settlements (2) <ChevronRight size={14} />
-            </button>
-            <p className="text-[#64748B] text-[13px] mb-4">Expect deposit before 9 pm</p>
-            <div className="mb-1">
-              <span className="text-[#1E293B] font-semibold text-[18px]">₹75,000</span>
-            </div>
-            <button className="text-[#2563EB] text-[13px] font-medium hover:underline">View breakup</button>
-          </div>
-
-          {/* Tomorrow's Settlement */}
-          <div className="flex-1">
-            <div className="flex items-start gap-3 mb-3">
-              <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-                <Calendar size={14} className="text-slate-600" />
-              </div>
-            </div>
-            <button className="flex items-center gap-1 text-[#1E293B] font-medium text-[14px] mb-1">
-              Tomorrow's settlement
-            </button>
-            <p className="text-[#64748B] text-[13px] mb-4">to be deposited tomorrow</p>
-            <button className="text-[#2563EB] text-[13px] font-medium hover:underline">View eligible transactions</button>
+      {/* Blue Header Section */}
+      <div
+        className="relative px-8 pt-6 pb-24 overflow-hidden"
+        style={{
+          background: 'linear-gradient(135deg, #6B8DD6 0%, #8E9FE8 50%, #7B9CE0 100%)'
+        }}
+      >
+        {/* Decorative diagonal lines */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-0 right-0 w-full h-full opacity-20">
+            <div className="absolute top-[-50%] right-[-20%] w-[80%] h-[200%] border-l border-white/30 rotate-[20deg]" />
+            <div className="absolute top-[-50%] right-[-10%] w-[80%] h-[200%] border-l border-white/20 rotate-[20deg]" />
+            <div className="absolute top-[-50%] right-[0%] w-[80%] h-[200%] border-l border-white/10 rotate-[20deg]" />
           </div>
         </div>
 
-        {/* Divider */}
-        <div className="hidden md:block w-px bg-slate-200 self-stretch" />
+        {/* Greeting Text */}
+        <div className="relative text-center">
+          <h1 className="text-white text-[28px] font-medium italic mb-1" style={{ fontFamily: "'TASA Orbiter Display', sans-serif" }}>
+            {greeting}
+          </h1>
+          <p className="text-white/80 text-[14px]">{dateString}</p>
+        </div>
+      </div>
 
-        {/* Available Balances */}
-        <div className="md:w-[240px]">
-          <div className="flex items-center gap-1 mb-4">
-            <span className="text-[#1E293B] font-medium text-[14px]">Available Balances (5)</span>
-          </div>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-[#1E293B] font-bold text-[28px]">
-              <span className="text-[20px] opacity-60">₹</span>1.05L
-            </span>
-            <Plus size={12} className="text-slate-400" />
-            <div className="flex -space-x-1">
-              <div className="w-6 h-6 rounded-full bg-gradient-to-r from-[#BF0A30] via-white to-[#BF0A30] border border-white" title="USD" />
-              <div className="w-6 h-6 rounded-full bg-gradient-to-b from-[#FF9933] via-white to-[#138808] border border-white" title="INR" />
+      {/* White Card Section - overlaps the blue header */}
+      <div className="relative -mt-16 mx-4 mb-4">
+        <div className="bg-white rounded-[12px] shadow-lg overflow-hidden">
+          <div className="flex flex-col md:flex-row">
+            {/* Left Panel - Current Balance */}
+            <div className="flex-1 p-6 md:p-8 flex flex-col justify-center">
+              <p className="text-[#64748B] text-[14px] mb-3">Current balance</p>
+              <div className="flex items-baseline">
+                <span className="text-[#1E293B] text-[14px] opacity-60 mr-1">₹</span>
+                <span className="text-[#1E293B] text-[36px] font-bold tracking-tight" style={{ fontFamily: "'TASA Orbiter Display', sans-serif" }}>
+                  {isNegative ? '-46,000' : '10,13,000'}
+                </span>
+                <span className="text-[#1E293B] text-[20px] opacity-60">.00</span>
+              </div>
+            </div>
+
+            {/* Vertical Divider */}
+            <div className="hidden md:block w-px bg-slate-200 my-6" />
+
+            {/* Right Panel - Today's Settlement */}
+            <div className="flex-1 p-6 md:p-8 border-t md:border-t-0 border-slate-100">
+              {/* Header with blue dot */}
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-3 h-3 rounded-full bg-blue-500" />
+                <span className="text-[#1E293B] font-semibold text-[16px]">Today's settlement</span>
+              </div>
+
+              {/* Amount */}
+              <div className="flex items-baseline mb-3">
+                <span className="text-[#1E293B] text-[14px] opacity-60 mr-1">₹</span>
+                <span className="text-[#1E293B] text-[28px] font-bold tracking-tight" style={{ fontFamily: "'TASA Orbiter Display', sans-serif" }}>
+                  3,63,000
+                </span>
+                <span className="text-[#1E293B] text-[16px] opacity-60">.00</span>
+              </div>
+
+              {/* On Track Badge */}
+              <div className="inline-block mb-4">
+                <span className={`px-3 py-1 rounded-md text-[13px] font-medium ${
+                  isNegative
+                    ? 'bg-red-50 text-red-600'
+                    : 'bg-green-50 text-green-600'
+                }`}>
+                  {isNegative ? 'Paused' : 'On Track'}
+                </span>
+              </div>
+
+              {/* Deposit info */}
+              <p className="text-[#64748B] text-[14px] mb-6">
+                • To be deposited in your bank account by 9:00 am tomorrow
+              </p>
+
+              {/* Divider */}
+              <div className="border-t border-slate-100 pt-4">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                  {/* Yesterday's deposit */}
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 size={18} className="text-green-500" />
+                    <span className="text-[#1E293B] text-[14px]">₹5,11,256.00 deposited yesterday</span>
+                  </div>
+
+                  {/* View All Settlements link */}
+                  <button className="text-[#2563EB] text-[14px] font-medium flex items-center gap-1 hover:underline">
+                    View All Settlements <ArrowRight size={16} />
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-          <button className="text-[#2563EB] text-[13px] font-medium hover:underline flex items-center gap-1">
-            <Plus size={12} />
-            Settle your online INR balance now
-          </button>
         </div>
       </div>
     </motion.div>
@@ -603,9 +623,16 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                         </div>
                      </div>
 
-                     {/* Dynamic Cards Grid */}
-                     <div className="w-full max-w-full md:max-w-[850px]">
-                        {/* Responsive Grid Layout with Equal Spacing */}
+                     {/* Balance & Settlement Card */}
+                     <div className="w-full max-w-full md:max-w-[900px]">
+                       <BalanceSettlementCard
+                         greeting={currentPersona.landing.greeting}
+                         isNegative={isNegative}
+                       />
+                     </div>
+
+                     {/* OLD CARDS - HIDDEN */}
+                     <div className="hidden w-full max-w-full md:max-w-[850px]">
                         <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-3 md:gap-4 auto-rows-min">
                         
                         {/* 1. TODAY'S BRIEFING CARD (Left) - Blue gradient background - Spans 2 rows on desktop */}
@@ -932,11 +959,6 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
 
                         </div>
 
-                     </div>
-
-                     {/* 4. SETTLEMENT OVERVIEW CARD - Full width below grid */}
-                     <div className="w-full max-w-full md:max-w-[850px] mt-4">
-                       <SettlementOverview />
                      </div>
 
                      </div>
