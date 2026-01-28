@@ -426,7 +426,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                           {/* Title */}
                           <p className="absolute font-['Inter',sans-serif] font-normal leading-[26px] left-[47px] not-italic text-[14px] text-white top-[28px] tracking-[-0.28px]">TODAY'S BRIEFING</p>
                           
-                          {/* Content List */}
+                          {/* Content List - Dynamic based on persona */}
                           <div className="absolute content-stretch flex flex-col gap-[20px] items-start left-[19px] top-[79px] w-[239px]">
                             {/* Item 1 */}
                             <div className="content-stretch flex gap-[10px] items-start relative shrink-0 w-full">
@@ -436,10 +436,13 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                                 </div>
                               </div>
                               <p className="font-['TASA_Orbiter_Display',sans-serif] font-normal leading-[24px] not-italic relative shrink-0 text-[#fdfdfd] text-[18px] tracking-[-0.234px]">
-                                Your refund volume for last<br />3 days was unusually high
+                                {isNegative
+                                  ? <>Your refund volume for last<br />3 days was unusually high</>
+                                  : <>No refunds or disputes so far<br />today</>
+                                }
                               </p>
                             </div>
-                            
+
                             {/* Item 2 */}
                             <div className="content-stretch flex gap-[10px] items-start relative shrink-0 w-full">
                               <div className="content-stretch flex items-center pt-[4px] relative shrink-0">
@@ -451,7 +454,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                                 Payment timeouts are the most common failure reason (2%)
                               </p>
                             </div>
-                            
+
                             {/* Item 3 */}
                             <div className="content-stretch flex gap-[10px] items-start relative shrink-0">
                               <div className="content-stretch flex items-center pt-[4px] relative shrink-0">
@@ -469,23 +472,26 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                         {/* Right Column - Nested Grid for 3 Cards */}
                         <div className="grid grid-cols-1 md:grid-rows-[auto_auto] gap-4 w-full">
                         
-                        {/* 2. ACCOUNT BALANCE CARD (Top Right) - Red gradient */}
-                        <motion.div 
-                          className="bg-white border border-[#fee4e2] border-solid overflow-clip rounded-[10px] h-[201px] w-full relative"
+                        {/* 2. ACCOUNT BALANCE / PAYMENT VOLUME CARD (Top Right) - Dynamic color based on theme */}
+                        <motion.div
+                          className={clsx(
+                            "bg-white border border-solid overflow-clip rounded-[10px] h-[201px] w-full relative",
+                            isNegative ? "border-[#fee4e2]" : "border-[#d1fae5]"
+                          )}
                           initial={{ opacity: 0, y: 26 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ 
-                            duration: 2.0, 
+                          transition={{
+                            duration: 2.0,
                             delay: 0.3,
                             ease: [0.16, 1, 0.3, 1]
                           }}
                         >
-                          {/* Red gradient SVG shapes in background */}
+                          {/* Gradient SVG shapes in background - dynamic color */}
                           <div className="absolute inset-[calc(24.4%-1px)_calc(-39.84%-1px)_calc(-54.56%-1px)_calc(57.66%-1px)]">
                             <div className="absolute inset-[-21.21%_-12.12%]">
                               <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 520.69 341.067">
                                 <g filter="url(#filter0_f_stats_bg1)">
-                                  <path d={svgPathsStats.pd204a80} fill="#FA8282" />
+                                  <path d={svgPathsStats.pd204a80} fill={isNegative ? "#FA8282" : "#6EE7B7"} />
                                 </g>
                                 <defs>
                                   <filter colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse" height="341.067" id="filter0_f_stats_bg1" width="520.691" x="0" y="0">
@@ -501,7 +507,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                             <div className="absolute inset-[-21.21%_-12.12%]">
                               <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 520.69 341.067">
                                 <g filter="url(#filter0_f_stats_bg2)">
-                                  <path d={svgPathsStats.pd204a80} fill="#FA8282" />
+                                  <path d={svgPathsStats.pd204a80} fill={isNegative ? "#FA8282" : "#6EE7B7"} />
                                 </g>
                                 <defs>
                                   <filter colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse" height="341.067" id="filter0_f_stats_bg2" width="520.691" x="0" y="0">
@@ -513,42 +519,84 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                               </svg>
                             </div>
                           </div>
-                          
-                          {/* Main Content */}
+
+                          {/* Main Content - Dynamic based on theme */}
                           <div className="absolute bottom-[21px] content-stretch flex flex-col gap-[8px] items-start left-[19px] w-[313px]">
-                            {/* Available Balance Row */}
-                            <div className="content-stretch flex items-center justify-between relative shrink-0 w-full">
-                              <p className="font-['Inter',sans-serif] font-medium leading-[16px] not-italic relative shrink-0 text-[#768ea7] text-[12px] tracking-[0.24px]">AVAILABLE BALANCE</p>
-                              <div className="content-stretch flex items-end justify-end relative shrink-0">
-                                <div className="content-stretch flex items-baseline relative shrink-0">
-                                  <div className="content-stretch flex gap-[2px] items-baseline relative shrink-0">
-                                    <span className="font-['Inter',sans-serif] font-semibold leading-[20px] not-italic text-[#192839] text-[14px] opacity-64">₹</span>
-                                    <span className="font-['TASA_Orbiter_Display',sans-serif] font-semibold leading-[26px] not-italic text-[#192839] text-[20px]">-46,000</span>
-                                    <span className="font-['Inter',sans-serif] font-semibold leading-[20px] not-italic text-[#192839] text-[14px] opacity-64">.00</span>
+                            {isNegative ? (
+                              <>
+                                {/* Arjun: Available Balance Row */}
+                                <div className="content-stretch flex items-center justify-between relative shrink-0 w-full">
+                                  <p className="font-['Inter',sans-serif] font-medium leading-[16px] not-italic relative shrink-0 text-[#768ea7] text-[12px] tracking-[0.24px]">AVAILABLE BALANCE</p>
+                                  <div className="content-stretch flex items-end justify-end relative shrink-0">
+                                    <div className="content-stretch flex items-baseline relative shrink-0">
+                                      <div className="content-stretch flex gap-[2px] items-baseline relative shrink-0">
+                                        <span className="font-['Inter',sans-serif] font-semibold leading-[20px] not-italic text-[#192839] text-[14px] opacity-64">₹</span>
+                                        <span className="font-['TASA_Orbiter_Display',sans-serif] font-semibold leading-[26px] not-italic text-[#192839] text-[20px]">-46,000</span>
+                                        <span className="font-['Inter',sans-serif] font-semibold leading-[20px] not-italic text-[#192839] text-[14px] opacity-64">.00</span>
+                                      </div>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            </div>
-                            
-                            {/* Payments Collected Row */}
-                            <div className="content-stretch flex items-end justify-between relative shrink-0 w-full">
-                              <p className="font-['Inter',sans-serif] font-medium leading-[16px] not-italic relative shrink-0 text-[#768ea7] text-[12px] tracking-[0.24px]">PAYMENTS COLLECTED</p>
-                              <div className="content-stretch flex items-end justify-end relative shrink-0">
-                                <div className="content-stretch flex items-baseline relative shrink-0">
-                                  <div className="content-stretch flex gap-[2px] items-baseline relative shrink-0">
-                                    <span className="font-['Inter',sans-serif] font-semibold leading-[20px] not-italic text-[#192839] text-[14px] opacity-64">₹</span>
-                                    <span className="font-['TASA_Orbiter_Display',sans-serif] font-semibold leading-[26px] not-italic text-[#192839] text-[20px]">1,20,000</span>
-                                    <span className="font-['Inter',sans-serif] font-semibold leading-[20px] not-italic text-[#192839] text-[14px] opacity-64">.00</span>
+                                {/* Arjun: Payments Collected Row */}
+                                <div className="content-stretch flex items-end justify-between relative shrink-0 w-full">
+                                  <p className="font-['Inter',sans-serif] font-medium leading-[16px] not-italic relative shrink-0 text-[#768ea7] text-[12px] tracking-[0.24px]">PAYMENTS COLLECTED</p>
+                                  <div className="content-stretch flex items-end justify-end relative shrink-0">
+                                    <div className="content-stretch flex items-baseline relative shrink-0">
+                                      <div className="content-stretch flex gap-[2px] items-baseline relative shrink-0">
+                                        <span className="font-['Inter',sans-serif] font-semibold leading-[20px] not-italic text-[#192839] text-[14px] opacity-64">₹</span>
+                                        <span className="font-['TASA_Orbiter_Display',sans-serif] font-semibold leading-[26px] not-italic text-[#192839] text-[20px]">1,20,000</span>
+                                        <span className="font-['Inter',sans-serif] font-semibold leading-[20px] not-italic text-[#192839] text-[14px] opacity-64">.00</span>
+                                      </div>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            </div>
+                              </>
+                            ) : (
+                              <>
+                                {/* Maya: Payments Collected Row */}
+                                <div className="content-stretch flex items-center justify-between relative shrink-0 w-full">
+                                  <p className="font-['Inter',sans-serif] font-medium leading-[16px] not-italic relative shrink-0 text-[#768ea7] text-[12px] tracking-[0.24px]">PAYMENTS COLLECTED</p>
+                                  <div className="content-stretch flex items-end justify-end relative shrink-0">
+                                    <div className="content-stretch flex items-baseline relative shrink-0">
+                                      <div className="content-stretch flex gap-[2px] items-baseline relative shrink-0">
+                                        <span className="font-['Inter',sans-serif] font-semibold leading-[20px] not-italic text-[#192839] text-[14px] opacity-64">₹</span>
+                                        <span className="font-['TASA_Orbiter_Display',sans-serif] font-semibold leading-[26px] not-italic text-[#192839] text-[20px]">1,13,000</span>
+                                        <span className="font-['Inter',sans-serif] font-semibold leading-[20px] not-italic text-[#192839] text-[14px] opacity-64">.00</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                {/* Maya: Available Balance Row */}
+                                <div className="content-stretch flex items-end justify-between relative shrink-0 w-full">
+                                  <p className="font-['Inter',sans-serif] font-medium leading-[16px] not-italic relative shrink-0 text-[#768ea7] text-[12px] tracking-[0.24px]">AVAILABLE BALANCE</p>
+                                  <div className="content-stretch flex items-end justify-end relative shrink-0">
+                                    <div className="content-stretch flex items-baseline relative shrink-0">
+                                      <div className="content-stretch flex gap-[2px] items-baseline relative shrink-0">
+                                        <span className="font-['Inter',sans-serif] font-semibold leading-[20px] not-italic text-[#192839] text-[14px] opacity-64">₹</span>
+                                        <span className="font-['TASA_Orbiter_Display',sans-serif] font-semibold leading-[26px] not-italic text-[#192839] text-[20px]">1,00,000</span>
+                                        <span className="font-['Inter',sans-serif] font-semibold leading-[20px] not-italic text-[#192839] text-[14px] opacity-64">.00</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </>
+                            )}
                           </div>
-                          
-                          {/* Title at top */}
+
+                          {/* Title at top - Dynamic based on theme */}
                           <p className="absolute font-['TASA_Orbiter_Display',sans-serif] leading-[28px] left-[19px] not-italic text-[20px] top-[17px] tracking-[-0.26px]">
-                            <span className="text-black">Your account balance </span>
-                            <span className="font-['TASA_Orbiter_Display',sans-serif] font-bold text-[#d92d20]">is negative</span>
+                            {isNegative ? (
+                              <>
+                                <span className="text-black">Your account balance </span>
+                                <span className="font-['TASA_Orbiter_Display',sans-serif] font-bold text-[#d92d20]">is negative</span>
+                              </>
+                            ) : (
+                              <>
+                                <span className="text-black">Payment volumes </span>
+                                <span className="font-['TASA_Orbiter_Display',sans-serif] font-bold text-[#00a251]">higher</span>
+                                <span className="text-black"> than usual today</span>
+                              </>
+                            )}
                           </p>
                         </motion.div>
 
@@ -580,23 +628,23 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                           </div>
                         </motion.div>
 
-                        {/* 4. SETTLEMENT CARD (Bottom Right) - Red gradient */}
-                        <motion.div 
+                        {/* 4. SETTLEMENT CARD (Bottom Right) - Dynamic color based on theme */}
+                        <motion.div
                           className="bg-[#fcfcfc] border border-[rgba(0,0,0,0.1)] border-solid h-[183px] overflow-clip rounded-[12px] w-full relative"
                           initial={{ opacity: 0, y: 26 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ 
-                            duration: 2.0, 
+                          transition={{
+                            duration: 2.0,
                             delay: 0.9,
                             ease: [0.16, 1, 0.3, 1]
                           }}
                         >
-                          {/* Red ellipse gradient at bottom */}
+                          {/* Ellipse gradient at bottom - dynamic color */}
                           <div className="absolute h-[98px] left-[-27px] top-[173px] w-[275px]">
                             <div className="absolute inset-[-61.22%_-21.82%]">
                               <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 395 218">
                                 <g filter="url(#filter0_f_settlement_glow)" opacity="0.97">
-                                  <ellipse cx="197.5" cy="109" fill="#D92D20" rx="137.5" ry="49" />
+                                  <ellipse cx="197.5" cy="109" fill={isNegative ? "#D92D20" : "#10B981"} rx="137.5" ry="49" />
                                 </g>
                                 <defs>
                                   <filter colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse" height="218" id="filter0_f_settlement_glow" width="395" x="0" y="0">
@@ -608,13 +656,17 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                               </svg>
                             </div>
                           </div>
-                          
-                          {/* Title */}
+
+                          {/* Title - Dynamic based on theme */}
                           <p className="absolute font-['TASA_Orbiter_Display',sans-serif] leading-[28px] left-[13px] not-italic text-[20px] top-[15px] tracking-[-0.26px]">
                             <span className="text-black text-[18px]">Your settlements are</span><br />
-                            <span className="font-['TASA_Orbiter_Display',sans-serif] font-bold text-[#d92d20] text-[18px]">paused</span>
+                            {isNegative ? (
+                              <span className="font-['TASA_Orbiter_Display',sans-serif] font-bold text-[#d92d20] text-[18px]">paused</span>
+                            ) : (
+                              <span className="font-['TASA_Orbiter_Display',sans-serif] font-bold text-[#00a251] text-[18px]">on track</span>
+                            )}
                           </p>
-                          
+
                           {/* Amount */}
                           <div className="absolute content-stretch flex items-end justify-end left-[15px] top-[131px]">
                             <div className="content-stretch flex items-baseline relative shrink-0">
@@ -624,7 +676,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                               </div>
                             </div>
                           </div>
-                          
+
                           {/* Label */}
                           <p className="absolute font-['Inter',sans-serif] font-medium leading-[16px] left-[15px] not-italic text-[#768ea7] text-[10px] top-[111px] tracking-[0.3px]">NEXT SETTLEMENT</p>
                         </motion.div>
