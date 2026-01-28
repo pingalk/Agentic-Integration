@@ -7,12 +7,15 @@ interface DemoContextType {
   currentPersona: PersonaConfig;
   setPersona: (id: PersonaId) => void;
   resetDemo: () => void;
+  isInChatView: boolean;
+  setIsInChatView: (value: boolean) => void;
 }
 
 const DemoContext = createContext<DemoContextType | undefined>(undefined);
 
 export const DemoProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentPersonaId, setCurrentPersonaId] = useState<PersonaId>('maya');
+  const [isInChatView, setIsInChatView] = useState(false);
 
   // Optional: Add a data-theme attribute to body for global CSS variables if needed later
   useEffect(() => {
@@ -29,7 +32,9 @@ export const DemoProvider = ({ children }: { children: React.ReactNode }) => {
       currentPersonaId,
       currentPersona: PERSONAS[currentPersonaId],
       setPersona: setCurrentPersonaId,
-      resetDemo
+      resetDemo,
+      isInChatView,
+      setIsInChatView
     }}>
       {children}
     </DemoContext.Provider>

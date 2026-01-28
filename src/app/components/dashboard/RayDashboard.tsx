@@ -161,9 +161,14 @@ export const RayDashboard: React.FC<RayDashboardProps> = (props) => {
 };
 
 const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNavigateToPayments, initialQuery, onLogout }) => {
-  const { currentPersona } = useDemo(); // <--- LISTENING TO CONTEXT
-  
+  const { currentPersona, setIsInChatView } = useDemo(); // <--- LISTENING TO CONTEXT
+
   const [view, setView] = useState<'landing' | 'chat'>('landing');
+
+  // Sync chat view state with context for DemoControls visibility
+  React.useEffect(() => {
+    setIsInChatView(view === 'chat');
+  }, [view, setIsInChatView]);
   const [prompt, setPrompt] = useState(initialQuery || '');
   const [waveTrigger, setWaveTrigger] = useState(0);
   const [lastQuery, setLastQuery] = useState("");
