@@ -323,9 +323,11 @@ Maya`,
                     subtext: "Here is the latest update on your request regarding the customer refund:",
                     ticket: {
                         id: '#4492',
-                        status: 'OPEN',
+                        status: 'Active',
                         issue: 'Customer Refund - ₹5,000 not received',
-                        raised: '3 days ago'
+                        raised: '3 days ago',
+                        createdOn: 'Jan 23, 2026, 5 days ago',
+                        eta: 'Jan 31'
                     },
                     explanation: {
                         title: "Why is this taking longer?",

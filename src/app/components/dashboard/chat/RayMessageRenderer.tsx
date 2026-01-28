@@ -1989,52 +1989,83 @@ const SupportTicketStatusArtifact = ({ data, onButtonClick, onSuggestionClick, i
             )}
           </div>
 
-          {/* Support Ticket Card (Phase 2+) */}
+          {/* Support Ticket Card (Phase 2+) - New Figma Design */}
           {phase >= 2 && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
-              className="border border-[#e2e8f0] rounded-[12px] overflow-hidden bg-white"
+              className="relative rounded-[12px] overflow-hidden shadow-[0px_6px_32px_4px_rgba(184,196,214,0.06)]"
+              style={{ background: 'linear-gradient(180deg, #ffffff 0%, #ffffff 72%, #E3F6FF 100%)' }}
             >
-              {/* Card Header */}
-              <div className="p-[16px] border-b border-[#e2e8f0] flex items-center justify-between">
-                <div className="flex items-center gap-[8px]">
-                  <span className="text-[16px] font-semibold text-[#192839]">Ticket {data.ticket.id}</span>
-                  <span className="px-[8px] py-[2px] bg-[#FEF3C7] text-[#B45309] text-[12px] font-semibold rounded-full uppercase">
-                    {data.ticket.status}
+              {/* Inner border effect */}
+              <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_-1.5px_0px_1px_white,inset_0px_1.5px_0px_1px_white]" />
+
+              <div className="flex flex-col gap-[19px] px-[15px] py-[12px]">
+                {/* Header Row */}
+                <div className="flex items-center justify-between pt-[8px]">
+                  <div className="flex gap-[16px] items-center">
+                    {/* Ticket Icon */}
+                    <div className="bg-[rgba(108,132,157,0.06)] flex items-center justify-center rounded-[4px] w-[40px] h-[40px]">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M15 5v2" />
+                        <path d="M15 11v2" />
+                        <path d="M15 17v2" />
+                        <path d="M5 5h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4V7a2 2 0 0 1 2-2z" />
+                      </svg>
+                    </div>
+                    {/* Title & Subtitle */}
+                    <div className="flex flex-col">
+                      <span className="font-['TASA_Orbiter_Display',sans-serif] font-semibold text-[18px] leading-[24px] text-[#3a4755]">
+                        {data.ticket.issue}
+                      </span>
+                      <span className="font-['TASA_Orbiter_Display',sans-serif] text-[18px] leading-[24px] text-[#768ea7]">
+                        Ticket {data.ticket.id}
+                      </span>
+                    </div>
+                  </div>
+                  {/* ETA Badge */}
+                  <span className="px-[8px] py-[4px] bg-[#E3F6FF] text-[#0284c7] text-[12px] font-medium rounded-[4px]">
+                    ETA: {data.ticket.eta || 'Jan 31'}
                   </span>
                 </div>
-              </div>
 
-              {/* Card Body */}
-              <div className="p-[16px] flex flex-col gap-[12px]">
-                <div className="flex flex-col gap-[4px]">
-                  <span className="text-[12px] font-medium text-[#768ea7] uppercase tracking-wide">Issue</span>
-                  <span className="text-[14px] text-[#40566d]">{data.ticket.issue}</span>
+                {/* Status Rows */}
+                <div className="flex flex-col gap-[12px]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[12px] font-medium text-[#768ea7] leading-[18px]">Status</span>
+                    <span className="text-[14px] font-medium text-[#40566d] leading-[20px]">
+                      {data.ticket.status}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[12px] font-medium text-[#768ea7] leading-[18px]">Created On</span>
+                    <span className="text-[14px] font-medium text-[#40566d] leading-[20px]">
+                      {data.ticket.createdOn || data.ticket.raised}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex flex-col gap-[4px]">
-                  <span className="text-[12px] font-medium text-[#768ea7] uppercase tracking-wide">Raised</span>
-                  <span className="text-[14px] text-[#40566d]">{data.ticket.raised}</span>
-                </div>
-              </div>
 
-              {/* Card Footer with Buttons */}
-              <div className="p-[16px] border-t border-[#e2e8f0] flex gap-[12px]">
-                {data.buttons.map((button: any, i: number) => (
+                {/* Action Buttons */}
+                <div className="flex gap-[12px]">
+                  {/* Primary Button - Gradient */}
                   <button
-                    key={i}
-                    onClick={() => onButtonClick?.(button.label)}
-                    className={clsx(
-                      'px-[16px] py-[8px] rounded-lg font-medium text-[14px] transition-all duration-200',
-                      button.variant === 'primary'
-                        ? 'bg-[#2563EB] text-white hover:bg-[#1d4ed8] shadow-sm'
-                        : 'bg-[#f1f5fa] text-[#40566d] hover:bg-[#e2e8f0] border border-[#e2e8f0]'
-                    )}
+                    onClick={() => onButtonClick?.('Escalate')}
+                    className="flex-1 h-[36px] rounded-[8px] text-white text-[12px] font-semibold tracking-[-0.156px] relative overflow-hidden shadow-[0px_1px_1px_0px_rgba(0,0,0,0.06)]"
+                    style={{ background: 'linear-gradient(-25deg, #1566F1 55%, #4793FD 99%)' }}
                   >
-                    {button.label}
+                    <span className="relative z-10">Escalate this Ticket</span>
+                    <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_2px_0px_0px_rgba(255,255,255,0.2),inset_0px_-2px_0px_0px_rgba(255,255,255,0.2)]" />
                   </button>
-                ))}
+                  {/* Secondary Button */}
+                  <button
+                    onClick={() => onButtonClick?.('Priority Support')}
+                    className="flex-1 h-[36px] bg-white rounded-[8px] text-[#050505] text-[12px] font-semibold tracking-[-0.156px] relative"
+                  >
+                    <span className="relative z-10">Pay ₹99 for Priority Support</span>
+                    <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_-1px_0.5px_0px_rgba(0,0,0,0.2),inset_0px_0px_0px_1px_#d1d8db]" />
+                  </button>
+                </div>
               </div>
             </motion.div>
           )}
