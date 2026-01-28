@@ -217,9 +217,9 @@ export const TransactionPreviewPane: React.FC<TransactionPreviewPaneProps> = ({
         {/* Amount display */}
         <div className="flex flex-col items-center gap-[8px] pt-[8px]">
           <div className="flex items-baseline">
-            <span className="text-[72px] font-semibold text-[#192839] leading-[78px]">₹</span>
-            <span className="text-[72px] font-semibold text-[#192839] leading-[78px]">{mainAmount}</span>
-            <span className="text-[72px] font-semibold text-[#192839] leading-[78px]">.{decimal.padEnd(2, '0')}</span>
+            <span className="text-[24px] font-semibold text-[#768ea7] leading-[28px]">₹</span>
+            <span className="text-[40px] font-semibold text-[#192839] leading-[44px]">{mainAmount}</span>
+            <span className="text-[24px] font-semibold text-[#768ea7] leading-[28px]">.{decimal.padEnd(2, '0')}</span>
           </div>
 
           {/* Status badge */}
