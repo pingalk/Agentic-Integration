@@ -146,8 +146,39 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
   // Refs to prevent double execution in React StrictMode
   const demoFlowStartedRef = useRef(false);
 
+  // Rauno-inspired easing function: ease-out-expo for snappy, fluid feel
+  const easeOutExpo = (t: number): number => {
+    return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+  };
+
+  // Custom smooth scroll with JavaScript animation for fluid, Rauno-inspired motion
+  const smoothScrollTo = (container: HTMLElement, targetScrollTop: number, duration: number, onComplete?: () => void) => {
+    const startScrollTop = container.scrollTop;
+    const distance = targetScrollTop - startScrollTop;
+    const startTime = performance.now();
+
+    const animateScroll = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easedProgress = easeOutExpo(progress);
+
+      container.scrollTop = startScrollTop + (distance * easedProgress);
+
+      if (progress < 1) {
+        requestAnimationFrame(animateScroll);
+      } else {
+        if (onComplete) {
+          onComplete();
+        }
+      }
+    };
+
+    requestAnimationFrame(animateScroll);
+  };
+
   // Helper function to scroll a message element to the top of the viewport
   // Used by VARUN_ELEGANT_SCROLL for smooth, sequenced scroll behavior
+  // Uses custom JS animation for fluid, Rauno-inspired motion
   const scrollMessageToTop = (messageId: string, callback?: () => void) => {
     requestAnimationFrame(() => {
       setTimeout(() => {
@@ -157,17 +188,10 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
           const containerRect = container.getBoundingClientRect();
           const elementRect = userMessageEl.getBoundingClientRect();
           const topOffset = 24;
-          const scrollTop = container.scrollTop + (elementRect.top - containerRect.top) - topOffset;
+          const targetScrollTop = Math.max(0, container.scrollTop + (elementRect.top - containerRect.top) - topOffset);
 
-          container.scrollTo({
-            top: Math.max(0, scrollTop),
-            behavior: 'smooth'
-          });
-
-          // Call callback after scroll animation completes (~400ms for smooth scroll)
-          if (callback) {
-            setTimeout(callback, 450);
-          }
+          // Use custom smooth scroll with 500ms duration for fluid feel
+          smoothScrollTo(container, targetScrollTop, 500, callback);
         } else if (callback) {
           callback();
         }
@@ -714,6 +738,10 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
     // Only handle AI message scrolling here - user message scroll is handled by the smart scroll effect
     if (lastMessage.sender !== 'ai' || lastMessage.isThinking) return;
 
+    // Skip auto-scroll for Varun's elegant scroll flow - the user message is already positioned at top
+    // and we don't want to interfere with the smooth animation sequence
+    if (VARUN_ELEGANT_SCROLL && currentPersona.id === 'varun') return;
+
     setTimeout(() => {
       const messageEl = messageRefs.current.get(lastMessage.id);
       if (!messageEl || !scrollContainerRef.current) return;
@@ -721,7 +749,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
       // AI message: scroll to show start of response
       messageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
-  }, [messages.length]);
+  }, [messages.length, currentPersona.id]);
 
   // Handle Scroll to toggle button visibility
   const handleScroll = () => {
