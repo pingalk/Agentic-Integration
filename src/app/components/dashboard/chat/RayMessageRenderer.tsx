@@ -2413,7 +2413,7 @@ const TicketEscalatedArtifact = ({ data, onSuggestionClick, isLast }: any) => {
 };
 
 // --- Shyam's Failed Payment Diagnosis Artifact ---
-const FailedPaymentDiagnosisArtifact = ({ data, onSuggestionClick, isLast }: any) => {
+const FailedPaymentDiagnosisArtifact = ({ data, onSuggestionClick, isLast, highlightedSuggestionIndex = null }: any) => {
   const [subtextStarted, setSubtextStarted] = useState(false);
   const narrativeCompleteCalledRef = React.useRef(false);
 
@@ -2548,21 +2548,24 @@ const FailedPaymentDiagnosisArtifact = ({ data, onSuggestionClick, isLast }: any
             >
               <h3 className="text-[18px] leading-[26px] font-semibold text-[#193f47]">Suggestions</h3>
               <div className="flex flex-col gap-[2px]">
-                {data.suggestions.map((sug: string, i: number) => (
-                  <motion.button
-                    key={i}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.1 }}
-                    onClick={() => onSuggestionClick?.(sug)}
-                    className="flex items-center gap-[4px] p-[4px] text-left w-full rounded-[4px] hover:bg-[#f1f5fa] group"
-                  >
-                    <div className="shrink-0 size-[20px] rounded-full flex items-center justify-center bg-[#f1f5fa] group-hover:bg-white">
-                      <span className="text-[10px] font-medium text-[#40566d] group-hover:text-[#2980e1]">{i + 1}</span>
-                    </div>
-                    <p className="text-[16px] leading-[26px] tracking-[0.16px] font-medium text-[#40566d] group-hover:text-[#2980e1]">{sug}</p>
-                  </motion.button>
-                ))}
+                {data.suggestions.map((sug: string, i: number) => {
+                  const isHighlighted = highlightedSuggestionIndex === i;
+                  return (
+                    <motion.button
+                      key={i}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.1 }}
+                      onClick={() => onSuggestionClick?.(sug)}
+                      className={`flex items-center gap-[4px] p-[4px] text-left w-full rounded-[4px] hover:bg-[#f1f5fa] group ${isHighlighted ? 'bg-[#f1f5fa]' : ''}`}
+                    >
+                      <div className={`shrink-0 size-[20px] rounded-full flex items-center justify-center ${isHighlighted ? 'bg-white' : 'bg-[#f1f5fa] group-hover:bg-white'}`}>
+                        <span className={`text-[10px] font-medium ${isHighlighted ? 'text-[#2980e1]' : 'text-[#40566d] group-hover:text-[#2980e1]'}`}>{i + 1}</span>
+                      </div>
+                      <p className={`text-[16px] leading-[26px] tracking-[0.16px] font-medium ${isHighlighted ? 'text-[#2980e1]' : 'text-[#40566d] group-hover:text-[#2980e1]'}`}>{sug}</p>
+                    </motion.button>
+                  );
+                })}
               </div>
             </motion.div>
           )}
@@ -3361,6 +3364,7 @@ export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast
           data={data.artifact.data}
           isLast={isLast}
           onSuggestionClick={onSuggestionClick}
+          highlightedSuggestionIndex={highlightedSuggestionIndex}
         />
       </div>
     );
