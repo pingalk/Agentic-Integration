@@ -161,24 +161,28 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
         // This gives maximum room for Ray's response to appear below
         const lastUserMessage = [...messages].reverse().find(m => m.sender === 'user');
         if (lastUserMessage && scrollContainerRef.current) {
-          setTimeout(() => {
-            const userMessageEl = messageRefs.current.get(lastUserMessage.id);
-            const container = scrollContainerRef.current;
-            if (userMessageEl && container) {
-              // Calculate the element's position relative to the scroll container
-              const containerRect = container.getBoundingClientRect();
-              const elementRect = userMessageEl.getBoundingClientRect();
+          // Use requestAnimationFrame to ensure DOM is fully rendered
+          requestAnimationFrame(() => {
+            setTimeout(() => {
+              const userMessageEl = messageRefs.current.get(lastUserMessage.id);
+              const container = scrollContainerRef.current;
+              if (userMessageEl && container) {
+                // Calculate the element's position relative to the scroll container
+                const containerRect = container.getBoundingClientRect();
+                const elementRect = userMessageEl.getBoundingClientRect();
 
-              // Calculate scroll position to put element at the very top of container
-              // Account for current scroll position and the offset between element and container top
-              const scrollTop = container.scrollTop + (elementRect.top - containerRect.top);
+                // Calculate scroll position to put element near the top of container
+                // Subtract a small offset (24px) for breathing room at the top
+                const topOffset = 24;
+                const scrollTop = container.scrollTop + (elementRect.top - containerRect.top) - topOffset;
 
-              container.scrollTo({
-                top: scrollTop,
-                behavior: 'smooth'
-              });
-            }
-          }, 100);
+                container.scrollTo({
+                  top: Math.max(0, scrollTop),
+                  behavior: 'smooth'
+                });
+              }
+            }, 50);
+          });
         }
       } else if (ENABLE_ROLL_UP_ANIMATION && latestMessage?.sender === 'user') {
         // Legacy roll-up: only scroll to top for user messages
