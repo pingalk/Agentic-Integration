@@ -10,6 +10,7 @@ import clsx from 'clsx';
 import { PerplexityStreamText } from './PerplexityStreamingTypography';
 import { RayThinking } from '../RayThinking';
 import { useStreamSequencer } from '../useStreamSequencer';
+import { SmartHighlight, SmartHighlightWithBold } from './SmartHighlight';
 
 // --- Elegant Tooltip Component ---
 const Tooltip = ({ children, text, position = 'top' }: { children: React.ReactNode; text: string; position?: 'top' | 'bottom' | 'left' | 'right' }) => {
@@ -384,7 +385,9 @@ const InvestigationReportArtifact = ({ data, onRowClick, onSuggestionClick, isLa
                   {data.stats.map((stat: any, i: number) => (
                     <li key={i} className="text-[16px] leading-[24px] text-[#40566d]">
                       <span className="text-[#40566d]">{stat.label}: </span>
-                      <span className="font-semibold text-[#192839]">{stat.value}</span>
+                      <span className="font-semibold">
+                        <SmartHighlight text={stat.value} />
+                      </span>
                     </li>
                   ))}
                 </motion.ul>
@@ -422,13 +425,17 @@ const InvestigationReportArtifact = ({ data, onRowClick, onSuggestionClick, isLa
                           className="relative flex h-[56px] items-center px-[16px] border-b border-[#E4E7EC] last:border-b-0 hover:bg-[#F9FAFB] transition-colors group/row cursor-pointer"
                           onClick={() => onRowClick?.(row)}
                         >
-                          <div className="w-[100px] shrink-0 font-semibold text-[#1D2939] text-[14px] pl-[20px]">{row.amount}</div>
+                          <div className="w-[100px] shrink-0 font-semibold text-[14px] pl-[20px]">
+                              <SmartHighlight text={row.amount} />
+                          </div>
                           <div className="w-[90px] shrink-0">
                             <span className="inline-flex items-center h-[20px] px-[8px] bg-[rgba(18,145,208,0.09)] text-[#0f78ad] text-[12px] font-medium leading-[18px] rounded-[1000px]">
                               {row.status}
                             </span>
                           </div>
-                          <div className="w-[160px] shrink-0 text-[#5D6B82] text-[14px] font-normal">{row.date}</div>
+                          <div className="w-[160px] shrink-0 text-[14px] font-normal">
+                              <SmartHighlight text={row.date} className="text-[#5D6B82]" />
+                          </div>
                           <div className="w-[130px] shrink-0 text-[#5D6B82] font-mono text-[14px] font-normal">
                             <CopyableText text={row.rrn} className="text-[#5D6B82]" />
                           </div>
@@ -469,7 +476,7 @@ const InvestigationReportArtifact = ({ data, onRowClick, onSuggestionClick, isLa
                   {data.resolution.title}
                 </h3>
                 <p className="text-[16px] leading-[26px] text-[#40566d] tracking-[0.16px] whitespace-pre-line">
-                  {parseMarkdownBold(data.resolution.content)}
+                  <SmartHighlightWithBold text={data.resolution.content} />
                 </p>
               </motion.div>
             )}
@@ -938,7 +945,7 @@ const BulletListWithButtonsArtifact = ({
                 {bullet.bold && (
                   <span className="font-semibold text-[#192839]">{bullet.bold} </span>
                 )}
-                <span>{parseMarkdownBold(bullet.text)}</span>
+                <SmartHighlightWithBold text={bullet.text} />
               </motion.li>
             ))}
           </motion.ul>
@@ -1102,7 +1109,7 @@ const SettingUpdatedWithBulletsArtifact = ({
                   transition={{ delay: i * 0.15, duration: 0.3 }}
                   className="text-[16px] leading-[26px] text-[#40566d] tracking-[0.16px]"
                 >
-                  {parseMarkdownBold(bullet.text)}
+                  <SmartHighlightWithBold text={bullet.text} />
                 </motion.li>
               ))}
             </motion.ul>
@@ -1283,14 +1290,20 @@ const PaymentLinksCreatedArtifact = ({
                         <div className="w-[260px] text-[14px] font-normal pl-[20px]">
                           <CopyableText text={row.linkUrl} isLink />
                         </div>
-                        <div className="w-[120px] font-semibold text-[#1D2939] text-[14px]">{row.amount}</div>
+                        <div className="w-[120px] font-semibold text-[14px]">
+                          <SmartHighlight text={row.amount} />
+                        </div>
                         <div className="w-[80px]">
                           <span className="inline-flex items-center h-[20px] px-[8px] bg-[rgba(16,185,129,0.1)] text-[#059669] text-[12px] font-medium leading-[18px] rounded-[1000px]">
                             {row.status}
                           </span>
                         </div>
-                        <div className="w-[180px] text-[#5D6B82] text-[14px] font-normal">{row.createdOn}</div>
-                        <div className="flex-1 text-[#5D6B82] text-[14px] font-normal">{row.expiry}</div>
+                        <div className="w-[180px] text-[14px] font-normal">
+                          <SmartHighlight text={row.createdOn} className="text-[#5D6B82]" />
+                        </div>
+                        <div className="flex-1 text-[14px] font-normal">
+                          <SmartHighlight text={row.expiry} className="text-[#5D6B82]" />
+                        </div>
                       </motion.div>
                     ))}
                   </div>
@@ -1324,7 +1337,7 @@ const PaymentLinksCreatedArtifact = ({
                   {data.followup.title}
                 </h3>
                 <p className="text-[16px] leading-[26px] text-[#40566d] tracking-[0.16px]">
-                  {parseMarkdownBold(data.followup.body)}
+                  <SmartHighlightWithBold text={data.followup.body} />
                 </p>
 
                 {/* Action Buttons */}
@@ -1503,7 +1516,9 @@ const MayaTransactionsReportArtifact = ({ data, onRowClick, onSuggestionClick, i
                             className="relative flex h-[56px] items-center px-[16px] border-b border-[#E4E7EC] last:border-b-0 hover:bg-[#F9FAFB] transition-colors group/row cursor-pointer"
                             onClick={() => onRowClick?.({ ...row, email: 'arvind@gmail.com' })}
                           >
-                            <div className="w-[120px] shrink-0 font-semibold text-[#1D2939] text-[14px] pl-[20px]">{row.amount}</div>
+                            <div className="w-[120px] shrink-0 font-semibold text-[14px] pl-[20px]">
+                              <SmartHighlight text={row.amount} />
+                            </div>
                             <div className="w-[90px] shrink-0">
                               <span className={clsx(
                                 "inline-flex items-center h-[20px] px-[8px] text-[12px] font-medium leading-[18px] rounded-[1000px]",
@@ -1512,8 +1527,12 @@ const MayaTransactionsReportArtifact = ({ data, onRowClick, onSuggestionClick, i
                                 {row.status}
                               </span>
                             </div>
-                            <div className="w-[120px] shrink-0 text-[#5D6B82] text-[14px] font-normal">{row.method}</div>
-                            <div className="w-[180px] shrink-0 text-[#5D6B82] text-[14px] font-normal">{row.date}</div>
+                            <div className="w-[120px] shrink-0 text-[14px] font-normal">
+                              <SmartHighlight text={row.method} className="text-[#5D6B82]" />
+                            </div>
+                            <div className="w-[180px] shrink-0 text-[14px] font-normal">
+                              <SmartHighlight text={row.date} className="text-[#5D6B82]" />
+                            </div>
                             <div className="min-w-[130px] flex-1 text-[14px] font-normal">
                               <CopyableText text={row.rrn} className="text-[#5D6B82] font-mono" />
                             </div>
@@ -1556,7 +1575,7 @@ const MayaTransactionsReportArtifact = ({ data, onRowClick, onSuggestionClick, i
                 <div className="flex flex-col gap-[4px]">
                   <span className="text-[14px] font-semibold text-[#1291D0]">Ray Insight</span>
                   <p className="text-[15px] leading-[24px] text-[#40566d]">
-                    {parseMarkdownBold(data.insight.text)}
+                    <SmartHighlightWithBold text={data.insight.text} />
                   </p>
                 </div>
               </motion.div>
@@ -1722,7 +1741,7 @@ const MayaDiagnosisArtifact = ({ data, onSuggestionClick, isLast, highlightedSug
                   {data.resolution.title}
                 </h3>
                 <p className="text-[16px] leading-[26px] text-[#40566d] tracking-[0.16px]">
-                  {parseMarkdownBold(data.resolution.content)}
+                  <SmartHighlightWithBold text={data.resolution.content} />
                 </p>
               </motion.div>
             )}

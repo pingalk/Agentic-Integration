@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import clsx from 'clsx';
+import { SmartHighlightWithBold } from './SmartHighlight';
 
 interface PerplexityStreamProps {
   content: string;
@@ -74,9 +75,25 @@ export const PerplexityStreamText = ({
     };
   }, [totalLength, speed, onComplete]);
 
+  // Check if streaming is complete
+  const isComplete = visibleCount >= totalLength;
+
   // 3. Render logic
   // We determine how much of each segment to show based on `visibleCount`
   const renderContent = () => {
+    // Once streaming is complete, use SmartHighlightWithBold for enhanced highlighting
+    if (isComplete && content) {
+      return (
+        <SmartHighlightWithBold
+          text={content}
+          className={clsx(
+            inheritStyles ? "" : "text-slate-600"
+          )}
+        />
+      );
+    }
+
+    // During streaming, render character by character
     let currentCount = 0;
     const elements: React.ReactNode[] = [];
 
@@ -106,11 +123,11 @@ export const PerplexityStreamText = ({
       );
 
       currentCount += segment.text.length;
-      
+
       // If we are partly through this segment, we are done
       if (visibleCount < segmentEnd) break;
     }
-    
+
     return elements;
   };
 

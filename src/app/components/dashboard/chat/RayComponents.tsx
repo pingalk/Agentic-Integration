@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Copy, ThumbsUp, ThumbsDown, Share2, Download, Maximize2, ExternalLink, AlertCircle, Check, CreditCard, Sparkles } from 'lucide-react';
 import clsx from 'clsx';
+import { SmartHighlight } from './SmartHighlight';
 
 // --- 2. Smart Table (Animation + Context + Dock) ---
 const tableContainer = {
@@ -45,8 +46,8 @@ export const SmartTable = ({ headers, rows }: { headers: string[], rows: any[] }
                           {isStatus ? (
                               <div className={clsx(
                                 "flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium border",
-                                value === 'Refunded' 
-                                  ? "bg-red-50 text-red-700 border-red-100" 
+                                value === 'Refunded'
+                                  ? "bg-red-50 text-red-700 border-red-100"
                                   : "bg-green-50 text-green-700 border-green-100"
                               )}>
                                 {value === 'Refunded' ? <AlertCircle size={10} /> : <Check size={10} />}
@@ -54,10 +55,10 @@ export const SmartTable = ({ headers, rows }: { headers: string[], rows: any[] }
                               </div>
                           ) : (
                               <span className={clsx(
-                                "truncate max-w-[140px]", 
-                                isAmount ? "font-mono font-medium text-slate-900" : "text-slate-600"
+                                "truncate max-w-[140px]",
+                                isAmount ? "font-mono" : ""
                               )}>
-                                {value}
+                                <SmartHighlight text={String(value)} className="text-slate-600" />
                               </span>
                           )}
 
