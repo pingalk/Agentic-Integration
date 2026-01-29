@@ -3313,13 +3313,8 @@ const InstantSettlementOfferArtifact = ({ data, onSuggestionClick, isLast, highl
           variants={containerVar}
         >
           <div className="flex flex-col gap-[16px]">
-            {/* Headline with Lightning Icon */}
-            <motion.div variants={itemVar} className="flex gap-[8px] items-start">
-              <div className="shrink-0 size-[24px] bg-[#FEF3C7] rounded-full flex items-center justify-center mt-[2px]">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-                </svg>
-              </div>
+            {/* Headline */}
+            <motion.div variants={itemVar}>
               <h3 className="text-[18px] leading-[24px] font-semibold text-[#020202]">
                 <PerplexityStreamText
                   content={data.headline}
