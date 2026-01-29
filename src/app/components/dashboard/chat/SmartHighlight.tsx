@@ -26,13 +26,13 @@ const HIGHLIGHT_PATTERNS = {
 
 // Highlight styles for different types (heavier font weight + #202020 color)
 const HIGHLIGHT_STYLES: Record<string, string> = {
-  amount: 'font-bold text-[#202020]',
+  amount: 'font-semibold text-[#202020]',
   date: 'font-semibold text-[#202020]',
   time: 'font-semibold text-[#202020]',
   id: 'font-mono font-semibold text-[#202020]',
   duration: 'font-semibold text-[#202020]',
-  percentage: 'font-bold text-[#202020]',
-  status: 'font-bold text-[#202020]',
+  percentage: 'font-semibold text-[#202020]',
+  status: 'font-semibold text-[#202020]',
 };
 
 interface HighlightMatch {
