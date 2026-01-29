@@ -4145,7 +4145,7 @@ export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast
         <InstantSettlementChargesArtifact
           data={data.artifact.data}
           onSuggestionClick={onSuggestionClick}
-          onButtonClick={onButtonClick}
+          onButtonClick={onSuggestionClick}
         />
       </div>
     );
@@ -4159,7 +4159,7 @@ export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast
           data={data.artifact.data}
           isLast={isLast}
           onSuggestionClick={onSuggestionClick}
-          onButtonClick={onButtonClick}
+          onButtonClick={onSuggestionClick}
           highlightedSuggestionIndex={highlightedSuggestionIndex}
         />
       </div>

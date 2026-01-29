@@ -24,15 +24,15 @@ const HIGHLIGHT_PATTERNS = {
   status: /\b(?:Processed|Processing|Pending|Failed|Captured|Refunded|Escalated|Completed|Success(?:ful)?|Declined|Approved|Rejected)\b/gi,
 };
 
-// Highlight styles for different types (font-weight only, no color changes)
+// Highlight styles for different types (heavier font weight + #202020 color)
 const HIGHLIGHT_STYLES: Record<string, string> = {
-  amount: 'font-semibold',
-  date: 'font-medium',
-  time: 'font-medium',
-  id: 'font-mono font-medium',
-  duration: 'font-medium',
-  percentage: 'font-semibold',
-  status: 'font-semibold',
+  amount: 'font-bold text-[#202020]',
+  date: 'font-semibold text-[#202020]',
+  time: 'font-semibold text-[#202020]',
+  id: 'font-mono font-semibold text-[#202020]',
+  duration: 'font-semibold text-[#202020]',
+  percentage: 'font-bold text-[#202020]',
+  status: 'font-bold text-[#202020]',
 };
 
 interface HighlightMatch {

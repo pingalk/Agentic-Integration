@@ -613,32 +613,28 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
     }, 400);
   }, [initialQuery, briefingReviewHandled, messages.length, currentPersona.theme, briefingReviewResponses]);
 
-  // Auto-scroll: user messages to top of viewport, AI messages show start
+  // Auto-scroll: AI messages show start (user message scroll handled by smart scroll effect above)
+  // Note: prevMessageCountRef is updated in the effect above, so we use a local comparison here
+  const prevAiScrollLengthRef = useRef(0);
   useEffect(() => {
     if (!scrollContainerRef.current || messages.length === 0) return;
 
-    const isNewMessage = messages.length > prevMessageCountRef.current;
-    prevMessageCountRef.current = messages.length;
+    const isNewMessage = messages.length > prevAiScrollLengthRef.current;
+    prevAiScrollLengthRef.current = messages.length;
 
     if (!isNewMessage) return;
 
     const lastMessage = messages[messages.length - 1];
 
+    // Only handle AI message scrolling here - user message scroll is handled by the smart scroll effect
+    if (lastMessage.sender !== 'ai' || lastMessage.isThinking) return;
+
     setTimeout(() => {
       const messageEl = messageRefs.current.get(lastMessage.id);
       if (!messageEl || !scrollContainerRef.current) return;
 
-      if (lastMessage.sender === 'user') {
-        // User message: scroll so it's at the TOP of viewport
-        const targetScroll = messageEl.offsetTop - 24;
-        scrollContainerRef.current.scrollTo({
-          top: Math.max(0, targetScroll),
-          behavior: 'smooth'
-        });
-      } else {
-        // AI message: scroll to show start of response
-        messageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+      // AI message: scroll to show start of response
+      messageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
   }, [messages.length]);
 
