@@ -230,6 +230,8 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
       } else if (ENABLE_SMART_SCROLL_ON_THINKING && latestMessage?.isThinking) {
         // Smart scroll: When Ray enters thinking state, scroll the last user message to top
         // This gives maximum room for Ray's response to appear below
+        // Note: We use a longer delay (400ms) to allow any previous scroll animations to complete
+        // and prevent the "jerk" effect when multiple scrolls happen in quick succession
         const lastUserMessage = [...messages].reverse().find(m => m.sender === 'user');
         if (lastUserMessage && scrollContainerRef.current) {
           // Use requestAnimationFrame to ensure DOM is fully rendered
@@ -252,7 +254,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
                   behavior: 'smooth'
                 });
               }
-            }, 50);
+            }, 400);
           });
         }
       } else if (ENABLE_ROLL_UP_ANIMATION && latestMessage?.sender === 'user') {
