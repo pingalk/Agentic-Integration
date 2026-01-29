@@ -500,7 +500,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                      </div>
 
                      {/* Dynamic Cards Grid */}
-                     <div className="w-full max-w-full md:max-w-[850px]">
+                     <div className="w-full max-w-full md:max-w-[850px] mt-[80px]">
                         {/* Responsive Grid Layout with Equal Spacing */}
                         <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-3 md:gap-4 auto-rows-min">
                         
