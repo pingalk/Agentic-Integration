@@ -3339,6 +3339,62 @@ const InstantSettlementOfferArtifact = ({ data, onSuggestionClick, isLast, highl
                 />
               </motion.div>
             )}
+
+            {/* Instant Settlement Card */}
+            {subtextStarted && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.4 }}
+                className="relative w-full max-w-[400px] h-[180px] rounded-[12px] border border-[#dee1e3] overflow-hidden shadow-[0px_6px_32px_4px_rgba(184,196,214,0.06)]"
+                style={{ background: 'linear-gradient(180deg, rgb(250, 250, 251) 0%, rgb(255, 255, 255) 28%, rgb(255, 255, 255) 72%, rgb(243, 244, 245) 100%)' }}
+              >
+                {/* Background gradient blob */}
+                <div className="absolute -right-[60px] -bottom-[80px] w-[200px] h-[200px] rounded-full bg-gradient-to-br from-[#e0e7ff] to-[#c7d2fe] opacity-50 blur-[40px]" />
+
+                {/* 3D Coin image */}
+                <div className="absolute bottom-[5px] right-[-2px] w-[139px] h-[129px]">
+                  <svg viewBox="0 0 139 129" fill="none" className="w-full h-full">
+                    <ellipse cx="69.5" cy="64.5" rx="55" ry="25" fill="url(#coinGradient)" />
+                    <ellipse cx="69.5" cy="59.5" rx="55" ry="25" fill="url(#coinTopGradient)" />
+                    <defs>
+                      <linearGradient id="coinGradient" x1="69.5" y1="39.5" x2="69.5" y2="89.5" gradientUnits="userSpaceOnUse">
+                        <stop stopColor="#a5b4fc" />
+                        <stop offset="1" stopColor="#6366f1" />
+                      </linearGradient>
+                      <linearGradient id="coinTopGradient" x1="69.5" y1="34.5" x2="69.5" y2="84.5" gradientUnits="userSpaceOnUse">
+                        <stop stopColor="#c7d2fe" />
+                        <stop offset="1" stopColor="#a5b4fc" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+
+                {/* Title */}
+                <p className="absolute left-[20px] top-[18px] font-['TASA_Orbiter_Display',sans-serif] font-semibold text-[18px] leading-[24px] text-[#192839]">
+                  Instant Settlements
+                </p>
+
+                {/* Checkmark items */}
+                <div className="absolute left-[19px] bottom-[21px] flex flex-col gap-[4px]">
+                  {['works even on bank holidays, non-banking hours', 'same day settlements', 'bank transfers in 10s'].map((text, i) => (
+                    <div key={i} className="flex items-center gap-[8px]">
+                      <div className="size-[24px] flex items-center justify-center">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      </div>
+                      <p className="font-['Inter',sans-serif] font-medium text-[12px] leading-[18px] text-[#768ea7]">
+                        {text}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Inner shadow overlay */}
+                <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_-1.5px_0px_1px_white]" />
+              </motion.div>
+            )}
           </div>
 
           {/* Divider */}
