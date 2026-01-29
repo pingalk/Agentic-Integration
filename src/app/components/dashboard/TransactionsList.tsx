@@ -729,13 +729,16 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({ onViewDetail
         </div>
 
         {/* Ray Insight Card */}
-        <div className="w-full relative rounded-[12px] overflow-hidden bg-gradient-to-r from-[#F0F5FF] to-[#FFFFFF] border border-[#DEE1E3] p-[12px] flex items-center gap-[12px] shadow-[0px_2px_8px_rgba(0,0,0,0.02)]">
-             <div className="w-[24px] h-[24px] shrink-0 flex items-center justify-center">
-                 <Ray />
+        <div className="w-full relative rounded-[12px] overflow-hidden bg-[rgba(18,145,208,0.06)] border border-[rgba(18,145,208,0.12)] p-[12px] flex items-center gap-[12px]">
+             <div className="w-[16px] h-[16px] shrink-0 flex items-center justify-center">
+                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                   <path d="M8 1L9.79 5.42L14.5 6.02L11 9.34L11.94 14L8 11.77L4.06 14L5 9.34L1.5 6.02L6.21 5.42L8 1Z" fill="#1291D0" stroke="#1291D0" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                 </svg>
              </div>
-             <div className="flex flex-col gap-[2px]">
-                 <p className="text-[#192839] text-[14px] leading-[20px] font-sans">
-                     <span className="font-medium">Ray Insight:</span> <span className="text-[#40566D]">30% of your failed payments this week were due to </span> <span className="font-medium text-[#192839]">insufficient funds</span>.
+             <div className="flex flex-col gap-[4px]">
+                 <span className="text-[14px] font-semibold text-[#1291D0]">Ray Insight</span>
+                 <p className="text-[15px] leading-[24px] text-[#40566d]">
+                     30% of your failed payments this week were due to <span className="font-semibold text-[#192839]">insufficient funds</span>.
                  </p>
              </div>
              <div className="ml-auto">

@@ -276,6 +276,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
   const isNegative = currentPersona.theme === 'negative';
   const isNeutral = currentPersona.theme === 'neutral'; // Sarah
   const isPositive = currentPersona.theme === 'positive'; // Maya
+  const isVarun = currentPersona.id === 'varun'; // Varun has special positive-like display despite neutral theme
 
   // Dynamic Styles
   const greetingColor = isNegative ? 'text-[#0e1c2a]' : 'text-[#094c85]';
@@ -604,13 +605,15 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                               hoveredIndex={hoveredBriefingItem}
                               onHover={setHoveredBriefingItem}
                               onReviewClick={() => handleBriefingReviewClick(1)}
-                              actionLabel={isNegative || isNeutral ? "Fix with Ray" : "Review with Ray"}
+                              actionLabel={isNegative || (isNeutral && !isVarun) ? "Fix with Ray" : "Review with Ray"}
                             >
                               {isNegative
                                 ? <>Your refund volume for last 3 days was unusually high</>
-                                : isNeutral
-                                  ? <>Your refund volumes are unusually high</>
-                                  : <>No refunds or disputes so far today</>
+                                : isVarun
+                                  ? <>Payment volumes are on huge surge</>
+                                  : isNeutral
+                                    ? <>Your refund volumes are unusually high</>
+                                    : <>No refunds or disputes so far today</>
                               }
                             </BriefingItem>
 
@@ -647,7 +650,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                         <motion.div
                           className={clsx(
                             "bg-white border border-solid overflow-clip rounded-[10px] h-[201px] w-full relative cursor-pointer",
-                            isNegative ? "border-[#fee4e2]" : isNeutral ? "border-[#fed7aa]" : "border-[#d1fae5]"
+                            isNegative ? "border-[#fee4e2]" : (isNeutral && !isVarun) ? "border-[#fed7aa]" : "border-[#d1fae5]"
                           )}
                           initial={{ opacity: 0, y: 26 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -664,7 +667,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                             <div className="absolute inset-[-21.21%_-12.12%]">
                               <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 520.69 341.067">
                                 <g filter="url(#filter0_f_stats_bg1)">
-                                  <path d={svgPathsStats.pd204a80} fill={isNegative ? "#FA8282" : isNeutral ? "#FDBA74" : "#6EE7B7"} />
+                                  <path d={svgPathsStats.pd204a80} fill={isNegative ? "#FA8282" : (isNeutral && !isVarun) ? "#FDBA74" : "#6EE7B7"} />
                                 </g>
                                 <defs>
                                   <filter colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse" height="341.067" id="filter0_f_stats_bg1" width="520.691" x="0" y="0">
@@ -680,7 +683,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                             <div className="absolute inset-[-21.21%_-12.12%]">
                               <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 520.69 341.067">
                                 <g filter="url(#filter0_f_stats_bg2)">
-                                  <path d={svgPathsStats.pd204a80} fill={isNegative ? "#FA8282" : isNeutral ? "#FDBA74" : "#6EE7B7"} />
+                                  <path d={svgPathsStats.pd204a80} fill={isNegative ? "#FA8282" : (isNeutral && !isVarun) ? "#FDBA74" : "#6EE7B7"} />
                                 </g>
                                 <defs>
                                   <filter colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse" height="341.067" id="filter0_f_stats_bg2" width="520.691" x="0" y="0">
@@ -718,6 +721,35 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                                       <div className="content-stretch flex gap-[2px] items-baseline relative shrink-0">
                                         <span className="font-['Inter',sans-serif] font-semibold leading-[20px] not-italic text-[#192839] text-[14px] opacity-64">₹</span>
                                         <span className="font-['TASA_Orbiter_Display',sans-serif] font-semibold leading-[26px] not-italic text-[#192839] text-[20px]">1,20,000</span>
+                                        <span className="font-['Inter',sans-serif] font-semibold leading-[20px] not-italic text-[#192839] text-[14px] opacity-64">.00</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </>
+                            ) : isVarun ? (
+                              <>
+                                {/* Varun: Payments Collected Row */}
+                                <div className="content-stretch flex items-center justify-between relative shrink-0 w-full">
+                                  <p className="font-['Inter',sans-serif] font-medium leading-[16px] not-italic relative shrink-0 text-[#768ea7] text-[12px] tracking-[0.24px]">PAYMENTS COLLECTED</p>
+                                  <div className="content-stretch flex items-end justify-end relative shrink-0">
+                                    <div className="content-stretch flex items-baseline relative shrink-0">
+                                      <div className="content-stretch flex gap-[2px] items-baseline relative shrink-0">
+                                        <span className="font-['Inter',sans-serif] font-semibold leading-[20px] not-italic text-[#192839] text-[14px] opacity-64">₹</span>
+                                        <span className="font-['TASA_Orbiter_Display',sans-serif] font-semibold leading-[26px] not-italic text-[#192839] text-[20px]">10,40,000</span>
+                                        <span className="font-['Inter',sans-serif] font-semibold leading-[20px] not-italic text-[#192839] text-[14px] opacity-64">.00</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                {/* Varun: Available Balance Row */}
+                                <div className="content-stretch flex items-end justify-between relative shrink-0 w-full">
+                                  <p className="font-['Inter',sans-serif] font-medium leading-[16px] not-italic relative shrink-0 text-[#768ea7] text-[12px] tracking-[0.24px]">AVAILABLE BALANCE</p>
+                                  <div className="content-stretch flex items-end justify-end relative shrink-0">
+                                    <div className="content-stretch flex items-baseline relative shrink-0">
+                                      <div className="content-stretch flex gap-[2px] items-baseline relative shrink-0">
+                                        <span className="font-['Inter',sans-serif] font-semibold leading-[20px] not-italic text-[#192839] text-[14px] opacity-64">₹</span>
+                                        <span className="font-['TASA_Orbiter_Display',sans-serif] font-semibold leading-[26px] not-italic text-[#192839] text-[20px]">13,40,000</span>
                                         <span className="font-['Inter',sans-serif] font-semibold leading-[20px] not-italic text-[#192839] text-[14px] opacity-64">.00</span>
                                       </div>
                                     </div>
@@ -762,6 +794,11 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                               <>
                                 <span className="text-black">Your account balance </span>
                                 <span className="font-['TASA_Orbiter_Display',sans-serif] font-bold text-[#d92d20]">is negative</span>
+                              </>
+                            ) : isVarun ? (
+                              <>
+                                <span className="text-black">Payment volumes are on </span>
+                                <span className="font-['TASA_Orbiter_Display',sans-serif] font-bold text-[#00a251]">huge surge</span>
                               </>
                             ) : isNeutral ? (
                               <>
@@ -875,7 +912,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                             <div className="content-stretch flex items-baseline relative shrink-0">
                               <div className="content-stretch flex gap-[2px] items-baseline relative shrink-0">
                                 <span className="font-['Inter',sans-serif] font-semibold leading-[26px] not-italic text-[#192839] text-[20px] opacity-64">₹</span>
-                                <span className="font-['TASA_Orbiter_Display',sans-serif] font-semibold leading-[38px] not-italic text-[#192839] text-[32px]">1.26L</span>
+                                <span className="font-['TASA_Orbiter_Display',sans-serif] font-semibold leading-[38px] not-italic text-[#192839] text-[32px]">{isVarun ? "3.1L" : "1.26L"}</span>
                               </div>
                             </div>
                           </div>

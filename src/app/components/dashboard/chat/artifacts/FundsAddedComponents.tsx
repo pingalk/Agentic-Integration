@@ -129,11 +129,11 @@ export const SettlementCard = () => {
 export const RayInsightCard = () => {
   return (
     <div className="w-full max-w-[688px] rounded-[12px] p-[12px] flex flex-col gap-[4px] border border-[rgba(18,145,208,0.18)] bg-gradient-to-b from-[rgba(237,247,247,0.5)] to-[rgba(18,145,208,0.09)]">
-      <div className="flex gap-[6px] items-center">
-         <div className="size-[12px] text-[#192839]">
-           <Ray />
-         </div>
-         <p className="text-[12px] font-semibold text-[#43505d] uppercase tracking-wide">Ray Insight: Refund Credits</p>
+      <div className="flex gap-[8px] items-center">
+         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="shrink-0">
+           <path d="M8 1L9.79 5.42L14.5 6.02L11 9.34L11.94 14L8 11.77L4.06 14L5 9.34L1.5 6.02L6.21 5.42L8 1Z" fill="#1291D0" stroke="#1291D0" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+         </svg>
+         <p className="text-[14px] font-semibold text-[#1291D0]">Ray Insight</p>
       </div>
       <p className="text-[14px] leading-[20px] text-[#40566d] tracking-[0.14px]">
         To avoid your settlements being paused during busy refund periods, you can use Refund Credits. Think of it as a separate 'wallet' used only for refunds, this way your settlements remain untouched and are processed seamlessly.

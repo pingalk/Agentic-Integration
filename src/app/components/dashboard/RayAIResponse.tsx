@@ -92,11 +92,18 @@ export const RayAIResponse: React.FC<RayAIResponseProps> = ({ headerText, dataCo
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                     className="pl-9 w-full"
                 >
-                    <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4 flex gap-3 items-start shadow-sm">
-                         <div className="shrink-0 w-1 h-full bg-blue-500 rounded-full min-h-[40px]" />
-                         <p className="text-sm text-blue-900 leading-relaxed font-medium">
+                    <div className="flex gap-[10px] items-start p-[16px] bg-[rgba(18,145,208,0.06)] rounded-[12px] border border-[rgba(18,145,208,0.12)]">
+                         <div className="shrink-0 size-[16px] flex items-center justify-center mt-[2px]">
+                           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                             <path d="M8 1L9.79 5.42L14.5 6.02L11 9.34L11.94 14L8 11.77L4.06 14L5 9.34L1.5 6.02L6.21 5.42L8 1Z" fill="#1291D0" stroke="#1291D0" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                           </svg>
+                         </div>
+                         <div className="flex flex-col gap-[4px]">
+                           <span className="text-[14px] font-semibold text-[#1291D0]">Ray Insight</span>
+                           <p className="text-[15px] leading-[24px] text-[#40566d]">
                              {insightText}
-                         </p>
+                           </p>
+                         </div>
                     </div>
                 </motion.div>
             )}
