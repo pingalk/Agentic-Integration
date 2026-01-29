@@ -181,11 +181,11 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
             inputRef.current?.focus();
           }, 50);
 
-          // In parallel, show highlight on the suggestion for 1.3s
+          // In parallel, show highlight on the suggestion for 260ms
           setHighlightedSuggestionIndex(suggestionIndex);
           setTimeout(() => {
             setHighlightedSuggestionIndex(null);
-          }, 1300);
+          }, 260);
         }
       }
     };
