@@ -425,17 +425,13 @@ const InvestigationReportArtifact = ({ data, onRowClick, onSuggestionClick, isLa
                           className="relative flex h-[56px] items-center px-[16px] border-b border-[#E4E7EC] last:border-b-0 hover:bg-[#F9FAFB] transition-colors group/row cursor-pointer"
                           onClick={() => onRowClick?.(row)}
                         >
-                          <div className="w-[100px] shrink-0 font-semibold text-[14px] pl-[20px]">
-                              <SmartHighlight text={row.amount} />
-                          </div>
+                          <div className="w-[100px] shrink-0 font-semibold text-[#1D2939] text-[14px] pl-[20px]">{row.amount}</div>
                           <div className="w-[90px] shrink-0">
                             <span className="inline-flex items-center h-[20px] px-[8px] bg-[rgba(18,145,208,0.09)] text-[#0f78ad] text-[12px] font-medium leading-[18px] rounded-[1000px]">
                               {row.status}
                             </span>
                           </div>
-                          <div className="w-[160px] shrink-0 text-[14px] font-normal">
-                              <SmartHighlight text={row.date} className="text-[#5D6B82]" />
-                          </div>
+                          <div className="w-[160px] shrink-0 text-[#5D6B82] text-[14px] font-normal">{row.date}</div>
                           <div className="w-[130px] shrink-0 text-[#5D6B82] font-mono text-[14px] font-normal">
                             <CopyableText text={row.rrn} className="text-[#5D6B82]" />
                           </div>
@@ -1290,20 +1286,14 @@ const PaymentLinksCreatedArtifact = ({
                         <div className="w-[260px] text-[14px] font-normal pl-[20px]">
                           <CopyableText text={row.linkUrl} isLink />
                         </div>
-                        <div className="w-[120px] font-semibold text-[14px]">
-                          <SmartHighlight text={row.amount} />
-                        </div>
+                        <div className="w-[120px] font-semibold text-[#1D2939] text-[14px]">{row.amount}</div>
                         <div className="w-[80px]">
                           <span className="inline-flex items-center h-[20px] px-[8px] bg-[rgba(16,185,129,0.1)] text-[#059669] text-[12px] font-medium leading-[18px] rounded-[1000px]">
                             {row.status}
                           </span>
                         </div>
-                        <div className="w-[180px] text-[14px] font-normal">
-                          <SmartHighlight text={row.createdOn} className="text-[#5D6B82]" />
-                        </div>
-                        <div className="flex-1 text-[14px] font-normal">
-                          <SmartHighlight text={row.expiry} className="text-[#5D6B82]" />
-                        </div>
+                        <div className="w-[180px] text-[#5D6B82] text-[14px] font-normal">{row.createdOn}</div>
+                        <div className="flex-1 text-[#5D6B82] text-[14px] font-normal">{row.expiry}</div>
                       </motion.div>
                     ))}
                   </div>
@@ -1516,9 +1506,7 @@ const MayaTransactionsReportArtifact = ({ data, onRowClick, onSuggestionClick, i
                             className="relative flex h-[56px] items-center px-[16px] border-b border-[#E4E7EC] last:border-b-0 hover:bg-[#F9FAFB] transition-colors group/row cursor-pointer"
                             onClick={() => onRowClick?.({ ...row, email: 'arvind@gmail.com' })}
                           >
-                            <div className="w-[120px] shrink-0 font-semibold text-[14px] pl-[20px]">
-                              <SmartHighlight text={row.amount} />
-                            </div>
+                            <div className="w-[120px] shrink-0 font-semibold text-[#1D2939] text-[14px] pl-[20px]">{row.amount}</div>
                             <div className="w-[90px] shrink-0">
                               <span className={clsx(
                                 "inline-flex items-center h-[20px] px-[8px] text-[12px] font-medium leading-[18px] rounded-[1000px]",
@@ -1527,12 +1515,8 @@ const MayaTransactionsReportArtifact = ({ data, onRowClick, onSuggestionClick, i
                                 {row.status}
                               </span>
                             </div>
-                            <div className="w-[120px] shrink-0 text-[14px] font-normal">
-                              <SmartHighlight text={row.method} className="text-[#5D6B82]" />
-                            </div>
-                            <div className="w-[180px] shrink-0 text-[14px] font-normal">
-                              <SmartHighlight text={row.date} className="text-[#5D6B82]" />
-                            </div>
+                            <div className="w-[120px] shrink-0 text-[#5D6B82] text-[14px] font-normal">{row.method}</div>
+                            <div className="w-[180px] shrink-0 text-[#5D6B82] text-[14px] font-normal">{row.date}</div>
                             <div className="min-w-[130px] flex-1 text-[14px] font-normal">
                               <CopyableText text={row.rrn} className="text-[#5D6B82] font-mono" />
                             </div>

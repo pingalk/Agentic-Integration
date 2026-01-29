@@ -24,32 +24,15 @@ const HIGHLIGHT_PATTERNS = {
   status: /\b(?:Processed|Processing|Pending|Failed|Captured|Refunded|Escalated|Completed|Success(?:ful)?|Declined|Approved|Rejected)\b/gi,
 };
 
-// Highlight styles for different types
+// Highlight styles for different types (font-weight only, no color changes)
 const HIGHLIGHT_STYLES: Record<string, string> = {
-  amount: 'text-[#0066CC] font-semibold',
-  date: 'text-[#2563EB] font-medium',
-  time: 'text-[#2563EB] font-medium',
-  id: 'text-[#7C3AED] font-mono font-medium',
-  duration: 'text-[#0891B2] font-medium',
-  percentage: 'text-[#059669] font-semibold',
+  amount: 'font-semibold',
+  date: 'font-medium',
+  time: 'font-medium',
+  id: 'font-mono font-medium',
+  duration: 'font-medium',
+  percentage: 'font-semibold',
   status: 'font-semibold',
-};
-
-// Status-specific colors
-const STATUS_COLORS: Record<string, string> = {
-  processed: 'text-[#16a34a]',
-  completed: 'text-[#16a34a]',
-  success: 'text-[#16a34a]',
-  successful: 'text-[#16a34a]',
-  approved: 'text-[#16a34a]',
-  captured: 'text-[#16a34a]',
-  refunded: 'text-[#16a34a]',
-  escalated: 'text-[#2563EB]',
-  processing: 'text-[#ca8a04]',
-  pending: 'text-[#ca8a04]',
-  failed: 'text-[#dc2626]',
-  declined: 'text-[#dc2626]',
-  rejected: 'text-[#dc2626]',
 };
 
 interface HighlightMatch {
@@ -92,11 +75,7 @@ function findAllMatches(text: string): HighlightMatch[] {
   return nonOverlapping;
 }
 
-function getHighlightClass(type: string, text: string): string {
-  if (type === 'status') {
-    const lowerText = text.toLowerCase();
-    return `${HIGHLIGHT_STYLES[type]} ${STATUS_COLORS[lowerText] || ''}`;
-  }
+function getHighlightClass(type: string): string {
   return HIGHLIGHT_STYLES[type] || '';
 }
 
@@ -129,7 +108,7 @@ export const SmartHighlight: React.FC<SmartHighlightProps> = ({ text, className 
     parts.push(
       <span
         key={`highlight-${i}`}
-        className={getHighlightClass(match.type, match.text)}
+        className={getHighlightClass(match.type)}
       >
         {match.text}
       </span>
