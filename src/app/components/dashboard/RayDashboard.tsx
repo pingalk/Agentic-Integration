@@ -236,7 +236,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
   // State for Shyam's image attachment
-  const [shyamAttachment, setShyamAttachment] = useState<{ filename: string; filesize: string } | null>(null);
+  const [shyamAttachment, setShyamAttachment] = useState<{ filename: string; fileType: string; thumbnailUrl?: string } | null>(null);
 
   // Sync prompt with persona when on landing page
   useEffect(() => {
@@ -244,7 +244,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
       // Special handling for Shyam - show attachment chip instead of text
       if (currentPersona.id === 'shyam') {
         setPrompt(''); // Clear text, show chip instead
-        setShyamAttachment({ filename: 'Image1.png', filesize: '13.9 KB' });
+        setShyamAttachment({ filename: 'Whatsapp Image', fileType: 'PNG' });
       } else {
         setPrompt(currentPersona.landing.initialPrompt);
         setShyamAttachment(null);
@@ -253,7 +253,8 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
   }, [currentPersona, view, initialQuery]);
 
   const handleSend = () => {
-    if (!prompt.trim()) return;
+    // Allow sending if there's text OR an attachment (for Shyam's flow)
+    if (!prompt.trim() && !shyamAttachment) return;
     setLastQuery(prompt);
     setPrompt('');
     setView('chat');

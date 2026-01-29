@@ -3131,17 +3131,55 @@ const FundsAddedMessage = ({ data, isLast, onSuggestionClick }: { data: RayRespo
   );
 };
 
+// Chat Stream Attachment Pill Component
+const ChatAttachmentPill = ({ filename, fileType }: { filename: string; fileType: string }) => {
+  return (
+    <div className="inline-flex items-center gap-[10px] p-[8px] bg-[#eff0f0] rounded-[12px]">
+      {/* Image thumbnail */}
+      <div className="w-[32px] h-[40px] rounded-[4px] overflow-hidden shadow-[0px_2px_16px_0px_rgba(25,40,57,0.09)] flex items-center justify-center bg-[#E2E8F0]">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+          <circle cx="8.5" cy="8.5" r="1.5" />
+          <polyline points="21 15 16 10 5 21" />
+        </svg>
+      </div>
+
+      {/* File info */}
+      <div className="flex flex-col justify-center">
+        <span className="font-['Inter',sans-serif] text-[14px] font-medium text-[#192839] leading-[20px]">{filename}</span>
+        <span className="font-['Inter',sans-serif] text-[14px] font-medium text-[#768ea7] leading-[20px]">{fileType}</span>
+      </div>
+    </div>
+  );
+};
+
 export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast = true }: { data: RayResponseData; onSuggestionClick?: (suggestion: string) => void; onRowClick?: (rowData: any) => void; isLast?: boolean }) => {
-  // 1. User Message (Right Aligned)
+  // 1. User Message (Right Aligned) - Show attachment pill first, then text bubble
   if (data.sender === 'user') {
+    // Extract image and text blocks
+    const imageBlocks = data.blocks?.filter(b => b.type === 'image') || [];
+    const textBlocks = data.blocks?.filter(b => b.type === 'text') || [];
+    const hasImage = imageBlocks.length > 0;
+    const hasText = textBlocks.length > 0 && textBlocks[0].content?.trim();
+
     return (
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 40, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }} // Cubic bezier for "rolling up" feel
-        className="bg-[#e6eafa] text-[#090e13] px-[16px] py-[12px] rounded-[12px] shadow-[0px_2px_2px_0px_rgba(237,236,236,0.16)] max-w-[398px] ml-auto w-fit text-[14px] leading-[20px] tracking-[-0.28px]"
+        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+        className="flex flex-col items-end gap-[8px] ml-auto max-w-[398px]"
       >
-        {data.blocks?.[0].type === 'text' ? data.blocks[0].content : ''}
+        {/* Attachment Pill - shown first */}
+        {hasImage && (
+          <ChatAttachmentPill filename="Whatsapp Image" fileType="PNG" />
+        )}
+
+        {/* Text Bubble - shown below attachment */}
+        {hasText && (
+          <div className="bg-[#e6eafa] text-[#090e13] px-[16px] py-[12px] rounded-[12px] shadow-[0px_2px_2px_0px_rgba(237,236,236,0.16)] w-fit text-[14px] leading-[20px] tracking-[-0.28px]">
+            {textBlocks[0].content}
+          </div>
+        )}
       </motion.div>
     );
   }

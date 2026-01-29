@@ -3,38 +3,44 @@ import { ArrowUp, Mic, Plus, X, Image as ImageIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import clsx from 'clsx';
 
-// Image Attachment Chip Component
+// Image Attachment Chip Component (Input Box variant - with close button)
 interface ImageAttachmentChipProps {
   filename: string;
-  filesize: string;
+  fileType: string;
+  thumbnailUrl?: string;
   onRemove?: () => void;
 }
 
 export const ImageAttachmentChip: React.FC<ImageAttachmentChipProps> = ({
   filename,
-  filesize,
+  fileType,
+  thumbnailUrl,
   onRemove
 }) => {
   return (
-    <div className="inline-flex items-center gap-[8px] h-[36px] px-[8px] py-[6px] bg-white border border-[#E3EAF3] rounded-[8px] shrink-0">
-      {/* Image thumbnail placeholder */}
-      <div className="w-[24px] h-[24px] bg-[#F1F5F9] rounded-[4px] flex items-center justify-center overflow-hidden">
-        <ImageIcon size={14} className="text-[#94A3B8]" />
+    <div className="inline-flex items-center gap-[10px] h-[56px] p-[8px] bg-[#eff0f0] rounded-[12px] shrink-0">
+      {/* Image thumbnail */}
+      <div className="w-[32px] h-[40px] rounded-[4px] overflow-hidden shadow-[0px_2px_16px_0px_rgba(25,40,57,0.09)] flex items-center justify-center bg-[#E2E8F0]">
+        {thumbnailUrl ? (
+          <img src={thumbnailUrl} alt="" className="w-full h-full object-cover" />
+        ) : (
+          <ImageIcon size={16} className="text-[#94A3B8]" />
+        )}
       </div>
 
       {/* File info */}
       <div className="flex flex-col justify-center">
-        <span className="font-['Inter',sans-serif] text-[13px] font-medium text-[#192839] leading-[16px]">{filename}</span>
-        <span className="font-['Inter',sans-serif] text-[11px] text-[#768EA7] leading-[14px]">{filesize}</span>
+        <span className="font-['Inter',sans-serif] text-[14px] font-medium text-[#192839] leading-[20px]">{filename}</span>
+        <span className="font-['Inter',sans-serif] text-[14px] font-medium text-[#768ea7] leading-[20px]">{fileType}</span>
       </div>
 
       {/* Close button */}
       {onRemove && (
         <button
           onClick={onRemove}
-          className="w-[20px] h-[20px] flex items-center justify-center rounded-full hover:bg-[#F1F5F9] transition-colors ml-[4px]"
+          className="w-[24px] h-[24px] flex items-center justify-center rounded-full hover:bg-[rgba(0,0,0,0.08)] transition-colors ml-[4px]"
         >
-          <X size={12} className="text-[#768EA7]" />
+          <X size={14} className="text-[#768EA7]" />
         </button>
       )}
     </div>
@@ -50,7 +56,8 @@ interface RayInputBoxProps {
   autoFocus?: boolean;
   attachmentChip?: {
     filename: string;
-    filesize: string;
+    fileType: string;
+    thumbnailUrl?: string;
   } | null;
   onRemoveAttachment?: () => void;
 }
@@ -114,7 +121,8 @@ export const RayInputBox: React.FC<RayInputBoxProps> = ({
             >
               <ImageAttachmentChip
                 filename={attachmentChip.filename}
-                filesize={attachmentChip.filesize}
+                fileType={attachmentChip.fileType}
+                thumbnailUrl={attachmentChip.thumbnailUrl}
                 onRemove={onRemoveAttachment}
               />
             </motion.div>
@@ -156,10 +164,10 @@ export const RayInputBox: React.FC<RayInputBoxProps> = ({
             </button>
           </div>
           
-          {/* Send Button - UP Arrow (no rotation) */}
+          {/* Send Button - UP Arrow (no rotation) - enabled if text OR attachment */}
           <button
             onClick={onSend}
-            disabled={!value.trim()}
+            disabled={!value.trim() && !attachmentChip}
             className="bg-[rgba(0,0,0,0.04)] relative rounded-[100px] shrink-0 size-[32px] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <div className="overflow-clip relative rounded-[inherit] size-full">
