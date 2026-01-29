@@ -8,6 +8,11 @@ import { useDemo } from '@/context/DemoContext';
 import { useDemoScript } from './useDemoScript';
 import { motion, AnimatePresence } from 'motion/react';
 
+// EXPERIMENTAL: Roll-up animation for user messages
+// Set to true to enable user messages scrolling to top before Ray responds
+// Set to false to restore default behavior (messages appear at bottom)
+const ENABLE_ROLL_UP_ANIMATION = true;
+
 // --- Context Aware Data Generator ---
 const generateArjunData = (): RayResponseData => {
   const today = new Date();
@@ -118,6 +123,27 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
   useEffect(() => {
     demoFlowStartedRef.current = false;
   }, [currentPersona.id]);
+
+  // EXPERIMENTAL: Roll-up animation - scroll to top when user message is added
+  useEffect(() => {
+    if (!ENABLE_ROLL_UP_ANIMATION) return;
+
+    // Check if a new message was added
+    if (messages.length > prevMessageCountRef.current) {
+      const latestMessage = messages[messages.length - 1];
+      // If the latest message is from the user, scroll to top
+      if (latestMessage?.sender === 'user') {
+        // Small delay to ensure DOM is updated
+        setTimeout(() => {
+          scrollContainerRef.current?.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }, 100);
+      }
+    }
+    prevMessageCountRef.current = messages.length;
+  }, [messages]);
 
   // Keyboard shortcut listener for suggestions (1, 2, 3)
   useEffect(() => {
@@ -847,14 +873,28 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
         >
            <div className={`flex flex-col gap-6 md:gap-10 mx-auto transition-all duration-300 w-full ${selectedTransaction ? 'max-w-full md:max-w-[600px]' : 'max-w-full md:max-w-[800px]'}`}>
               {messages.map((msg, index) => (
-                 <div key={msg.id} ref={el => { if (el) messageRefs.current.set(msg.id, el) }} className="w-full">
+                 <motion.div
+                   key={msg.id}
+                   ref={el => { if (el) messageRefs.current.set(msg.id, el) }}
+                   className="w-full"
+                   // EXPERIMENTAL: Roll-up animation for user messages
+                   initial={ENABLE_ROLL_UP_ANIMATION && msg.sender === 'user' ? { opacity: 0, y: 200 } : { opacity: 1, y: 0 }}
+                   animate={{ opacity: 1, y: 0 }}
+                   transition={ENABLE_ROLL_UP_ANIMATION && msg.sender === 'user' ? {
+                     type: "spring",
+                     stiffness: 100,
+                     damping: 20,
+                     mass: 1,
+                     delay: 0.05
+                   } : { duration: 0 }}
+                 >
                     <RayMessageRenderer
                       data={msg}
                       isLast={index === messages.length - 1}
                       onSuggestionClick={handleSuggestionClick}
                       onRowClick={handleRowClick}
                     />
-                 </div>
+                 </motion.div>
               ))}
            </div>
         </div>
