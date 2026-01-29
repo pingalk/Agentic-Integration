@@ -3132,16 +3132,22 @@ const FundsAddedMessage = ({ data, isLast, onSuggestionClick }: { data: RayRespo
 };
 
 // Chat Stream Attachment Pill Component
-const ChatAttachmentPill = ({ filename, fileType }: { filename: string; fileType: string }) => {
+const ChatAttachmentPill = ({ filename, fileType, thumbnailUrl }: { filename: string; fileType: string; thumbnailUrl?: string }) => {
   return (
-    <div className="inline-flex items-center gap-[10px] p-[8px] bg-[#eff0f0] rounded-[12px]">
+    <div className="inline-flex items-center gap-[10px] p-[8px] pr-[12px] bg-[#eff0f0] rounded-[12px]">
       {/* Image thumbnail */}
-      <div className="w-[32px] h-[40px] rounded-[4px] overflow-hidden shadow-[0px_2px_16px_0px_rgba(25,40,57,0.09)] flex items-center justify-center bg-[#E2E8F0]">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-          <circle cx="8.5" cy="8.5" r="1.5" />
-          <polyline points="21 15 16 10 5 21" />
-        </svg>
+      <div className="w-[32px] h-[40px] rounded-[4px] overflow-hidden shadow-[0px_2px_16px_0px_rgba(25,40,57,0.09)]">
+        {thumbnailUrl ? (
+          <img src={thumbnailUrl} alt="" className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full bg-[#E2E8F0] flex items-center justify-center">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <polyline points="21 15 16 10 5 21" />
+            </svg>
+          </div>
+        )}
       </div>
 
       {/* File info */}
@@ -3171,7 +3177,11 @@ export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast
       >
         {/* Attachment Pill - shown first */}
         {hasImage && (
-          <ChatAttachmentPill filename="Whatsapp Image" fileType="PNG" />
+          <ChatAttachmentPill
+            filename={imageBlocks[0].filename || "Whatsapp Image"}
+            fileType={imageBlocks[0].fileType || "PNG"}
+            thumbnailUrl={imageBlocks[0].content}
+          />
         )}
 
         {/* Text Bubble - shown below attachment */}

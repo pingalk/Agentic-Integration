@@ -244,7 +244,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
       // Special handling for Shyam - show attachment chip instead of text
       if (currentPersona.id === 'shyam') {
         setPrompt(''); // Clear text, show chip instead
-        setShyamAttachment({ filename: 'Whatsapp Image', fileType: 'PNG' });
+        setShyamAttachment({ filename: 'Whatsapp Image', fileType: 'PNG', thumbnailUrl: '/screenshot-failed-payment.png' });
       } else {
         setPrompt(currentPersona.landing.initialPrompt);
         setShyamAttachment(null);

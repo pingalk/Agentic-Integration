@@ -18,13 +18,15 @@ export const ImageAttachmentChip: React.FC<ImageAttachmentChipProps> = ({
   onRemove
 }) => {
   return (
-    <div className="inline-flex items-center gap-[10px] h-[56px] p-[8px] bg-[#eff0f0] rounded-[12px] shrink-0">
+    <div className="relative inline-flex items-center gap-[10px] p-[8px] pr-[12px] bg-[#eff0f0] rounded-[12px] shrink-0">
       {/* Image thumbnail */}
-      <div className="w-[32px] h-[40px] rounded-[4px] overflow-hidden shadow-[0px_2px_16px_0px_rgba(25,40,57,0.09)] flex items-center justify-center bg-[#E2E8F0]">
+      <div className="w-[32px] h-[40px] rounded-[4px] overflow-hidden shadow-[0px_2px_16px_0px_rgba(25,40,57,0.09)]">
         {thumbnailUrl ? (
           <img src={thumbnailUrl} alt="" className="w-full h-full object-cover" />
         ) : (
-          <ImageIcon size={16} className="text-[#94A3B8]" />
+          <div className="w-full h-full bg-[#E2E8F0] flex items-center justify-center">
+            <ImageIcon size={16} className="text-[#94A3B8]" />
+          </div>
         )}
       </div>
 
@@ -34,13 +36,13 @@ export const ImageAttachmentChip: React.FC<ImageAttachmentChipProps> = ({
         <span className="font-['Inter',sans-serif] text-[14px] font-medium text-[#768ea7] leading-[20px]">{fileType}</span>
       </div>
 
-      {/* Close button */}
+      {/* Close button - floating at top right */}
       {onRemove && (
         <button
           onClick={onRemove}
-          className="w-[24px] h-[24px] flex items-center justify-center rounded-full hover:bg-[rgba(0,0,0,0.08)] transition-colors ml-[4px]"
+          className="absolute top-[-5px] right-[-5px] w-[20px] h-[20px] flex items-center justify-center rounded-full bg-[#c7c7c7] hover:bg-[#b0b0b0] transition-colors"
         >
-          <X size={14} className="text-[#768EA7]" />
+          <X size={12} strokeWidth={2.5} className="text-white" />
         </button>
       )}
     </div>
