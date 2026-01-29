@@ -385,9 +385,11 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                     />
                 ) : (
                 <div className="relative z-10 h-full overflow-y-auto flex flex-col items-center justify-center p-4 md:p-8 px-4 md:px-[32px] pb-[100px] scrollbar-hide">
-                     {/* Greeting Section - offset slightly above center */}
+                     {/* Greeting + Input wrapper - positioned 100px above center */}
+                     <div className="flex flex-col items-center -translate-y-[100px]">
+                     {/* Greeting Section */}
                      <div
-                         className="flex items-center gap-[12px] mb-8 group cursor-default -mt-[15vh]"
+                         className="flex items-center gap-[12px] mb-8 group cursor-default"
                          onMouseEnter={() => setWaveTrigger(prev => prev + 1)}
                      >
                         <div className="relative shrink-0 size-[32px]">
@@ -498,6 +500,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                         </div>
                         */}
                      </div>
+                     </div>{/* End of Greeting + Input wrapper */}
 
                      {/* Dynamic Cards Grid */}
                      <div className="w-full max-w-full md:max-w-[850px]">
