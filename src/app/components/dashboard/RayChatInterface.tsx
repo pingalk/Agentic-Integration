@@ -13,6 +13,12 @@ import { motion, AnimatePresence } from 'motion/react';
 // Set to false to restore default behavior (messages appear at bottom)
 const ENABLE_ROLL_UP_ANIMATION = true;
 
+// EXPERIMENTAL: Pin user messages to top
+// Set to true to display messages in reverse order (newest at top)
+// When enabled, user's latest message appears at top, followed by Ray's response below
+// Set to false to restore default behavior (oldest at top, newest at bottom)
+const ENABLE_PIN_TO_TOP = true;
+
 // --- Context Aware Data Generator ---
 const generateArjunData = (): RayResponseData => {
   const today = new Date();
@@ -127,16 +133,25 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
     demoFlowStartedRef.current = false;
   }, [currentPersona.id]);
 
-  // EXPERIMENTAL: Roll-up animation - scroll to top when user message is added
+  // EXPERIMENTAL: Pin-to-top / Roll-up animation - scroll to show newest content
   useEffect(() => {
-    if (!ENABLE_ROLL_UP_ANIMATION) return;
+    if (!ENABLE_ROLL_UP_ANIMATION && !ENABLE_PIN_TO_TOP) return;
 
     // Check if a new message was added
     if (messages.length > prevMessageCountRef.current) {
       const latestMessage = messages[messages.length - 1];
-      // If the latest message is from the user, scroll to top
-      if (latestMessage?.sender === 'user') {
-        // Small delay to ensure DOM is updated
+
+      if (ENABLE_PIN_TO_TOP) {
+        // In pin-to-top mode, always scroll to top to show newest content
+        // (newest messages appear at top with flex-col-reverse)
+        setTimeout(() => {
+          scrollContainerRef.current?.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }, 100);
+      } else if (ENABLE_ROLL_UP_ANIMATION && latestMessage?.sender === 'user') {
+        // Legacy roll-up: only scroll to top for user messages
         setTimeout(() => {
           scrollContainerRef.current?.scrollTo({
             top: 0,
@@ -901,34 +916,40 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
         <div
           ref={scrollContainerRef}
           onScroll={handleScroll}
-          className="flex-1 overflow-y-auto px-3 md:px-6 pt-4 md:pt-6 pb-32 md:pb-56 scrollbar-hide"
+          className={`flex-1 overflow-y-auto px-3 md:px-6 pt-4 md:pt-6 pb-32 md:pb-56 scrollbar-hide ${ENABLE_PIN_TO_TOP ? 'flex flex-col' : ''}`}
         >
-           <div className={`flex flex-col gap-6 md:gap-10 mx-auto transition-all duration-300 w-full ${selectedTransaction ? 'max-w-full md:max-w-[600px]' : 'max-w-full md:max-w-[800px]'}`}>
-              {messages.map((msg, index) => (
-                 <motion.div
-                   key={msg.id}
-                   ref={el => { if (el) messageRefs.current.set(msg.id, el) }}
-                   className="w-full"
-                   // EXPERIMENTAL: Roll-up animation for user messages
-                   initial={ENABLE_ROLL_UP_ANIMATION && msg.sender === 'user' ? { opacity: 0, y: 200 } : { opacity: 1, y: 0 }}
-                   animate={{ opacity: 1, y: 0 }}
-                   transition={ENABLE_ROLL_UP_ANIMATION && msg.sender === 'user' ? {
-                     type: "spring",
-                     stiffness: 100,
-                     damping: 20,
-                     mass: 1,
-                     delay: 0.05
-                   } : { duration: 0 }}
-                 >
-                    <RayMessageRenderer
-                      data={msg}
-                      isLast={index === messages.length - 1}
-                      onSuggestionClick={handleSuggestionClick}
-                      onRowClick={handleRowClick}
-                      highlightedSuggestionIndex={highlightedSuggestionIndex}
-                    />
-                 </motion.div>
-              ))}
+           <div className={`flex gap-6 md:gap-10 mx-auto transition-all duration-300 w-full ${selectedTransaction ? 'max-w-full md:max-w-[600px]' : 'max-w-full md:max-w-[800px]'} ${ENABLE_PIN_TO_TOP ? 'flex-col-reverse mt-auto' : 'flex-col'}`}>
+              {messages.map((msg, index) => {
+                 // When pin-to-top is enabled, "isLast" should be the most recent message (highest index)
+                 // which will appear at the TOP of the reversed layout
+                 const isLastMessage = index === messages.length - 1;
+
+                 return (
+                   <motion.div
+                     key={msg.id}
+                     ref={el => { if (el) messageRefs.current.set(msg.id, el) }}
+                     className="w-full"
+                     // EXPERIMENTAL: Roll-up animation for user messages
+                     initial={ENABLE_ROLL_UP_ANIMATION && msg.sender === 'user' ? { opacity: 0, y: ENABLE_PIN_TO_TOP ? -200 : 200 } : { opacity: 1, y: 0 }}
+                     animate={{ opacity: 1, y: 0 }}
+                     transition={ENABLE_ROLL_UP_ANIMATION && msg.sender === 'user' ? {
+                       type: "spring",
+                       stiffness: 100,
+                       damping: 20,
+                       mass: 1,
+                       delay: 0.05
+                     } : { duration: 0 }}
+                   >
+                      <RayMessageRenderer
+                        data={msg}
+                        isLast={isLastMessage}
+                        onSuggestionClick={handleSuggestionClick}
+                        onRowClick={handleRowClick}
+                        highlightedSuggestionIndex={highlightedSuggestionIndex}
+                      />
+                   </motion.div>
+                 );
+              })}
            </div>
         </div>
 
