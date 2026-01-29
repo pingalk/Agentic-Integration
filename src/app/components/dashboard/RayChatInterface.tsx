@@ -25,6 +25,15 @@ const ENABLE_PIN_TO_TOP = false;
 // Set to false to disable this behavior
 const ENABLE_SMART_SCROLL_ON_THINKING = true;
 
+// EXPERIMENTAL: Varun Elegant Scroll (Reversible)
+// When enabled, Varun's flow uses a custom scroll pattern:
+// 1. User message appears
+// 2. Smooth scroll positions user message at top of viewport
+// 3. THEN Ray's thinking animation plays
+// 4. THEN Ray's response renders
+// Set to false to use the default scroll behavior for Varun
+const VARUN_ELEGANT_SCROLL = true;
+
 // --- Context Aware Data Generator ---
 const generateArjunData = (): RayResponseData => {
   const today = new Date();
@@ -137,6 +146,35 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
   // Refs to prevent double execution in React StrictMode
   const demoFlowStartedRef = useRef(false);
 
+  // Helper function to scroll a message element to the top of the viewport
+  // Used by VARUN_ELEGANT_SCROLL for smooth, sequenced scroll behavior
+  const scrollMessageToTop = (messageId: string, callback?: () => void) => {
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        const userMessageEl = messageRefs.current.get(messageId);
+        const container = scrollContainerRef.current;
+        if (userMessageEl && container) {
+          const containerRect = container.getBoundingClientRect();
+          const elementRect = userMessageEl.getBoundingClientRect();
+          const topOffset = 24;
+          const scrollTop = container.scrollTop + (elementRect.top - containerRect.top) - topOffset;
+
+          container.scrollTo({
+            top: Math.max(0, scrollTop),
+            behavior: 'smooth'
+          });
+
+          // Call callback after scroll animation completes (~400ms for smooth scroll)
+          if (callback) {
+            setTimeout(callback, 450);
+          }
+        } else if (callback) {
+          callback();
+        }
+      }, 50);
+    });
+  };
+
   // Reset demo flow ref when persona changes
   useEffect(() => {
     demoFlowStartedRef.current = false;
@@ -149,6 +187,12 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
     // Check if a new message was added
     if (messages.length > prevMessageCountRef.current) {
       const latestMessage = messages[messages.length - 1];
+
+      // Skip auto-scroll if message has skipAutoScroll flag (used by Varun elegant scroll)
+      if (latestMessage?.skipAutoScroll) {
+        prevMessageCountRef.current = messages.length;
+        return;
+      }
 
       if (ENABLE_PIN_TO_TOP) {
         // In pin-to-top mode, always scroll to top to show newest content
@@ -513,39 +557,80 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
   useEffect(() => {
     if (currentPersona.id === 'varun' && messages.length === 0 && !demoFlowStartedRef.current) {
         demoFlowStartedRef.current = true;
-        // Step 1: User asks about upcoming settlement
-        setTimeout(() => {
-            const userText = initialQuery || "What is my upcoming settlement?";
-            setMessages([{
-                id: 'varun-u1',
-                sender: 'user',
-                blocks: [{ type: 'text', content: userText }]
-            }]);
-            setVarunFlowStep(1);
+        const userText = initialQuery || "What is my upcoming settlement?";
+        const userMessageId = 'varun-u1';
 
-            // Step 2: Show Thinking State
+        if (VARUN_ELEGANT_SCROLL) {
+            // ELEGANT SCROLL PATTERN for initial flow
             setTimeout(() => {
-                setIsStreaming(true);
-                const thinkingMsg: RayResponseData = {
-                    id: 'varun-ai-1',
-                    sender: 'ai',
-                    isThinking: true
-                };
-                setMessages(prev => [...prev, thinkingMsg]);
+                // Step 1: Add user message with skipAutoScroll
+                setMessages([{
+                    id: userMessageId,
+                    sender: 'user',
+                    blocks: [{ type: 'text', content: userText }],
+                    skipAutoScroll: true
+                }]);
+                setVarunFlowStep(1);
 
-                // Step 3: Replace with Settlement Upcoming after delay
+                // Step 2: Wait for DOM, then scroll user message to top
                 setTimeout(() => {
-                    setMessages(prev => prev.map(msg =>
-                        msg.id === 'varun-ai-1' ? {
-                            ...varunScript.varun_step_1,
+                    scrollMessageToTop(userMessageId, () => {
+                        // Step 3: After scroll completes, show thinking state
+                        setIsStreaming(true);
+                        const thinkingMsg: RayResponseData = {
                             id: 'varun-ai-1',
-                            sender: 'ai' as const
-                        } : msg
-                    ));
-                    setTimeout(() => setIsStreaming(false), 3000);
-                }, 2000);
+                            sender: 'ai',
+                            isThinking: true,
+                            skipAutoScroll: true
+                        };
+                        setMessages(prev => [...prev, thinkingMsg]);
+
+                        // Step 4: Replace with Settlement Upcoming after delay
+                        setTimeout(() => {
+                            setMessages(prev => prev.map(msg =>
+                                msg.id === 'varun-ai-1' ? {
+                                    ...varunScript.varun_step_1,
+                                    id: 'varun-ai-1',
+                                    sender: 'ai' as const
+                                } : msg
+                            ));
+                            setTimeout(() => setIsStreaming(false), 3000);
+                        }, 1500);
+                    });
+                }, 100);
             }, 600);
-        }, 600);
+        } else {
+            // DEFAULT SCROLL PATTERN (legacy behavior)
+            setTimeout(() => {
+                setMessages([{
+                    id: userMessageId,
+                    sender: 'user',
+                    blocks: [{ type: 'text', content: userText }]
+                }]);
+                setVarunFlowStep(1);
+
+                setTimeout(() => {
+                    setIsStreaming(true);
+                    const thinkingMsg: RayResponseData = {
+                        id: 'varun-ai-1',
+                        sender: 'ai',
+                        isThinking: true
+                    };
+                    setMessages(prev => [...prev, thinkingMsg]);
+
+                    setTimeout(() => {
+                        setMessages(prev => prev.map(msg =>
+                            msg.id === 'varun-ai-1' ? {
+                                ...varunScript.varun_step_1,
+                                id: 'varun-ai-1',
+                                sender: 'ai' as const
+                            } : msg
+                        ));
+                        setTimeout(() => setIsStreaming(false), 3000);
+                    }, 2000);
+                }, 600);
+            }, 600);
+        }
     }
   }, [currentPersona.id, messages.length, varunScript, initialQuery]);
 
@@ -1061,38 +1146,83 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
 
   // Helper function to advance Varun's flow
   const handleVarunFlowAdvance = (userMessage: string, nextStep: any, nextFlowStep: number) => {
-    // Add user message
-    setMessages(prev => [...prev, {
-      id: `varun-u-${Date.now()}`,
-      sender: 'user',
-      blocks: [{ type: 'text', content: userMessage }]
-    }]);
+    const userMessageId = `varun-u-${Date.now()}`;
 
-    // Show thinking state
-    setTimeout(() => {
-      setIsStreaming(true);
-      const thinkingId = `varun-ai-thinking-${Date.now()}`;
+    if (VARUN_ELEGANT_SCROLL) {
+      // ELEGANT SCROLL PATTERN:
+      // 1. Add user message (with skipAutoScroll to prevent global scroll effects)
+      // 2. Manually scroll user message to top of viewport
+      // 3. Wait for scroll to complete
+      // 4. THEN show Ray's thinking animation
+      // 5. THEN render Ray's response
+
+      // Step 1: Add user message with skipAutoScroll flag
       setMessages(prev => [...prev, {
-        id: thinkingId,
-        sender: 'ai',
-        isThinking: true
+        id: userMessageId,
+        sender: 'user',
+        blocks: [{ type: 'text', content: userMessage }],
+        skipAutoScroll: true
       }]);
 
-      // Replace with next step response
+      // Step 2: Wait for DOM update, then scroll user message to top
       setTimeout(() => {
-        setMessages(prev => {
-          const withoutThinking = prev.filter(m => !m.isThinking);
-          return [...withoutThinking, {
-            ...nextStep,
-            id: `varun-ai-${Date.now()}`,
-            sender: 'ai' as const
-          }];
+        scrollMessageToTop(userMessageId, () => {
+          // Step 3: After scroll completes, show thinking state
+          setIsStreaming(true);
+          const thinkingId = `varun-ai-thinking-${Date.now()}`;
+          setMessages(prev => [...prev, {
+            id: thinkingId,
+            sender: 'ai',
+            isThinking: true,
+            skipAutoScroll: true
+          }]);
+
+          // Step 4: Replace with next step response
+          setTimeout(() => {
+            setMessages(prev => {
+              const withoutThinking = prev.filter(m => !m.isThinking);
+              return [...withoutThinking, {
+                ...nextStep,
+                id: `varun-ai-${Date.now()}`,
+                sender: 'ai' as const
+              }];
+            });
+            setVarunFlowStep(nextFlowStep);
+            setTimeout(() => setIsStreaming(false), 3000);
+          }, 1500);
         });
-        setVarunFlowStep(nextFlowStep);
-        // Keep streaming for a bit while content animates, then stop
-        setTimeout(() => setIsStreaming(false), 3000);
-      }, 1500);
-    }, 600);
+      }, 100);
+    } else {
+      // DEFAULT SCROLL PATTERN (legacy behavior)
+      setMessages(prev => [...prev, {
+        id: userMessageId,
+        sender: 'user',
+        blocks: [{ type: 'text', content: userMessage }]
+      }]);
+
+      setTimeout(() => {
+        setIsStreaming(true);
+        const thinkingId = `varun-ai-thinking-${Date.now()}`;
+        setMessages(prev => [...prev, {
+          id: thinkingId,
+          sender: 'ai',
+          isThinking: true
+        }]);
+
+        setTimeout(() => {
+          setMessages(prev => {
+            const withoutThinking = prev.filter(m => !m.isThinking);
+            return [...withoutThinking, {
+              ...nextStep,
+              id: `varun-ai-${Date.now()}`,
+              sender: 'ai' as const
+            }];
+          });
+          setVarunFlowStep(nextFlowStep);
+          setTimeout(() => setIsStreaming(false), 3000);
+        }, 1500);
+      }, 600);
+    }
   };
 
   return (

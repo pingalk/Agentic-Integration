@@ -76,6 +76,7 @@ export interface RayResponseData {
   blocks?: ContentBlock[]; // Flexible array of content
   suggestions?: string[];
   isThinking?: boolean;
+  skipAutoScroll?: boolean; // When true, global scroll effects will skip this message
   resolution?: { title: string; content: string };
   artifact?: {
     type: 'investigation_report';
