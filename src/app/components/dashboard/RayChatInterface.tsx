@@ -83,7 +83,7 @@ interface RayChatInterfaceProps {
 
 export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProps) => {
   const { currentPersona } = useDemo();
-  const { arjunScript, sarahScript, mayaScript, samScript, shyamScript, kiaraScript, briefingReviewResponses } = useDemoScript();
+  const { arjunScript, sarahScript, mayaScript, samScript, shyamScript, kiaraScript, varunScript, briefingReviewResponses } = useDemoScript();
   const [messages, setMessages] = useState<RayResponseData[]>([]);
   const [inputValue, setInputValue] = useState("");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -118,6 +118,9 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
 
   // Kiara Flow State
   const [kiaraFlowStep, setKiaraFlowStep] = useState(0);
+
+  // Varun Flow State
+  const [varunFlowStep, setVarunFlowStep] = useState(0);
 
   // Briefing Review Flow State
   const [briefingReviewHandled, setBriefingReviewHandled] = useState(false);
@@ -506,6 +509,46 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
     }
   }, [currentPersona.id, messages.length, kiaraScript, initialQuery]);
 
+  // Triggers for demo flow - Varun (Instant Settlements)
+  useEffect(() => {
+    if (currentPersona.id === 'varun' && messages.length === 0 && !demoFlowStartedRef.current) {
+        demoFlowStartedRef.current = true;
+        // Step 1: User asks about upcoming settlement
+        setTimeout(() => {
+            const userText = initialQuery || "What is my upcoming settlement?";
+            setMessages([{
+                id: 'varun-u1',
+                sender: 'user',
+                blocks: [{ type: 'text', content: userText }]
+            }]);
+            setVarunFlowStep(1);
+
+            // Step 2: Show Thinking State
+            setTimeout(() => {
+                setIsStreaming(true);
+                const thinkingMsg: RayResponseData = {
+                    id: 'varun-ai-1',
+                    sender: 'ai',
+                    isThinking: true
+                };
+                setMessages(prev => [...prev, thinkingMsg]);
+
+                // Step 3: Replace with Settlement Upcoming after delay
+                setTimeout(() => {
+                    setMessages(prev => prev.map(msg =>
+                        msg.id === 'varun-ai-1' ? {
+                            ...varunScript.varun_step_1,
+                            id: 'varun-ai-1',
+                            sender: 'ai' as const
+                        } : msg
+                    ));
+                    setTimeout(() => setIsStreaming(false), 3000);
+                }, 2000);
+            }, 600);
+        }, 600);
+    }
+  }, [currentPersona.id, messages.length, varunScript, initialQuery]);
+
   // Triggers for briefing review queries (from "Review with Ray" click)
   useEffect(() => {
     if (!initialQuery || briefingReviewHandled || messages.length > 0) return;
@@ -797,6 +840,69 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
         return;
       }
     }
+
+    // Handle Varun's flow transitions (Instant Settlements)
+    if (currentPersona.id === 'varun') {
+      // Step 1 → Step 2: Why is it low? / Show payments not included
+      if (varunFlowStep === 1 && (
+        suggestion.toLowerCase().includes('low') ||
+        suggestion.toLowerCase().includes('not included') ||
+        suggestion.toLowerCase().includes('remaining')
+      )) {
+        handleVarunFlowAdvance(suggestion, varunScript.varun_step_2, 2);
+        return;
+      }
+
+      // Step 2 → Step 3: Can I get this money sooner?
+      if (varunFlowStep === 2 && (
+        suggestion.toLowerCase().includes('sooner') ||
+        suggestion.toLowerCase().includes('get this money')
+      )) {
+        handleVarunFlowAdvance(suggestion, varunScript.varun_step_3, 3);
+        return;
+      }
+
+      // Step 3 → Step 4: Are there any additional charges?
+      if (varunFlowStep === 3 && (
+        suggestion.toLowerCase().includes('charge') ||
+        suggestion.toLowerCase().includes('cost') ||
+        suggestion.toLowerCase().includes('fee')
+      )) {
+        handleVarunFlowAdvance(suggestion, varunScript.varun_step_4, 4);
+        return;
+      }
+
+      // Step 4 → Step 5: Yes (enable instant settlements)
+      if (varunFlowStep === 4 && suggestion === 'Yes') {
+        handleVarunFlowAdvance(suggestion, varunScript.varun_step_5, 5);
+        return;
+      }
+
+      // Handle "No" button click at step 4
+      if (varunFlowStep === 4 && suggestion === 'No') {
+        setMessages(prev => [...prev, {
+          id: `varun-u-${Date.now()}`,
+          sender: 'user',
+          blocks: [{ type: 'text', content: 'No' }]
+        }]);
+
+        setTimeout(() => {
+          setMessages(prev => [...prev, {
+            id: `varun-ai-dismiss-${Date.now()}`,
+            sender: 'ai',
+            artifact: {
+              type: 'simple_text',
+              data: {
+                headline: "No problem!",
+                body: "Your regular T+2 settlements will continue as scheduled. You can enable Instant Settlements anytime from Settings → Settlements.",
+                suggestions: ["View settlement schedule", "Learn more about Instant Settlements"]
+              }
+            }
+          }]);
+        }, 600);
+        return;
+      }
+    }
   };
 
   // Helper function to advance Sarah's flow
@@ -851,6 +957,34 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
     if (currentPersona.id === 'maya' && mayaFlowStep === 2 && text.includes('draft')) {
       setInputValue('');
       handleMayaFlowAdvance(inputValue, mayaScript.maya_step_3, 3);
+      return;
+    }
+
+    // Varun: Handle "low" input (Why is it so low?)
+    if (currentPersona.id === 'varun' && varunFlowStep === 1 && text.includes('low')) {
+      setInputValue('');
+      handleVarunFlowAdvance(inputValue, varunScript.varun_step_2, 2);
+      return;
+    }
+
+    // Varun: Handle "sooner" input (Can I get this money sooner?)
+    if (currentPersona.id === 'varun' && varunFlowStep === 2 && text.includes('sooner')) {
+      setInputValue('');
+      handleVarunFlowAdvance(inputValue, varunScript.varun_step_3, 3);
+      return;
+    }
+
+    // Varun: Handle "charges" input (Are there any additional charges?)
+    if (currentPersona.id === 'varun' && varunFlowStep === 3 && (text.includes('charge') || text.includes('cost') || text.includes('fee'))) {
+      setInputValue('');
+      handleVarunFlowAdvance(inputValue, varunScript.varun_step_4, 4);
+      return;
+    }
+
+    // Varun: Handle "yes" input (Enable instant settlements)
+    if (currentPersona.id === 'varun' && varunFlowStep === 4 && text.includes('yes')) {
+      setInputValue('');
+      handleVarunFlowAdvance('Yes', varunScript.varun_step_5, 5);
       return;
     }
 
@@ -923,6 +1057,42 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
           }];
         });
         setSamFlowStep(nextFlowStep);
+        // Keep streaming for a bit while content animates, then stop
+        setTimeout(() => setIsStreaming(false), 3000);
+      }, 1500);
+    }, 600);
+  };
+
+  // Helper function to advance Varun's flow
+  const handleVarunFlowAdvance = (userMessage: string, nextStep: any, nextFlowStep: number) => {
+    // Add user message
+    setMessages(prev => [...prev, {
+      id: `varun-u-${Date.now()}`,
+      sender: 'user',
+      blocks: [{ type: 'text', content: userMessage }]
+    }]);
+
+    // Show thinking state
+    setTimeout(() => {
+      setIsStreaming(true);
+      const thinkingId = `varun-ai-thinking-${Date.now()}`;
+      setMessages(prev => [...prev, {
+        id: thinkingId,
+        sender: 'ai',
+        isThinking: true
+      }]);
+
+      // Replace with next step response
+      setTimeout(() => {
+        setMessages(prev => {
+          const withoutThinking = prev.filter(m => !m.isThinking);
+          return [...withoutThinking, {
+            ...nextStep,
+            id: `varun-ai-${Date.now()}`,
+            sender: 'ai' as const
+          }];
+        });
+        setVarunFlowStep(nextFlowStep);
         // Keep streaming for a bit while content animates, then stop
         setTimeout(() => setIsStreaming(false), 3000);
       }, 1500);

@@ -4,6 +4,7 @@ import Ray from '@/imports/Ray';
 import Copy from '@/imports/Copy';
 import { FundsAddedCard } from './artifacts/FundsAddedCard';
 import { FundsAddedHeader, FundsAddedBody, SettlementCard, RayInsightCard } from './artifacts/FundsAddedComponents';
+import { ConfigurableSettlementCard, SettlementStatusTable, FeeCalculatorCard } from './artifacts/SettlementComponents';
 import { Wallet, Download, ExternalLink, ThumbsUp, ThumbsDown, Share2, Copy as CopyIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import clsx from 'clsx';
@@ -248,6 +249,68 @@ export interface RayResponseData {
         title: string;
         content: string;
       };
+      suggestions: string[];
+    };
+  } | {
+    type: 'settlement_upcoming';
+    data: {
+      headline: string;
+      subtext: string;
+      settlement: {
+        amount: string;
+        scheduledFor: string;
+        status: 'Scheduled' | 'Processing' | 'Completed';
+        cycle: string;
+      };
+      suggestions: string[];
+    };
+  } | {
+    type: 'settlement_explanation';
+    data: {
+      headline: string;
+      subtext: string;
+      table: {
+        rows: Array<{ status: string; amount: string }>;
+      };
+      suggestions: string[];
+    };
+  } | {
+    type: 'instant_settlement_offer';
+    data: {
+      headline: string;
+      subtext: string;
+      eligibility: {
+        amount: string;
+        available: boolean;
+      };
+      suggestions: string[];
+    };
+  } | {
+    type: 'instant_settlement_charges';
+    data: {
+      headline: string;
+      subtext: string;
+      fee: {
+        percentage: string;
+        amount: string;
+        settlementAmount: string;
+      };
+      promptText: string;
+      buttons: Array<{ label: string; variant: 'primary' | 'secondary' }>;
+    };
+  } | {
+    type: 'instant_settlement_enabled';
+    data: {
+      headline: string;
+      subtext: string;
+      settlement: {
+        amount: string;
+        scheduledFor: string;
+        status: 'Scheduled' | 'Processing' | 'Completed';
+        type: 'regular' | 'instant';
+      };
+      promptText: string;
+      buttons: Array<{ label: string; variant: 'primary' | 'secondary' }>;
       suggestions: string[];
     };
   };
@@ -2978,6 +3041,603 @@ const RefundStatusReportArtifact = ({ data, onSuggestionClick, isLast, highlight
   );
 };
 
+// --- Settlement Upcoming Artifact (Varun Step 1) ---
+const SettlementUpcomingArtifact = ({ data, onSuggestionClick, isLast, highlightedSuggestionIndex = null }: any) => {
+  const [subtextStarted, setSubtextStarted] = useState(false);
+  const narrativeCompleteCalledRef = React.useRef(false);
+
+  const { phase, onNarrativeComplete } = useStreamSequencer({
+    hasDataAsset: true,
+    hasInsight: false,
+    hasSuggestions: data.suggestions?.length > 0,
+    thinkingDuration: 3000
+  });
+
+  const handleHeadlineComplete = React.useCallback(() => {
+    setTimeout(() => setSubtextStarted(true), 800);
+  }, []);
+
+  const handleSubtextComplete = React.useCallback(() => {
+    if (!narrativeCompleteCalledRef.current) {
+      narrativeCompleteCalledRef.current = true;
+      onNarrativeComplete();
+    }
+  }, [onNarrativeComplete]);
+
+  return (
+    <>
+      {phase === 0 && <RayThinking />}
+
+      {phase >= 1 && (
+        <motion.div
+          className="flex flex-col gap-[24px] w-full mt-2"
+          initial="hidden"
+          animate="visible"
+          variants={containerVar}
+        >
+          <div className="flex flex-col gap-[16px]">
+            {/* Headline */}
+            <motion.div variants={itemVar}>
+              <h3 className="text-[18px] leading-[24px] font-semibold text-[#020202]">
+                <PerplexityStreamText
+                  content={data.headline}
+                  speed={15}
+                  onComplete={handleHeadlineComplete}
+                  inheritStyles
+                />
+              </h3>
+            </motion.div>
+
+            {/* Subtext */}
+            {subtextStarted && data.subtext && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-[16px] text-[#40566d] leading-[26px] tracking-[0.16px]"
+              >
+                <PerplexityStreamText
+                  content={data.subtext}
+                  speed={10}
+                  onComplete={handleSubtextComplete}
+                />
+              </motion.div>
+            )}
+          </div>
+
+          {/* Settlement Card (Phase 2+) */}
+          {phase >= 2 && data.settlement && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              <ConfigurableSettlementCard
+                amount={data.settlement.amount}
+                scheduledFor={data.settlement.scheduledFor}
+                status={data.settlement.status}
+                type="regular"
+                progressSteps={1}
+              />
+            </motion.div>
+          )}
+
+          {/* Divider */}
+          {phase >= 5 && isLast && data.suggestions && (
+            <motion.div
+              initial={{ opacity: 0, scaleX: 0 }}
+              animate={{ opacity: 1, scaleX: 1 }}
+              className="w-full h-[0.5px] bg-[#CBD5E2] origin-left"
+            />
+          )}
+
+          {/* Suggestions */}
+          {phase >= 5 && isLast && data.suggestions && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-[12px] mb-[30px]">
+              <h3 className="text-[18px] leading-[26px] font-semibold text-[#193f47]">Suggestions</h3>
+              <div className="flex flex-col gap-[2px]">
+                {data.suggestions.map((sug: string, i: number) => {
+                  const isHighlighted = highlightedSuggestionIndex === i;
+                  return (
+                    <motion.button
+                      key={i}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.1 }}
+                      onClick={() => onSuggestionClick?.(sug)}
+                      className={`flex items-center gap-[4px] p-[4px] text-left w-full rounded-[4px] hover:bg-[#f1f5fa] group ${isHighlighted ? 'bg-[#f1f5fa]' : ''}`}
+                    >
+                      <div className={`shrink-0 size-[20px] rounded-full flex items-center justify-center ${isHighlighted ? 'bg-white' : 'bg-[#f1f5fa] group-hover:bg-white'}`}>
+                        <span className={`text-[10px] font-medium ${isHighlighted ? 'text-[#2980e1]' : 'text-[#40566d] group-hover:text-[#2980e1]'}`}>{i + 1}</span>
+                      </div>
+                      <p className={`text-[16px] leading-[26px] tracking-[0.16px] font-medium ${isHighlighted ? 'text-[#2980e1]' : 'text-[#40566d] group-hover:text-[#2980e1]'}`}>{sug}</p>
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+        </motion.div>
+      )}
+    </>
+  );
+};
+
+// --- Settlement Explanation Artifact (Varun Step 2) ---
+const SettlementExplanationArtifact = ({ data, onSuggestionClick, isLast, highlightedSuggestionIndex = null }: any) => {
+  const [subtextStarted, setSubtextStarted] = useState(false);
+  const narrativeCompleteCalledRef = React.useRef(false);
+
+  const { phase, onNarrativeComplete } = useStreamSequencer({
+    hasDataAsset: true,
+    hasInsight: false,
+    hasSuggestions: data.suggestions?.length > 0,
+    thinkingDuration: 3000
+  });
+
+  const handleHeadlineComplete = React.useCallback(() => {
+    setTimeout(() => setSubtextStarted(true), 800);
+  }, []);
+
+  const handleSubtextComplete = React.useCallback(() => {
+    if (!narrativeCompleteCalledRef.current) {
+      narrativeCompleteCalledRef.current = true;
+      onNarrativeComplete();
+    }
+  }, [onNarrativeComplete]);
+
+  return (
+    <>
+      {phase === 0 && <RayThinking />}
+
+      {phase >= 1 && (
+        <motion.div
+          className="flex flex-col gap-[24px] w-full mt-2"
+          initial="hidden"
+          animate="visible"
+          variants={containerVar}
+        >
+          <div className="flex flex-col gap-[16px]">
+            {/* Headline */}
+            <motion.div variants={itemVar}>
+              <h3 className="text-[18px] leading-[24px] font-semibold text-[#020202]">
+                <PerplexityStreamText
+                  content={data.headline}
+                  speed={15}
+                  onComplete={handleHeadlineComplete}
+                  inheritStyles
+                />
+              </h3>
+            </motion.div>
+
+            {/* Subtext */}
+            {subtextStarted && data.subtext && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-[16px] text-[#40566d] leading-[26px] tracking-[0.16px] whitespace-pre-line"
+              >
+                <PerplexityStreamText
+                  content={data.subtext}
+                  speed={10}
+                  onComplete={handleSubtextComplete}
+                />
+              </motion.div>
+            )}
+          </div>
+
+          {/* Settlement Status Table (Phase 2+) */}
+          {phase >= 2 && data.table && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              <SettlementStatusTable rows={data.table.rows} />
+            </motion.div>
+          )}
+
+          {/* Divider */}
+          {phase >= 5 && isLast && data.suggestions && (
+            <motion.div
+              initial={{ opacity: 0, scaleX: 0 }}
+              animate={{ opacity: 1, scaleX: 1 }}
+              className="w-full h-[0.5px] bg-[#CBD5E2] origin-left"
+            />
+          )}
+
+          {/* Suggestions */}
+          {phase >= 5 && isLast && data.suggestions && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-[12px] mb-[30px]">
+              <h3 className="text-[18px] leading-[26px] font-semibold text-[#193f47]">Suggestions</h3>
+              <div className="flex flex-col gap-[2px]">
+                {data.suggestions.map((sug: string, i: number) => {
+                  const isHighlighted = highlightedSuggestionIndex === i;
+                  return (
+                    <motion.button
+                      key={i}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.1 }}
+                      onClick={() => onSuggestionClick?.(sug)}
+                      className={`flex items-center gap-[4px] p-[4px] text-left w-full rounded-[4px] hover:bg-[#f1f5fa] group ${isHighlighted ? 'bg-[#f1f5fa]' : ''}`}
+                    >
+                      <div className={`shrink-0 size-[20px] rounded-full flex items-center justify-center ${isHighlighted ? 'bg-white' : 'bg-[#f1f5fa] group-hover:bg-white'}`}>
+                        <span className={`text-[10px] font-medium ${isHighlighted ? 'text-[#2980e1]' : 'text-[#40566d] group-hover:text-[#2980e1]'}`}>{i + 1}</span>
+                      </div>
+                      <p className={`text-[16px] leading-[26px] tracking-[0.16px] font-medium ${isHighlighted ? 'text-[#2980e1]' : 'text-[#40566d] group-hover:text-[#2980e1]'}`}>{sug}</p>
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+        </motion.div>
+      )}
+    </>
+  );
+};
+
+// --- Instant Settlement Offer Artifact (Varun Step 3) ---
+const InstantSettlementOfferArtifact = ({ data, onSuggestionClick, isLast, highlightedSuggestionIndex = null }: any) => {
+  const [subtextStarted, setSubtextStarted] = useState(false);
+  const narrativeCompleteCalledRef = React.useRef(false);
+
+  const { phase, onNarrativeComplete } = useStreamSequencer({
+    hasDataAsset: false,
+    hasInsight: false,
+    hasSuggestions: data.suggestions?.length > 0,
+    thinkingDuration: 3000
+  });
+
+  const handleHeadlineComplete = React.useCallback(() => {
+    setTimeout(() => setSubtextStarted(true), 800);
+  }, []);
+
+  const handleSubtextComplete = React.useCallback(() => {
+    if (!narrativeCompleteCalledRef.current) {
+      narrativeCompleteCalledRef.current = true;
+      onNarrativeComplete();
+    }
+  }, [onNarrativeComplete]);
+
+  return (
+    <>
+      {phase === 0 && <RayThinking />}
+
+      {phase >= 1 && (
+        <motion.div
+          className="flex flex-col gap-[24px] w-full mt-2"
+          initial="hidden"
+          animate="visible"
+          variants={containerVar}
+        >
+          <div className="flex flex-col gap-[16px]">
+            {/* Headline with Lightning Icon */}
+            <motion.div variants={itemVar} className="flex gap-[8px] items-start">
+              <div className="shrink-0 size-[24px] bg-[#FEF3C7] rounded-full flex items-center justify-center mt-[2px]">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                </svg>
+              </div>
+              <h3 className="text-[18px] leading-[24px] font-semibold text-[#020202]">
+                <PerplexityStreamText
+                  content={data.headline}
+                  speed={15}
+                  onComplete={handleHeadlineComplete}
+                  inheritStyles
+                />
+              </h3>
+            </motion.div>
+
+            {/* Subtext */}
+            {subtextStarted && data.subtext && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-[16px] text-[#40566d] leading-[26px] tracking-[0.16px]"
+              >
+                <PerplexityStreamText
+                  content={data.subtext}
+                  speed={10}
+                  onComplete={handleSubtextComplete}
+                />
+              </motion.div>
+            )}
+          </div>
+
+          {/* Divider */}
+          {phase >= 5 && isLast && data.suggestions && (
+            <motion.div
+              initial={{ opacity: 0, scaleX: 0 }}
+              animate={{ opacity: 1, scaleX: 1 }}
+              className="w-full h-[0.5px] bg-[#CBD5E2] origin-left"
+            />
+          )}
+
+          {/* Suggestions */}
+          {phase >= 5 && isLast && data.suggestions && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-[12px] mb-[30px]">
+              <h3 className="text-[18px] leading-[26px] font-semibold text-[#193f47]">Suggestions</h3>
+              <div className="flex flex-col gap-[2px]">
+                {data.suggestions.map((sug: string, i: number) => {
+                  const isHighlighted = highlightedSuggestionIndex === i;
+                  return (
+                    <motion.button
+                      key={i}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.1 }}
+                      onClick={() => onSuggestionClick?.(sug)}
+                      className={`flex items-center gap-[4px] p-[4px] text-left w-full rounded-[4px] hover:bg-[#f1f5fa] group ${isHighlighted ? 'bg-[#f1f5fa]' : ''}`}
+                    >
+                      <div className={`shrink-0 size-[20px] rounded-full flex items-center justify-center ${isHighlighted ? 'bg-white' : 'bg-[#f1f5fa] group-hover:bg-white'}`}>
+                        <span className={`text-[10px] font-medium ${isHighlighted ? 'text-[#2980e1]' : 'text-[#40566d] group-hover:text-[#2980e1]'}`}>{i + 1}</span>
+                      </div>
+                      <p className={`text-[16px] leading-[26px] tracking-[0.16px] font-medium ${isHighlighted ? 'text-[#2980e1]' : 'text-[#40566d] group-hover:text-[#2980e1]'}`}>{sug}</p>
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+        </motion.div>
+      )}
+    </>
+  );
+};
+
+// --- Instant Settlement Charges Artifact (Varun Step 4) ---
+const InstantSettlementChargesArtifact = ({ data, onSuggestionClick, onButtonClick }: any) => {
+  const [subtextStarted, setSubtextStarted] = useState(false);
+  const narrativeCompleteCalledRef = React.useRef(false);
+
+  const { phase, onNarrativeComplete } = useStreamSequencer({
+    hasDataAsset: false,
+    hasInsight: true,
+    hasSuggestions: false,
+    thinkingDuration: 3000
+  });
+
+  const handleHeadlineComplete = React.useCallback(() => {
+    setTimeout(() => setSubtextStarted(true), 800);
+  }, []);
+
+  const handleSubtextComplete = React.useCallback(() => {
+    if (!narrativeCompleteCalledRef.current) {
+      narrativeCompleteCalledRef.current = true;
+      onNarrativeComplete();
+    }
+  }, [onNarrativeComplete]);
+
+  return (
+    <>
+      {phase === 0 && <RayThinking />}
+
+      {phase >= 1 && (
+        <motion.div
+          className="flex flex-col gap-[24px] w-full mt-2"
+          initial="hidden"
+          animate="visible"
+          variants={containerVar}
+        >
+          <div className="flex flex-col gap-[16px]">
+            {/* Headline */}
+            <motion.div variants={itemVar}>
+              <h3 className="text-[18px] leading-[24px] font-semibold text-[#020202]">
+                <PerplexityStreamText
+                  content={data.headline}
+                  speed={15}
+                  onComplete={handleHeadlineComplete}
+                  inheritStyles
+                />
+              </h3>
+            </motion.div>
+
+            {/* Subtext */}
+            {subtextStarted && data.subtext && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-[16px] text-[#40566d] leading-[26px] tracking-[0.16px] whitespace-pre-line"
+              >
+                <PerplexityStreamText
+                  content={data.subtext}
+                  speed={10}
+                  onComplete={handleSubtextComplete}
+                />
+              </motion.div>
+            )}
+          </div>
+
+          {/* Prompt Text + Buttons (Phase 3+) */}
+          {phase >= 3 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="flex flex-col gap-[16px]"
+            >
+              <p className="text-[16px] text-[#192839] font-medium">{data.promptText}</p>
+              <div className="flex gap-3">
+                {data.buttons?.map((button: { label: string; variant: 'primary' | 'secondary' }, i: number) => (
+                  <button
+                    key={i}
+                    onClick={() => onButtonClick?.(button.label)}
+                    className={clsx(
+                      'px-4 py-2 rounded-lg font-medium text-[14px] transition-all duration-200',
+                      button.variant === 'primary'
+                        ? 'bg-[#2563EB] text-white hover:bg-[#1d4ed8] shadow-sm'
+                        : 'bg-[#f1f5fa] text-[#40566d] hover:bg-[#e2e8f0] border border-[#e2e8f0]'
+                    )}
+                  >
+                    {button.label}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </motion.div>
+      )}
+    </>
+  );
+};
+
+// --- Instant Settlement Enabled Artifact (Varun Step 5) ---
+const InstantSettlementEnabledArtifact = ({ data, onSuggestionClick, onButtonClick, isLast, highlightedSuggestionIndex = null }: any) => {
+  const [subtextStarted, setSubtextStarted] = useState(false);
+  const narrativeCompleteCalledRef = React.useRef(false);
+
+  const { phase, onNarrativeComplete } = useStreamSequencer({
+    hasDataAsset: true,
+    hasInsight: true,
+    hasSuggestions: data.suggestions?.length > 0,
+    thinkingDuration: 3000
+  });
+
+  const handleHeadlineComplete = React.useCallback(() => {
+    setTimeout(() => setSubtextStarted(true), 800);
+  }, []);
+
+  const handleSubtextComplete = React.useCallback(() => {
+    if (!narrativeCompleteCalledRef.current) {
+      narrativeCompleteCalledRef.current = true;
+      onNarrativeComplete();
+    }
+  }, [onNarrativeComplete]);
+
+  return (
+    <>
+      {phase === 0 && <RayThinking />}
+
+      {phase >= 1 && (
+        <motion.div
+          className="flex flex-col gap-[24px] w-full mt-2"
+          initial="hidden"
+          animate="visible"
+          variants={containerVar}
+        >
+          <div className="flex flex-col gap-[16px]">
+            {/* Headline with Checkmark */}
+            <motion.div variants={itemVar} className="flex gap-[6px] items-center">
+              <div className="shrink-0 size-[20px] bg-[#10B981] rounded-[3.33px] flex items-center justify-center shadow-sm">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              <h3 className="text-[18px] leading-[24px] font-semibold text-[#020202]">
+                <PerplexityStreamText
+                  content={data.headline}
+                  speed={15}
+                  onComplete={handleHeadlineComplete}
+                  inheritStyles
+                />
+              </h3>
+            </motion.div>
+
+            {/* Subtext */}
+            {subtextStarted && data.subtext && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-[16px] text-[#40566d] leading-[26px] tracking-[0.16px]"
+              >
+                <PerplexityStreamText
+                  content={data.subtext}
+                  speed={10}
+                  onComplete={handleSubtextComplete}
+                />
+              </motion.div>
+            )}
+          </div>
+
+          {/* Settlement Card (Phase 2+) */}
+          {phase >= 2 && data.settlement && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              <ConfigurableSettlementCard
+                amount={data.settlement.amount}
+                scheduledFor={data.settlement.scheduledFor}
+                status={data.settlement.status}
+                type={data.settlement.type}
+                progressSteps={2}
+              />
+            </motion.div>
+          )}
+
+          {/* Prompt Text + Buttons (Phase 3+) */}
+          {phase >= 3 && data.promptText && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.2 }}
+              className="flex flex-col gap-[16px]"
+            >
+              <p className="text-[16px] text-[#192839] font-medium">{data.promptText}</p>
+              {data.buttons && (
+                <div className="flex gap-3">
+                  {data.buttons.map((button: { label: string; variant: 'primary' | 'secondary' }, i: number) => (
+                    <button
+                      key={i}
+                      onClick={() => onButtonClick?.(button.label)}
+                      className={clsx(
+                        'px-4 py-2 rounded-lg font-medium text-[14px] transition-all duration-200',
+                        button.variant === 'primary'
+                          ? 'bg-[#2563EB] text-white hover:bg-[#1d4ed8] shadow-sm'
+                          : 'bg-[#f1f5fa] text-[#40566d] hover:bg-[#e2e8f0] border border-[#e2e8f0]'
+                      )}
+                    >
+                      {button.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {/* Divider */}
+          {phase >= 5 && isLast && data.suggestions && (
+            <motion.div
+              initial={{ opacity: 0, scaleX: 0 }}
+              animate={{ opacity: 1, scaleX: 1 }}
+              className="w-full h-[0.5px] bg-[#CBD5E2] origin-left"
+            />
+          )}
+
+          {/* Suggestions */}
+          {phase >= 5 && isLast && data.suggestions && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-[12px] mb-[30px]">
+              <h3 className="text-[18px] leading-[26px] font-semibold text-[#193f47]">Suggestions</h3>
+              <div className="flex flex-col gap-[2px]">
+                {data.suggestions.map((sug: string, i: number) => {
+                  const isHighlighted = highlightedSuggestionIndex === i;
+                  return (
+                    <motion.button
+                      key={i}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.1 }}
+                      onClick={() => onSuggestionClick?.(sug)}
+                      className={`flex items-center gap-[4px] p-[4px] text-left w-full rounded-[4px] hover:bg-[#f1f5fa] group ${isHighlighted ? 'bg-[#f1f5fa]' : ''}`}
+                    >
+                      <div className={`shrink-0 size-[20px] rounded-full flex items-center justify-center ${isHighlighted ? 'bg-white' : 'bg-[#f1f5fa] group-hover:bg-white'}`}>
+                        <span className={`text-[10px] font-medium ${isHighlighted ? 'text-[#2980e1]' : 'text-[#40566d] group-hover:text-[#2980e1]'}`}>{i + 1}</span>
+                      </div>
+                      <p className={`text-[16px] leading-[26px] tracking-[0.16px] font-medium ${isHighlighted ? 'text-[#2980e1]' : 'text-[#40566d] group-hover:text-[#2980e1]'}`}>{sug}</p>
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+        </motion.div>
+      )}
+    </>
+  );
+};
+
 // --- Block Sequencer ---
 const BlockSequencer = ({ blocks, onComplete }: { blocks: ContentBlock[], onComplete?: () => void }) => {
   const [visibleIndex, setVisibleIndex] = useState(0);
@@ -3436,7 +4096,77 @@ export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast
     );
   }
 
-  // 17. Ray AI Message (Standard Blocks, Max Width 398px)
+  // 17. Varun's Settlement Upcoming
+  if (data.artifact?.type === 'settlement_upcoming') {
+    return (
+      <div className="w-full animate-fade-in-up">
+        <SettlementUpcomingArtifact
+          data={data.artifact.data}
+          isLast={isLast}
+          onSuggestionClick={onSuggestionClick}
+          highlightedSuggestionIndex={highlightedSuggestionIndex}
+        />
+      </div>
+    );
+  }
+
+  // 18. Varun's Settlement Explanation
+  if (data.artifact?.type === 'settlement_explanation') {
+    return (
+      <div className="w-full animate-fade-in-up">
+        <SettlementExplanationArtifact
+          data={data.artifact.data}
+          isLast={isLast}
+          onSuggestionClick={onSuggestionClick}
+          highlightedSuggestionIndex={highlightedSuggestionIndex}
+        />
+      </div>
+    );
+  }
+
+  // 19. Varun's Instant Settlement Offer
+  if (data.artifact?.type === 'instant_settlement_offer') {
+    return (
+      <div className="w-full animate-fade-in-up">
+        <InstantSettlementOfferArtifact
+          data={data.artifact.data}
+          isLast={isLast}
+          onSuggestionClick={onSuggestionClick}
+          highlightedSuggestionIndex={highlightedSuggestionIndex}
+        />
+      </div>
+    );
+  }
+
+  // 20. Varun's Instant Settlement Charges
+  if (data.artifact?.type === 'instant_settlement_charges') {
+    return (
+      <div className="w-full animate-fade-in-up">
+        <InstantSettlementChargesArtifact
+          data={data.artifact.data}
+          onSuggestionClick={onSuggestionClick}
+          onButtonClick={onButtonClick}
+        />
+      </div>
+    );
+  }
+
+  // 21. Varun's Instant Settlement Enabled
+  if (data.artifact?.type === 'instant_settlement_enabled') {
+    return (
+      <div className="w-full animate-fade-in-up">
+        <InstantSettlementEnabledArtifact
+          data={data.artifact.data}
+          isLast={isLast}
+          onSuggestionClick={onSuggestionClick}
+          onButtonClick={onButtonClick}
+          highlightedSuggestionIndex={highlightedSuggestionIndex}
+        />
+      </div>
+    );
+  }
+
+  // 22. Ray AI Message (Standard Blocks, Max Width 398px)
   return (
     <div className="flex gap-4 items-start w-full max-w-[398px] animate-fade-in-up">
         {/* Content Container - No Avatar */}

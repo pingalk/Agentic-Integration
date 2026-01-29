@@ -1,6 +1,6 @@
 // src/data/demoConfig.ts
 
-export type PersonaId = 'maya' | 'arjun' | 'sarah' | 'sam' | 'shyam' | 'kiara';
+export type PersonaId = 'maya' | 'arjun' | 'sarah' | 'sam' | 'shyam' | 'kiara' | 'varun';
 export type Theme = 'positive' | 'negative' | 'neutral';
 
 export interface DashboardCard {
@@ -225,6 +225,40 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
           title: "Your settlements are on track",
           value: "₹82K",
           subtext: "Next Settlement",
+          status: 'healthy'
+        }
+      ]
+    }
+  },
+  varun: {
+    id: 'varun',
+    name: 'Varun',
+    theme: 'neutral',
+    landing: {
+      greeting: "Good afternoon, Varun!",
+      initialPrompt: "What is my upcoming settlement?",
+      cards: [
+        {
+          id: 'briefing',
+          type: 'briefing',
+          title: "Festive season surge detected",
+          subtext: "Orders up 340% this week — record collections!"
+        },
+        {
+          id: 'stats',
+          type: 'stats',
+          title: "Record payment collections",
+          value: "₹10,40,000.00",
+          secondaryValue: "₹7,30,000.00",
+          trend: 'up',
+          status: 'healthy'
+        },
+        {
+          id: 'settlement',
+          type: 'settlement',
+          title: "Next settlement: Tomorrow",
+          value: "₹3.1L",
+          subtext: "T+2 Cycle",
           status: 'healthy'
         }
       ]

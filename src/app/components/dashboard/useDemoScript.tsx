@@ -471,6 +471,116 @@ Maya`,
         }
     };
 
+    // Varun's Journey (Instant Settlements / Working Capital)
+    const varunScript = {
+        varun_step_0: {
+            input: "What is my upcoming settlement?",
+            response: null,
+            suggestions: []
+        },
+        varun_step_1: {
+            artifact: {
+                type: 'settlement_upcoming',
+                data: {
+                    headline: "Your next settlement is ₹3.1L, scheduled for tomorrow",
+                    subtext: "This settlement includes payments collected on Jan 25, as per your T+2 cycle.",
+                    settlement: {
+                        amount: '3,10,000',
+                        scheduledFor: 'Tomorrow, Jan 28, 2026 10:00 AM',
+                        status: 'Scheduled',
+                        cycle: 'T+2'
+                    },
+                    suggestions: [
+                        "Show payments not included in this settlement",
+                        "When will the remaining amount settle?",
+                        "What is settlement cycle? How to change it"
+                    ]
+                }
+            }
+        },
+        varun_step_2: {
+            artifact: {
+                type: 'settlement_explanation',
+                data: {
+                    headline: "Most of your recent payments haven't reached the settlement window yet (T+2)",
+                    subtext: "You're on a T+2 settlement cycle, which means payments take 2 working days to settle. Jan 26 was a national holiday.\n\nBecause of this, recent payments worth ₹7.3L were collected after the cutoff for tomorrow's settlement. Nothing is wrong—this is purely a timing gap.",
+                    table: {
+                        rows: [
+                            { status: 'Settling tomorrow (T+2)', amount: '₹3.1L' },
+                            { status: 'Processing (next 1–2 days)', amount: '₹7.3L' },
+                            { status: 'Total collected (last 2 days)', amount: '₹10.4L' }
+                        ]
+                    },
+                    suggestions: [
+                        "When exactly will I receive the remaining ₹7.3L?",
+                        "Can I get this money sooner?"
+                    ]
+                }
+            }
+        },
+        varun_step_3: {
+            artifact: {
+                type: 'instant_settlement_offer',
+                data: {
+                    headline: "You can receive up to ₹7L today using Instant Settlements",
+                    subtext: "I audited your profile and found that you're eligible for Instant Settlements. This would let you receive ₹7L by end of day, instead of waiting for the T+2 cycle.",
+                    eligibility: {
+                        amount: '₹7,00,000',
+                        available: true
+                    },
+                    suggestions: [
+                        "How much does instant settlement cost?",
+                        "Enable instant settlement",
+                        "Are there additional charges?"
+                    ]
+                }
+            }
+        },
+        varun_step_4: {
+            artifact: {
+                type: 'instant_settlement_charges',
+                data: {
+                    headline: "A 0.3% fee applies to the settled amount in Instant Settlements",
+                    subtext: "For ₹7L, the fee would be ₹2,100.\nThere are no setup or subscription charges.",
+                    fee: {
+                        percentage: '0.3%',
+                        amount: '₹2,100',
+                        settlementAmount: '₹7,00,000'
+                    },
+                    promptText: "Should I enable instant settlements for you?",
+                    buttons: [
+                        { label: "Yes", variant: "primary" },
+                        { label: "No", variant: "secondary" }
+                    ]
+                }
+            }
+        },
+        varun_step_5: {
+            artifact: {
+                type: 'instant_settlement_enabled',
+                data: {
+                    headline: "Instant Settlements enabled 🎉",
+                    subtext: "₹7L will be credited to your bank account by today, EOD. You can turn Instant Settlements on or off anytime.",
+                    settlement: {
+                        amount: '7,00,000',
+                        scheduledFor: 'Today, EOD',
+                        status: 'Processing',
+                        type: 'instant'
+                    },
+                    promptText: "Would you like me to notify you as soon as the settlement is credited?",
+                    buttons: [
+                        { label: "Yes", variant: "primary" },
+                        { label: "No", variant: "secondary" }
+                    ],
+                    suggestions: [
+                        "Check settlement status",
+                        "Download settlement summary"
+                    ]
+                }
+            }
+        }
+    };
+
     const processInput = (text: string) => {
         const lowerText = text.toLowerCase();
         let nextStep = step;
@@ -501,6 +611,7 @@ Maya`,
         samScript,
         shyamScript,
         kiaraScript,
+        varunScript,
         briefingReviewResponses,
         getFutureDate
     };
