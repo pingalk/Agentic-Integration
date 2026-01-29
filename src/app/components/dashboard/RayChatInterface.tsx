@@ -174,18 +174,17 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
         if (suggestions[suggestionIndex]) {
           e.preventDefault();
 
-          // Show hover state on the suggestion first
-          setHighlightedSuggestionIndex(suggestionIndex);
+          // Immediately populate the input box
+          setInputValue(suggestions[suggestionIndex]);
+          setIsInputFocused(true);
+          setTimeout(() => {
+            inputRef.current?.focus();
+          }, 50);
 
-          // After 1.3s delay, populate the input and clear highlight
+          // In parallel, show highlight on the suggestion for 1.3s
+          setHighlightedSuggestionIndex(suggestionIndex);
           setTimeout(() => {
             setHighlightedSuggestionIndex(null);
-            setInputValue(suggestions[suggestionIndex]);
-            setIsInputFocused(true);
-            // Focus the input after a small delay to ensure state is updated
-            setTimeout(() => {
-              inputRef.current?.focus();
-            }, 50);
           }, 1300);
         }
       }
