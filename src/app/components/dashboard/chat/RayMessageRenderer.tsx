@@ -3349,27 +3349,6 @@ const InstantSettlementOfferArtifact = ({ data, onSuggestionClick, isLast, highl
                 className="relative w-full max-w-[400px] h-[180px] rounded-[12px] border border-[#dee1e3] overflow-hidden shadow-[0px_6px_32px_4px_rgba(184,196,214,0.06)]"
                 style={{ background: 'linear-gradient(180deg, rgb(250, 250, 251) 0%, rgb(255, 255, 255) 28%, rgb(255, 255, 255) 72%, rgb(243, 244, 245) 100%)' }}
               >
-                {/* Background gradient blob */}
-                <div className="absolute -right-[60px] -bottom-[80px] w-[200px] h-[200px] rounded-full bg-gradient-to-br from-[#e0e7ff] to-[#c7d2fe] opacity-50 blur-[40px]" />
-
-                {/* 3D Coin image */}
-                <div className="absolute bottom-[5px] right-[-2px] w-[139px] h-[129px]">
-                  <svg viewBox="0 0 139 129" fill="none" className="w-full h-full">
-                    <ellipse cx="69.5" cy="64.5" rx="55" ry="25" fill="url(#coinGradient)" />
-                    <ellipse cx="69.5" cy="59.5" rx="55" ry="25" fill="url(#coinTopGradient)" />
-                    <defs>
-                      <linearGradient id="coinGradient" x1="69.5" y1="39.5" x2="69.5" y2="89.5" gradientUnits="userSpaceOnUse">
-                        <stop stopColor="#a5b4fc" />
-                        <stop offset="1" stopColor="#6366f1" />
-                      </linearGradient>
-                      <linearGradient id="coinTopGradient" x1="69.5" y1="34.5" x2="69.5" y2="84.5" gradientUnits="userSpaceOnUse">
-                        <stop stopColor="#c7d2fe" />
-                        <stop offset="1" stopColor="#a5b4fc" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </div>
-
                 {/* Title */}
                 <p className="absolute left-[20px] top-[18px] font-['TASA_Orbiter_Display',sans-serif] font-semibold text-[18px] leading-[24px] text-[#192839]">
                   Instant Settlements
