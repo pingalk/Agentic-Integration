@@ -3131,24 +3131,29 @@ const FundsAddedMessage = ({ data, isLast, onSuggestionClick }: { data: RayRespo
   );
 };
 
+// Stylized screenshot thumbnail mockup for chat stream
+const ScreenshotThumbnail = () => (
+  <div className="w-[32px] h-[40px] rounded-[4px] overflow-hidden shadow-[0px_2px_16px_0px_rgba(25,40,57,0.09)] bg-[#efe6f7] relative shrink-0">
+    {/* Purple header bar */}
+    <div className="absolute top-0 left-0 right-0 h-[6px] bg-[#5f259e]" />
+    {/* White content rows */}
+    <div className="absolute top-[7px] left-[1px] right-[1px] h-[6px] bg-white rounded-[1px]" />
+    <div className="absolute top-[14px] left-[1px] right-[1px] h-[9px] bg-white rounded-[1px]">
+      <div className="absolute left-[2px] top-[3px] w-[4px] h-[4px] bg-[#7034b2] rounded-[1px]" />
+    </div>
+    <div className="absolute top-[24px] left-[1px] right-[1px] h-[9px] bg-white rounded-[1px]">
+      <div className="absolute left-[2px] top-[2px] w-[4px] h-[4px] bg-white rounded-[1px]" />
+    </div>
+    <div className="absolute top-[34px] left-[1px] right-[1px] h-[6px] bg-white rounded-[1px]" />
+  </div>
+);
+
 // Chat Stream Attachment Pill Component
-const ChatAttachmentPill = ({ filename, fileType, thumbnailUrl }: { filename: string; fileType: string; thumbnailUrl?: string }) => {
+const ChatAttachmentPill = ({ filename, fileType }: { filename: string; fileType: string }) => {
   return (
     <div className="inline-flex items-center gap-[10px] p-[8px] pr-[12px] bg-[#EAEEFF] rounded-[12px]">
-      {/* Image thumbnail */}
-      <div className="w-[32px] h-[40px] rounded-[4px] overflow-hidden shadow-[0px_2px_16px_0px_rgba(25,40,57,0.09)]">
-        {thumbnailUrl ? (
-          <img src={thumbnailUrl} alt="" className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full bg-[#efe6f7] flex items-center justify-center">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-              <circle cx="8.5" cy="8.5" r="1.5" />
-              <polyline points="21 15 16 10 5 21" />
-            </svg>
-          </div>
-        )}
-      </div>
+      {/* Stylized screenshot thumbnail */}
+      <ScreenshotThumbnail />
 
       {/* File info */}
       <div className="flex flex-col justify-center">
@@ -3180,7 +3185,6 @@ export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast
           <ChatAttachmentPill
             filename={imageBlocks[0].filename || "Whatsapp Image"}
             fileType={imageBlocks[0].fileType || "PNG"}
-            thumbnailUrl={imageBlocks[0].content}
           />
         )}
 

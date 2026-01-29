@@ -11,6 +11,23 @@ interface ImageAttachmentChipProps {
   onRemove?: () => void;
 }
 
+// Stylized screenshot thumbnail mockup
+const ScreenshotThumbnail = () => (
+  <div className="w-[32px] h-[40px] rounded-[4px] overflow-hidden shadow-[0px_2px_16px_0px_rgba(25,40,57,0.09)] bg-[#efe6f7] relative">
+    {/* Purple header bar */}
+    <div className="absolute top-0 left-0 right-0 h-[6px] bg-[#5f259e]" />
+    {/* White content rows */}
+    <div className="absolute top-[7px] left-[1px] right-[1px] h-[6px] bg-white rounded-[1px]" />
+    <div className="absolute top-[14px] left-[1px] right-[1px] h-[9px] bg-white rounded-[1px]">
+      <div className="absolute left-[2px] top-[3px] w-[4px] h-[4px] bg-[#7034b2] rounded-[1px]" />
+    </div>
+    <div className="absolute top-[24px] left-[1px] right-[1px] h-[9px] bg-white rounded-[1px]">
+      <div className="absolute left-[2px] top-[2px] w-[4px] h-[4px] bg-white rounded-[1px]" />
+    </div>
+    <div className="absolute top-[34px] left-[1px] right-[1px] h-[6px] bg-white rounded-[1px]" />
+  </div>
+);
+
 export const ImageAttachmentChip: React.FC<ImageAttachmentChipProps> = ({
   filename,
   fileType,
@@ -19,16 +36,8 @@ export const ImageAttachmentChip: React.FC<ImageAttachmentChipProps> = ({
 }) => {
   return (
     <div className="relative inline-flex items-center gap-[10px] p-[8px] pr-[12px] bg-[#EAEEFF] rounded-[12px] shrink-0">
-      {/* Image thumbnail */}
-      <div className="w-[32px] h-[40px] rounded-[4px] overflow-hidden shadow-[0px_2px_16px_0px_rgba(25,40,57,0.09)]">
-        {thumbnailUrl ? (
-          <img src={thumbnailUrl} alt="" className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full bg-[#efe6f7] flex items-center justify-center">
-            <ImageIcon size={16} className="text-[#94A3B8]" />
-          </div>
-        )}
-      </div>
+      {/* Stylized screenshot thumbnail */}
+      <ScreenshotThumbnail />
 
       {/* File info */}
       <div className="flex flex-col justify-center">
