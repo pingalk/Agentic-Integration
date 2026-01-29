@@ -3134,13 +3134,13 @@ const FundsAddedMessage = ({ data, isLast, onSuggestionClick }: { data: RayRespo
 // Chat Stream Attachment Pill Component
 const ChatAttachmentPill = ({ filename, fileType, thumbnailUrl }: { filename: string; fileType: string; thumbnailUrl?: string }) => {
   return (
-    <div className="inline-flex items-center gap-[10px] p-[8px] pr-[12px] bg-[#eff0f0] rounded-[12px]">
+    <div className="inline-flex items-center gap-[10px] p-[8px] pr-[12px] bg-[#EAEEFF] rounded-[12px]">
       {/* Image thumbnail */}
       <div className="w-[32px] h-[40px] rounded-[4px] overflow-hidden shadow-[0px_2px_16px_0px_rgba(25,40,57,0.09)]">
         {thumbnailUrl ? (
           <img src={thumbnailUrl} alt="" className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full bg-[#E2E8F0] flex items-center justify-center">
+          <div className="w-full h-full bg-[#efe6f7] flex items-center justify-center">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
               <circle cx="8.5" cy="8.5" r="1.5" />
