@@ -716,13 +716,22 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
     if (currentPersona.id === 'shyam') {
       // Handle "create payment link" suggestion
       if (shyamFlowStep === 1 && suggestion.toLowerCase().includes('payment link')) {
-        // Open payment link widget with prefilled data for Rahul
-        setPaymentLinkPrefill({
-          amount: '15000',
-          purpose: 'Payment retry for failed transaction',
-          email: 'rahul@gmail.com'
-        });
-        setShowPaymentLinkWidget(true);
+        // First record the user's message in the chat stream
+        setMessages(prev => [...prev, {
+          id: `shyam-u-${Date.now()}`,
+          sender: 'user',
+          blocks: [{ type: 'text', content: suggestion }]
+        }]);
+
+        // Then open payment link widget with prefilled data for Rahul
+        setTimeout(() => {
+          setPaymentLinkPrefill({
+            amount: '15000',
+            purpose: 'Payment retry for failed transaction',
+            email: 'rahul@gmail.com'
+          });
+          setShowPaymentLinkWidget(true);
+        }, 300); // Small delay so user sees their message first
         return;
       }
     }

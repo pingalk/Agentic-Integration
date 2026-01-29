@@ -265,15 +265,55 @@ export const PaymentLinkWidget: React.FC<PaymentLinkWidgetProps> = ({
     return null;
   };
 
-  // Handle key navigation
-  const handleKeyDown = (e: React.KeyboardEvent, field: string, nextRef?: React.RefObject<HTMLInputElement>) => {
+  // Define field order for keyboard navigation
+  const step0Fields = [amountRef, purposeRef];
+  const step1Fields = [emailRef, phoneRef];
+
+  // Handle key navigation with Enter, ArrowUp, and ArrowDown
+  const handleKeyDown = (
+    e: React.KeyboardEvent,
+    currentRef: React.RefObject<HTMLInputElement>,
+    prevRef?: React.RefObject<HTMLInputElement>,
+    nextRef?: React.RefObject<HTMLInputElement>,
+    isLastInStep?: boolean,
+    stepValidation?: boolean,
+    currentStep?: number
+  ) => {
     if (e.key === 'Enter') {
+      e.preventDefault();
+      if (isLastInStep && stepValidation !== false && currentStep !== undefined) {
+        // Move to next step
+        handleNextStep(currentStep);
+      } else if (nextRef?.current) {
+        nextRef.current.focus();
+      }
+    } else if (e.key === 'ArrowDown') {
       e.preventDefault();
       if (nextRef?.current) {
         nextRef.current.focus();
       }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (prevRef?.current) {
+        prevRef.current.focus();
+      }
     }
   };
+
+  // Global keyboard listener for review screen (Enter to submit)
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (activeStep === 3 && e.key === 'Enter' && isFormValid && status === 'editing') {
+        e.preventDefault();
+        handleSubmit();
+      }
+    };
+
+    if (activeStep === 3) {
+      window.addEventListener('keydown', handleGlobalKeyDown);
+      return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+    }
+  }, [activeStep, isFormValid, status]);
 
   if (!isOpen) return null;
 
@@ -385,7 +425,7 @@ export const PaymentLinkWidget: React.FC<PaymentLinkWidgetProps> = ({
                                 type="text"
                                 value={formData.amount}
                                 onChange={(e) => updateField('amount', e.target.value)}
-                                onKeyDown={(e) => handleKeyDown(e, 'amount', purposeRef)}
+                                onKeyDown={(e) => handleKeyDown(e, amountRef, undefined, purposeRef, false)}
                                 className="font-['Inter',sans-serif] font-bold text-[16px] text-[#40566d] w-full outline-none bg-transparent placeholder:text-slate-300"
                                 placeholder="0.00"
                               />
@@ -400,12 +440,7 @@ export const PaymentLinkWidget: React.FC<PaymentLinkWidgetProps> = ({
                                 type="text"
                                 value={formData.purpose}
                                 onChange={(e) => updateField('purpose', e.target.value)}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter' && isStep0Valid) {
-                                    e.preventDefault();
-                                    handleNextStep(0);
-                                  }
-                                }}
+                                onKeyDown={(e) => handleKeyDown(e, purposeRef, amountRef, undefined, true, isStep0Valid, 0)}
                                 className="font-['Inter',sans-serif] text-[16px] text-[#40566d] w-full outline-none bg-transparent placeholder:text-[#40566d]/40"
                                 placeholder="Payment for"
                               />
@@ -480,7 +515,7 @@ export const PaymentLinkWidget: React.FC<PaymentLinkWidgetProps> = ({
                                 type="email"
                                 value={formData.email}
                                 onChange={(e) => updateField('email', e.target.value)}
-                                onKeyDown={(e) => handleKeyDown(e, 'email', phoneRef)}
+                                onKeyDown={(e) => handleKeyDown(e, emailRef, undefined, phoneRef, false)}
                                 className="font-['Inter',sans-serif] text-[16px] text-[#40566d] w-full outline-none bg-transparent placeholder:text-[#40566d]/40"
                                 placeholder="customer@example.com"
                               />
@@ -496,12 +531,7 @@ export const PaymentLinkWidget: React.FC<PaymentLinkWidgetProps> = ({
                                 type="text"
                                 value={formData.phone}
                                 onChange={(e) => updateField('phone', e.target.value)}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    handleNextStep(1);
-                                  }
-                                }}
+                                onKeyDown={(e) => handleKeyDown(e, phoneRef, emailRef, undefined, true, true, 1)}
                                 className="font-['Inter',sans-serif] text-[16px] text-[#40566d] w-full outline-none bg-transparent placeholder:text-[#40566d]/40"
                                 placeholder="Phone number (optional)"
                               />

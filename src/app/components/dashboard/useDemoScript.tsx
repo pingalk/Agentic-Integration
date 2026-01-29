@@ -400,7 +400,7 @@ Maya`,
                         ]
                     },
                     suggestions: [
-                        "Show me how to send a fresh Payment Link to Rahul.",
+                        "Issue a fresh Payment Link to Rahul.",
                         "Check if there are other failed payments from today.",
                         "How do I track if the money is returned to the customer?"
                     ]
