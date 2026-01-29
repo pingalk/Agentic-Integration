@@ -160,13 +160,22 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
         // Smart scroll: When Ray enters thinking state, scroll the last user message to top
         // This gives maximum room for Ray's response to appear below
         const lastUserMessage = [...messages].reverse().find(m => m.sender === 'user');
-        if (lastUserMessage) {
+        if (lastUserMessage && scrollContainerRef.current) {
           setTimeout(() => {
             const userMessageEl = messageRefs.current.get(lastUserMessage.id);
-            if (userMessageEl) {
-              userMessageEl.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
+            const container = scrollContainerRef.current;
+            if (userMessageEl && container) {
+              // Calculate the element's position relative to the scroll container
+              const containerRect = container.getBoundingClientRect();
+              const elementRect = userMessageEl.getBoundingClientRect();
+
+              // Calculate scroll position to put element at the very top of container
+              // Account for current scroll position and the offset between element and container top
+              const scrollTop = container.scrollTop + (elementRect.top - containerRect.top);
+
+              container.scrollTo({
+                top: scrollTop,
+                behavior: 'smooth'
               });
             }
           }, 100);
