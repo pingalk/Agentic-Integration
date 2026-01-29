@@ -503,7 +503,7 @@ Maya`,
                 type: 'settlement_explanation',
                 data: {
                     headline: "Most of your recent payments haven't reached the settlement window yet (T+2)",
-                    subtext: "You're on a T+2 settlement cycle, which means payments take 2 working days to settle. Jan 26 was a national holiday.\n\nBecause of this, recent payments worth ₹7.3L were collected after the cutoff for tomorrow's settlement. Nothing is wrong—this is purely a timing gap.",
+                    subtext: "• You're on a T+2 settlement cycle, which means payments take 2 working days to settle.\n• Jan 26 was a national holiday.\n\nBecause of this, recent payments worth ₹7.3L were collected after the cutoff for tomorrow's settlement. Nothing is wrong—this is purely a timing gap.",
                     table: {
                         rows: [
                             { status: 'Settling tomorrow (T+2)', amount: '₹3.1L' },
