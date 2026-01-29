@@ -723,15 +723,28 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
           blocks: [{ type: 'text', content: suggestion }]
         }]);
 
-        // Then open payment link widget with prefilled data for Rahul
+        // Show Ray's thinking animation
         setTimeout(() => {
-          setPaymentLinkPrefill({
-            amount: '15000',
-            purpose: 'Payment retry for failed transaction',
-            email: 'rahul@gmail.com'
-          });
-          setShowPaymentLinkWidget(true);
-        }, 300); // Small delay so user sees their message first
+          setIsStreaming(true);
+          const thinkingId = `shyam-thinking-${Date.now()}`;
+          setMessages(prev => [...prev, {
+            id: thinkingId,
+            sender: 'ai',
+            isThinking: true
+          }]);
+
+          // After 7 seconds, remove thinking and show payment link widget
+          setTimeout(() => {
+            setMessages(prev => prev.filter(m => m.id !== thinkingId));
+            setIsStreaming(false);
+            setPaymentLinkPrefill({
+              amount: '15000',
+              purpose: 'Payment retry for failed transaction',
+              email: 'rahul@gmail.com'
+            });
+            setShowPaymentLinkWidget(true);
+          }, 7000);
+        }, 300);
         return;
       }
     }
