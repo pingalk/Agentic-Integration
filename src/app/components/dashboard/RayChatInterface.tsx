@@ -19,6 +19,12 @@ const ENABLE_ROLL_UP_ANIMATION = true;
 // Set to false to restore default behavior (oldest at top, newest at bottom)
 const ENABLE_PIN_TO_TOP = false;
 
+// EXPERIMENTAL: Smart scroll on Ray thinking
+// When Ray enters thinking state, scroll so the user's latest message is at the TOP of the viewport
+// This gives maximum room for Ray's response to appear below
+// Set to false to disable this behavior
+const ENABLE_SMART_SCROLL_ON_THINKING = true;
+
 // --- Context Aware Data Generator ---
 const generateArjunData = (): RayResponseData => {
   const today = new Date();
@@ -135,7 +141,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
 
   // EXPERIMENTAL: Pin-to-top / Roll-up animation - scroll to show newest content
   useEffect(() => {
-    if (!ENABLE_ROLL_UP_ANIMATION && !ENABLE_PIN_TO_TOP) return;
+    if (!ENABLE_ROLL_UP_ANIMATION && !ENABLE_PIN_TO_TOP && !ENABLE_SMART_SCROLL_ON_THINKING) return;
 
     // Check if a new message was added
     if (messages.length > prevMessageCountRef.current) {
@@ -150,6 +156,21 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
             behavior: 'smooth'
           });
         }, 100);
+      } else if (ENABLE_SMART_SCROLL_ON_THINKING && latestMessage?.isThinking) {
+        // Smart scroll: When Ray enters thinking state, scroll the last user message to top
+        // This gives maximum room for Ray's response to appear below
+        const lastUserMessage = [...messages].reverse().find(m => m.sender === 'user');
+        if (lastUserMessage) {
+          setTimeout(() => {
+            const userMessageEl = messageRefs.current.get(lastUserMessage.id);
+            if (userMessageEl) {
+              userMessageEl.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+              });
+            }
+          }, 100);
+        }
       } else if (ENABLE_ROLL_UP_ANIMATION && latestMessage?.sender === 'user') {
         // Legacy roll-up: only scroll to top for user messages
         setTimeout(() => {
