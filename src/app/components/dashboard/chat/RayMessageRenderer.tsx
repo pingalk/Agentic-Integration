@@ -3347,7 +3347,7 @@ const InstantSettlementOfferArtifact = ({ data, onSuggestionClick, isLast, highl
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.4 }}
                 className="relative w-full max-w-[400px] h-[180px] rounded-[12px] border border-[#dee1e3] overflow-hidden shadow-[0px_6px_32px_4px_rgba(184,196,214,0.06)]"
-                style={{ background: 'linear-gradient(180deg, rgb(250, 250, 251) 0%, rgb(255, 255, 255) 28%, rgb(255, 255, 255) 72%, rgb(243, 244, 245) 100%)' }}
+                style={{ background: 'linear-gradient(180deg, rgb(240, 249, 255) 0%, rgb(255, 255, 255) 28%, rgb(255, 255, 255) 72%, rgb(224, 242, 254) 100%)' }}
               >
                 {/* Title */}
                 <p className="absolute left-[20px] top-[18px] font-['TASA_Orbiter_Display',sans-serif] font-semibold text-[18px] leading-[24px] text-[#192839]">
