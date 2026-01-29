@@ -241,22 +241,22 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
         {
           id: 'briefing',
           type: 'briefing',
-          title: "Festive season surge detected",
+          title: "Payment volumes are on huge surge",
           subtext: "Orders up 340% this week — record collections!"
         },
         {
           id: 'stats',
           type: 'stats',
-          title: "Record payment collections",
+          title: "Payments collected",
           value: "₹10,40,000.00",
-          secondaryValue: "₹7,30,000.00",
+          secondaryValue: "₹13,40,000.00",
           trend: 'up',
           status: 'healthy'
         },
         {
           id: 'settlement',
           type: 'settlement',
-          title: "Next settlement: Tomorrow",
+          title: "Upcoming settlement",
           value: "₹3.1L",
           subtext: "T+2 Cycle",
           status: 'healthy'
