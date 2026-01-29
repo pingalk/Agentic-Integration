@@ -311,7 +311,7 @@ const parseMarkdownBold = (content: string): React.ReactNode[] => {
 };
 
 // --- Investigation Report Component ---
-const InvestigationReportArtifact = ({ data, onRowClick, onSuggestionClick, isLast }: any) => {
+const InvestigationReportArtifact = ({ data, onRowClick, onSuggestionClick, isLast, highlightedSuggestionIndex = null }: any) => {
   const [subtextStarted, setSubtextStarted] = useState(false);
 
   const { phase, onNarrativeComplete } = useStreamSequencer({
@@ -554,25 +554,28 @@ const InvestigationReportArtifact = ({ data, onRowClick, onSuggestionClick, isLa
                 Suggestions
               </h3>
               <div className="flex flex-col gap-[2px]">
-                {data.suggestions.map((sug: string, i: number) => (
-                  <motion.button
-                    key={i}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.1, duration: 0.2 }}
-                    onClick={() => onSuggestionClick?.(sug)}
-                    className="flex items-center gap-[4px] p-[4px] text-left w-full rounded-[4px] transition-colors hover:bg-[#f1f5fa] group"
-                  >
-                    <div className="shrink-0 size-[20px] rounded-full flex items-center justify-center bg-[#f1f5fa] group-hover:bg-white transition-colors">
-                      <span className="text-[10px] font-medium leading-[14px] text-[#40566d] group-hover:text-[#2980e1] transition-colors">
-                        {i + 1}
-                      </span>
-                    </div>
-                    <p className="text-[16px] leading-[26px] tracking-[0.16px] font-medium text-[#40566d] group-hover:text-[#2980e1] transition-colors">
-                      {sug}
-                    </p>
-                  </motion.button>
-                ))}
+                {data.suggestions.map((sug: string, i: number) => {
+                  const isHighlighted = highlightedSuggestionIndex === i;
+                  return (
+                    <motion.button
+                      key={i}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.1, duration: 0.2 }}
+                      onClick={() => onSuggestionClick?.(sug)}
+                      className={`flex items-center gap-[4px] p-[4px] text-left w-full rounded-[4px] transition-colors hover:bg-[#f1f5fa] group ${isHighlighted ? 'bg-[#f1f5fa]' : ''}`}
+                    >
+                      <div className={`shrink-0 size-[20px] rounded-full flex items-center justify-center transition-colors ${isHighlighted ? 'bg-white' : 'bg-[#f1f5fa] group-hover:bg-white'}`}>
+                        <span className={`text-[10px] font-medium leading-[14px] transition-colors ${isHighlighted ? 'text-[#2980e1]' : 'text-[#40566d] group-hover:text-[#2980e1]'}`}>
+                          {i + 1}
+                        </span>
+                      </div>
+                      <p className={`text-[16px] leading-[26px] tracking-[0.16px] font-medium transition-colors ${isHighlighted ? 'text-[#2980e1]' : 'text-[#40566d] group-hover:text-[#2980e1]'}`}>
+                        {sug}
+                      </p>
+                    </motion.button>
+                  );
+                })}
               </div>
             </motion.div>
           )}
@@ -3164,7 +3167,7 @@ const ChatAttachmentPill = ({ filename, fileType }: { filename: string; fileType
   );
 };
 
-export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast = true }: { data: RayResponseData; onSuggestionClick?: (suggestion: string) => void; onRowClick?: (rowData: any) => void; isLast?: boolean }) => {
+export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast = true, highlightedSuggestionIndex = null }: { data: RayResponseData; onSuggestionClick?: (suggestion: string) => void; onRowClick?: (rowData: any) => void; isLast?: boolean; highlightedSuggestionIndex?: number | null }) => {
   // 1. User Message (Right Aligned) - Show attachment pill first, then text bubble
   if (data.sender === 'user') {
     // Extract image and text blocks
@@ -3207,7 +3210,7 @@ export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast
   if (data.artifact?.type === 'investigation_report') {
     return (
       <div className="w-full animate-fade-in-up">
-        <InvestigationReportArtifact data={data.artifact.data} onSuggestionClick={onSuggestionClick} onRowClick={onRowClick} isLast={isLast} />
+        <InvestigationReportArtifact data={data.artifact.data} onSuggestionClick={onSuggestionClick} onRowClick={onRowClick} isLast={isLast} highlightedSuggestionIndex={highlightedSuggestionIndex} />
       </div>
     );
   }

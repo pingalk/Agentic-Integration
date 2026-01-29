@@ -116,6 +116,9 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
   // Input ref for focus checking
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Highlighted suggestion index for keyboard shortcut hover preview
+  const [highlightedSuggestionIndex, setHighlightedSuggestionIndex] = useState<number | null>(null);
+
   // Refs to prevent double execution in React StrictMode
   const demoFlowStartedRef = useRef(false);
 
@@ -170,12 +173,20 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
         const suggestionIndex = keyNum - 1;
         if (suggestions[suggestionIndex]) {
           e.preventDefault();
-          setInputValue(suggestions[suggestionIndex]);
-          setIsInputFocused(true);
-          // Focus the input after a small delay to ensure state is updated
+
+          // Show hover state on the suggestion first
+          setHighlightedSuggestionIndex(suggestionIndex);
+
+          // After 1.3s delay, populate the input and clear highlight
           setTimeout(() => {
-            inputRef.current?.focus();
-          }, 50);
+            setHighlightedSuggestionIndex(null);
+            setInputValue(suggestions[suggestionIndex]);
+            setIsInputFocused(true);
+            // Focus the input after a small delay to ensure state is updated
+            setTimeout(() => {
+              inputRef.current?.focus();
+            }, 50);
+          }, 1300);
         }
       }
     };
@@ -893,6 +904,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
                       isLast={index === messages.length - 1}
                       onSuggestionClick={handleSuggestionClick}
                       onRowClick={handleRowClick}
+                      highlightedSuggestionIndex={highlightedSuggestionIndex}
                     />
                  </motion.div>
               ))}
