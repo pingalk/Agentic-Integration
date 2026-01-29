@@ -17,7 +17,7 @@ const ENABLE_ROLL_UP_ANIMATION = true;
 // Set to true to display messages in reverse order (newest at top)
 // When enabled, user's latest message appears at top, followed by Ray's response below
 // Set to false to restore default behavior (oldest at top, newest at bottom)
-const ENABLE_PIN_TO_TOP = true;
+const ENABLE_PIN_TO_TOP = false;
 
 // --- Context Aware Data Generator ---
 const generateArjunData = (): RayResponseData => {
