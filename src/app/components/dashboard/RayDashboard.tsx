@@ -384,7 +384,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, onNaviga
                         }}
                     />
                 ) : (
-                <div className="relative z-10 h-full overflow-y-auto flex flex-col items-center justify-center p-4 md:p-8 px-4 md:px-[32px] pt-[80px] md:pt-[100px] pb-[100px] scrollbar-hide">
+                <div className="relative z-10 h-full overflow-y-auto flex flex-col items-center justify-center p-4 md:p-8 px-4 md:px-[32px] pt-[210px] md:pt-[230px] pb-[100px] scrollbar-hide">
                      {/* Greeting Section - offset slightly above center */}
                      <div
                          className="flex items-center gap-[12px] mb-8 group cursor-default -mt-[15vh]"
