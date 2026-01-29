@@ -562,10 +562,10 @@ Maya`,
                     headline: "Instant Settlements enabled 🎉",
                     subtext: "₹7L will be credited to your bank account by today, EOD. You can turn Instant Settlements on or off anytime.",
                     settlement: {
-                        amount: '7,00,000',
+                        amount: '7,10,000',
                         scheduledFor: 'Today, EOD',
-                        status: 'Processing',
-                        type: 'instant'
+                        status: 'Scheduled',
+                        type: 'regular'
                     },
                     promptText: "Would you like me to notify you as soon as the settlement is credited?",
                     buttons: [
