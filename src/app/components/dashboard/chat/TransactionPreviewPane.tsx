@@ -223,7 +223,7 @@ export const TransactionPreviewPane: React.FC<TransactionPreviewPaneProps> = ({
   };
 
   return (
-    <div className="h-full w-full bg-white rounded-[8px] shadow-[0_16px_48px_-4px_rgba(25,40,57,0.18)] flex flex-col overflow-hidden">
+    <div className="h-full w-full bg-white rounded-[8px] shadow-[0_8px_32px_-4px_rgba(18,145,208,0.18)] flex flex-col overflow-hidden">
       {/* Header with gradient */}
       <motion.div
         className="flex flex-col gap-[20px] p-[20px] shrink-0"
