@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { SmartTable, MessageFooter, SuggestionStack } from './RayComponents';
 import Ray from '@/imports/Ray';
 import Copy from '@/imports/Copy';
+import { PaymentLinkMiniCard } from './PaymentLinkMiniCard';
 import { FundsAddedCard } from './artifacts/FundsAddedCard';
 import { FundsAddedHeader, FundsAddedBody, SettlementCard, RayInsightCard } from './artifacts/FundsAddedComponents';
 import { ConfigurableSettlementCard, SettlementStatusTable, FeeCalculatorCard } from './artifacts/SettlementComponents';
@@ -313,6 +314,17 @@ export interface RayResponseData {
       promptText: string;
       buttons: Array<{ label: string; variant: 'primary' | 'secondary' }>;
       suggestions: string[];
+    };
+  } | {
+    type: 'payment_link_form_card';
+    data: {
+      formId: string;
+      status: 'draft' | 'completed';
+      prefill: {
+        amount: string;
+        purpose: string;
+        email?: string;
+      };
     };
   };
 }
@@ -3893,7 +3905,7 @@ const ChatAttachmentPill = ({ filename, fileType }: { filename: string; fileType
   );
 };
 
-export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast = true, highlightedSuggestionIndex = null }: { data: RayResponseData; onSuggestionClick?: (suggestion: string) => void; onRowClick?: (rowData: any) => void; isLast?: boolean; highlightedSuggestionIndex?: number | null }) => {
+export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast = true, highlightedSuggestionIndex = null, onMiniCardClick }: { data: RayResponseData; onSuggestionClick?: (suggestion: string) => void; onRowClick?: (rowData: any) => void; isLast?: boolean; highlightedSuggestionIndex?: number | null; onMiniCardClick?: (formId: string) => void }) => {
   // 1. User Message (Right Aligned) - Show attachment pill first, then text bubble
   if (data.sender === 'user') {
     // Extract image and text blocks
@@ -4197,7 +4209,20 @@ export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast
     );
   }
 
-  // 22. Ray AI Message (Standard Blocks, Max Width 398px)
+  // 22. Payment Link Form Card (Mini-Card for Modal)
+  if (data.artifact?.type === 'payment_link_form_card') {
+    return (
+      <div className="w-full animate-fade-in-up">
+        <PaymentLinkMiniCard
+          formData={data.artifact.data.prefill}
+          status={data.artifact.data.status}
+          onClick={() => onMiniCardClick?.(data.artifact.data.formId)}
+        />
+      </div>
+    );
+  }
+
+  // 23. Ray AI Message (Standard Blocks, Max Width 398px)
   return (
     <div className="flex gap-4 items-start w-full max-w-[398px] animate-fade-in-up">
         {/* Content Container - No Avatar */}

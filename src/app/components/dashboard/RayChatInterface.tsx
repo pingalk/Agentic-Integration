@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { RayMessageRenderer, RayResponseData } from './chat/RayMessageRenderer';
 import { AddFundsWidget } from './chat/AddFundsWidget';
-import { PaymentLinkWidget, PaymentLinkPrefill, parsePaymentLinkIntent } from './chat/PaymentLinkWidget';
+import { PaymentLinkPrefill, parsePaymentLinkIntent } from './chat/PaymentLinkWidget';
+import { PaymentLinkModal } from './chat/PaymentLinkModal';
 import { TransactionPreviewPane, TransactionData } from './chat/TransactionPreviewPane';
 import { ArrowDown, ArrowUp, Mic, Plus, Sparkles, Square } from 'lucide-react';
 import { useDemo } from '@/context/DemoContext';
@@ -104,9 +105,10 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
   const [showAddFundsWidget, setShowAddFundsWidget] = useState(false);
   const [widgetAmount, setWidgetAmount] = useState('');
 
-  // Payment Link Widget States
-  const [showPaymentLinkWidget, setShowPaymentLinkWidget] = useState(false);
+  // Payment Link Modal States
+  const [isPaymentLinkModalOpen, setIsPaymentLinkModalOpen] = useState(false);
   const [paymentLinkPrefill, setPaymentLinkPrefill] = useState<PaymentLinkPrefill | null>(null);
+  const [activeFormCardId, setActiveFormCardId] = useState<string | null>(null);
 
   // Input Box States
   const [isInputFocused, setIsInputFocused] = useState(false);
@@ -805,7 +807,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
       const prefill = parsePaymentLinkIntent(inputValue);
       if (prefill) {
         setPaymentLinkPrefill(prefill);
-        setShowPaymentLinkWidget(true);
+        setIsPaymentLinkModalOpen(true);
       }
     }
   }, [inputValue]);
@@ -936,17 +938,41 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
             isThinking: true
           }]);
 
-          // After 7 seconds, remove thinking and show payment link widget
+          // After 2 seconds, remove thinking, add mini-card, and open modal
           setTimeout(() => {
-            setMessages(prev => prev.filter(m => m.id !== thinkingId));
-            setIsStreaming(false);
-            setPaymentLinkPrefill({
+            const formCardId = `form-card-${Date.now()}`;
+            setActiveFormCardId(formCardId);
+
+            // Set prefill data
+            const prefillData: PaymentLinkPrefill = {
               amount: '15000',
               purpose: 'Payment retry for failed transaction',
               email: 'rahul@gmail.com'
+            };
+            setPaymentLinkPrefill(prefillData);
+
+            // Remove thinking, add mini-card message
+            setMessages(prev => {
+              const filtered = prev.filter(m => m.id !== thinkingId);
+              return [...filtered, {
+                id: formCardId,
+                sender: 'ai' as const,
+                artifact: {
+                  type: 'payment_link_form_card' as const,
+                  data: {
+                    formId: formCardId,
+                    status: 'draft' as const,
+                    prefill: prefillData
+                  }
+                }
+              }];
             });
-            setShowPaymentLinkWidget(true);
-          }, 7000);
+
+            setIsStreaming(false);
+            // Open modal automatically
+            setIsPaymentLinkModalOpen(true);
+            setShyamFlowStep(2);
+          }, 2000);
         }, 300);
         return;
       }
@@ -1306,6 +1332,10 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
                         onSuggestionClick={handleSuggestionClick}
                         onRowClick={handleRowClick}
                         highlightedSuggestionIndex={highlightedSuggestionIndex}
+                        onMiniCardClick={(formId) => {
+                          setActiveFormCardId(formId);
+                          setIsPaymentLinkModalOpen(true);
+                        }}
                       />
                    </motion.div>
                  );
@@ -1382,73 +1412,60 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
            )}
          </AnimatePresence>
 
-         {/* Payment Link Widget - Floats above input */}
-         <AnimatePresence>
-           {showPaymentLinkWidget && (
-             <PaymentLinkWidget
-               isOpen={showPaymentLinkWidget}
-               onClose={() => {
-                 setShowPaymentLinkWidget(false);
-                 setPaymentLinkPrefill(null);
-               }}
-               onComplete={(result) => {
-                 setShowPaymentLinkWidget(false);
-                 setPaymentLinkPrefill(null);
-                 setInputValue('');
+         {/* Payment Link Modal - Opens with scrim, chat input stays above */}
+         <PaymentLinkModal
+           isOpen={isPaymentLinkModalOpen}
+           onClose={() => {
+             setIsPaymentLinkModalOpen(false);
+           }}
+           onComplete={(result) => {
+             setIsPaymentLinkModalOpen(false);
+             setPaymentLinkPrefill(null);
+             setInputValue('');
 
-                 // 1. User Message
-                 setMessages(prev => [...prev, {
-                   id: `u-${Date.now()}`,
-                   sender: 'user',
-                   blocks: [{ type: 'text', content: `Create payment link for ₹${result.amount} - ${result.purpose}` }]
-                 }]);
-
-                 // 2. Thinking State
-                 setTimeout(() => {
-                   setIsStreaming(true);
-                   setMessages(prev => [...prev, {
-                     id: `ai-think-${Date.now()}`,
-                     sender: 'ai',
-                     isThinking: true
-                   }]);
-
-                   // 3. Success Response - Special handling for Shyam
-                   setTimeout(() => {
-                     setMessages(prev => {
-                       const withoutThinking = prev.filter(m => !m.isThinking);
-
-                       if (currentPersona.id === 'shyam') {
-                         // Show Shyam's payment link created card
-                         setShyamFlowStep(2);
-                         return [...withoutThinking, {
-                           ...shyamScript.shyam_step_2,
-                           id: `ai-${Date.now()}`,
-                           sender: 'ai' as const
-                         }];
+             // Update mini-card status to completed if it exists
+             if (activeFormCardId) {
+               setMessages(prev => prev.map(msg =>
+                 msg.id === activeFormCardId && msg.artifact?.type === 'payment_link_form_card'
+                   ? {
+                       ...msg,
+                       artifact: {
+                         ...msg.artifact,
+                         data: { ...msg.artifact.data, status: 'completed' as const }
                        }
+                     }
+                   : msg
+               ));
+             }
 
-                       // Default response for other personas
-                       return [...withoutThinking, {
-                         id: `ai-${Date.now()}`,
-                         sender: 'ai',
-                         artifact: {
-                           type: 'simple_text',
-                           data: {
-                             headline: 'Payment link created!',
-                             body: `Your payment link for **₹${Number(result.amount).toLocaleString('en-IN')}** (${result.purpose}) is ready:\n\n${result.linkUrl}\n\nShare this link with your customer to collect payment.`,
-                             suggestions: ['Create another payment link', 'View all payment links']
-                           }
-                         }
-                       }];
-                     });
-                     setTimeout(() => setIsStreaming(false), 3000);
-                   }, 1500);
-                 }, 600);
-               }}
-               prefill={paymentLinkPrefill || undefined}
-             />
-           )}
-         </AnimatePresence>
+             // For Shyam flow, show the payment link created success card
+             if (currentPersona.id === 'shyam') {
+               setTimeout(() => {
+                 setMessages(prev => [...prev, {
+                   ...shyamScript.shyam_step_2,
+                   id: `ai-${Date.now()}`,
+                   sender: 'ai' as const
+                 }]);
+               }, 500);
+               return;
+             }
+
+             // Default response for other personas
+             setMessages(prev => [...prev, {
+               id: `ai-${Date.now()}`,
+               sender: 'ai',
+               artifact: {
+                 type: 'simple_text',
+                 data: {
+                   headline: 'Payment link created!',
+                   body: `Your payment link for **₹${Number(result.amount).toLocaleString('en-IN')}** (${result.purpose}) is ready:\n\n${result.linkUrl}\n\nShare this link with your customer to collect payment.`,
+                   suggestions: ['Create another payment link', 'View all payment links']
+                 }
+               }
+             }]);
+           }}
+           prefill={paymentLinkPrefill || undefined}
+         />
 
          {/* Top Fade Gradient */}
          <div className="h-16 w-full bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
