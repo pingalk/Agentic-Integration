@@ -5,13 +5,15 @@ interface StreamSequencerProps {
     hasInsight: boolean;
     hasSuggestions: boolean;
     thinkingDuration?: number;  // 0 = skip thinking, 2000 = 2s, 7000 = 7s
+    onStreamComplete?: () => void;  // Called when phase 5 is reached
 }
 
 export const useStreamSequencer = ({
     hasDataAsset,
     hasInsight,
     hasSuggestions,
-    thinkingDuration = 0
+    thinkingDuration = 0,
+    onStreamComplete
 }: StreamSequencerProps) => {
     // Phase 0: Thinking (if thinkingDuration > 0)
     // Phase 1: Narrative
@@ -77,6 +79,13 @@ export const useStreamSequencer = ({
              return () => clearTimeout(timer);
         }
     }, [phase]);
+
+    // Call onStreamComplete when phase 5 is reached
+    useEffect(() => {
+        if (phase === 5 && onStreamComplete) {
+            onStreamComplete();
+        }
+    }, [phase, onStreamComplete]);
 
     return { phase, onNarrativeComplete };
 };

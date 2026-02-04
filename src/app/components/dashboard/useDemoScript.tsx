@@ -197,12 +197,8 @@ Maya`,
                     },
                     resolution: {
                         title: "The cause:",
-                        content: "Your payment capture setting was likely set to **manual capture**, when you updated your Shopify integration recently. This is likely the root cause.\n\n**My recommendation:** I can switch your account to \"Auto-capture\" right now so you never miss a payment again. Should I go and change this to auto-capture?"
+                        content: "Your payment capture setting was likely set to **manual capture**, when you updated your Shopify integration recently. This is likely the root cause.\n\n**My recommendation:** Switch to \"Auto-capture\" so you never miss a payment again."
                     },
-                    buttons: [
-                        { label: "Yes", variant: "primary" },
-                        { label: "Not now", variant: "secondary" }
-                    ],
                     suggestions: [
                         "What is payment capture? Why does it matter?",
                         "Can the payment capture setting be reversed later on?",

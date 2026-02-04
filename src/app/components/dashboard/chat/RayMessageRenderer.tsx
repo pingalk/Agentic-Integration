@@ -390,14 +390,15 @@ const parseMarkdownBold = (content: string): React.ReactNode[] => {
 };
 
 // --- Investigation Report Component ---
-const InvestigationReportArtifact = ({ data, onRowClick, onSuggestionClick, isLast, highlightedSuggestionIndex = null }: any) => {
+const InvestigationReportArtifact = ({ data, onRowClick, onSuggestionClick, isLast, highlightedSuggestionIndex = null, onStreamComplete }: any) => {
   const [subtextStarted, setSubtextStarted] = useState(false);
 
   const { phase, onNarrativeComplete } = useStreamSequencer({
     hasDataAsset: !!data.table,
     hasInsight: !!data.resolution,
     hasSuggestions: data.suggestions?.length > 0,
-    thinkingDuration: 7000  // 7 seconds for primary response
+    thinkingDuration: 7000,  // 7 seconds for primary response
+    onStreamComplete
   });
 
   // Start subtext after 1.3s cognitive pause following headline
@@ -3907,7 +3908,7 @@ const ChatAttachmentPill = ({ filename, fileType }: { filename: string; fileType
   );
 };
 
-export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast = true, highlightedSuggestionIndex = null, onMiniCardClick }: { data: RayResponseData; onSuggestionClick?: (suggestion: string) => void; onRowClick?: (rowData: any) => void; isLast?: boolean; highlightedSuggestionIndex?: number | null; onMiniCardClick?: (formId: string) => void }) => {
+export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast = true, highlightedSuggestionIndex = null, onMiniCardClick, onStreamComplete }: { data: RayResponseData; onSuggestionClick?: (suggestion: string) => void; onRowClick?: (rowData: any) => void; isLast?: boolean; highlightedSuggestionIndex?: number | null; onMiniCardClick?: (formId: string) => void; onStreamComplete?: () => void }) => {
   // 1. User Message (Right Aligned) - Show attachment pill first, then text bubble
   if (data.sender === 'user') {
     // Extract image and text blocks
@@ -3950,7 +3951,7 @@ export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast
   if (data.artifact?.type === 'investigation_report') {
     return (
       <div className="w-full animate-fade-in-up">
-        <InvestigationReportArtifact data={data.artifact.data} onSuggestionClick={onSuggestionClick} onRowClick={onRowClick} isLast={isLast} highlightedSuggestionIndex={highlightedSuggestionIndex} />
+        <InvestigationReportArtifact data={data.artifact.data} onSuggestionClick={onSuggestionClick} onRowClick={onRowClick} isLast={isLast} highlightedSuggestionIndex={highlightedSuggestionIndex} onStreamComplete={onStreamComplete} />
       </div>
     );
   }

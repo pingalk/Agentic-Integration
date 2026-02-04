@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { RayMessageRenderer, RayResponseData } from './chat/RayMessageRenderer';
 import { AddFundsWidget } from './chat/AddFundsWidget';
@@ -151,6 +151,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
 
   // Refs to prevent double execution in React StrictMode
   const demoFlowStartedRef = useRef(false);
+  const sarahCaptureCardShownRef = useRef(false);
 
   // Rauno-inspired easing function: ease-out-expo for snappy, fluid feel
   const easeOutExpo = (t: number): number => {
@@ -410,26 +411,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
                         } : msg
                     ));
                     setSarahFlowStep(1);
-
-                    // Step 4: Show Capture Settings mini card after report streams (8s delay)
-                    setTimeout(() => {
-                        const captureCardId = `capture-card-${Date.now()}`;
-                        setActiveCaptureCardId(captureCardId);
-                        setMessages(prev => [...prev, {
-                            id: captureCardId,
-                            sender: 'ai' as const,
-                            artifact: {
-                                type: 'capture_settings_form_card' as const,
-                                data: {
-                                    formId: captureCardId,
-                                    status: 'draft' as const,
-                                    currentSetting: 'manual',
-                                    isLoading: false
-                                }
-                            }
-                        }]);
-                        setIsStreaming(false);
-                    }, 8000);
+                    // Capture card will appear via onStreamComplete callback when streaming finishes
                 }, 2000); // 2s thinking time
             }, 600);
         }, 600);
@@ -835,6 +817,32 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
       }
     }
   }, [inputValue]);
+
+  // Handler for when Sarah's investigation report finishes streaming
+  const handleSarahStreamComplete = useCallback(() => {
+    if (currentPersona.id !== 'sarah' || sarahCaptureCardShownRef.current) return;
+    sarahCaptureCardShownRef.current = true;
+
+    // Show capture card after a brief delay for visual breathing room
+    setTimeout(() => {
+      const captureCardId = `capture-card-${Date.now()}`;
+      setActiveCaptureCardId(captureCardId);
+      setMessages(prev => [...prev, {
+        id: captureCardId,
+        sender: 'ai' as const,
+        artifact: {
+          type: 'capture_settings_form_card' as const,
+          data: {
+            formId: captureCardId,
+            status: 'draft' as const,
+            currentSetting: 'manual',
+            isLoading: false
+          }
+        }
+      }]);
+      setIsStreaming(false);
+    }, 500);
+  }, [currentPersona.id]);
 
   const handleSuggestionClick = (suggestion: string) => {
     // Handle Arjun's Add Funds suggestion
@@ -1650,6 +1658,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
                             setIsPaymentLinkModalOpen(true);
                           }
                         }}
+                        onStreamComplete={msg.id === 'sarah-ai-1' ? handleSarahStreamComplete : undefined}
                       />
                    </motion.div>
                  );
