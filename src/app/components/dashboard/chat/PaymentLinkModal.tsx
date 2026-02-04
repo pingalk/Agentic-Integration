@@ -172,17 +172,17 @@ export const PaymentLinkModal: React.FC<PaymentLinkModalProps> = ({
                 key="form"
                 initial={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex flex-col w-full"
+                className="flex flex-col w-full h-full max-h-[90vh]"
               >
-                {/* Header */}
-                <div className="px-6 pt-6 pb-4">
+                {/* Header - Fixed */}
+                <div className="flex-shrink-0 px-6 pt-6 pb-4 border-b border-[#e2e8f0]">
                   <h2 className="text-[22px] font-semibold text-[#3a4755]">
                     Standard Payment Link
                   </h2>
                 </div>
 
                 {/* Scrollable Form Content */}
-                <div className="flex-1 overflow-y-auto px-6 pb-4">
+                <div className="flex-1 overflow-y-auto px-6 py-4 min-h-0">
                   <div className="flex flex-col gap-5">
 
                     {/* Amount */}
@@ -363,8 +363,8 @@ export const PaymentLinkModal: React.FC<PaymentLinkModalProps> = ({
                   </div>
                 </div>
 
-                {/* Footer */}
-                <div className="px-6 py-4 bg-[#f8fafc] border-t border-[#e2e8f0] flex gap-3 justify-end rounded-b-[8px]">
+                {/* Footer - Fixed */}
+                <div className="flex-shrink-0 px-6 py-4 bg-[#f8fafc] border-t border-[#e2e8f0] flex gap-3 justify-end rounded-b-[8px]">
                   <button
                     onClick={onClose}
                     className="h-[42px] px-6 rounded-[6px] text-[14px] font-semibold text-[#64748b] bg-white border border-[#e2e8f0] hover:bg-[#f1f5f9] transition-colors"
