@@ -409,7 +409,27 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
                             sender: 'ai' as const
                         } : msg
                     ));
-                    setTimeout(() => setIsStreaming(false), 3000);
+                    setSarahFlowStep(1);
+
+                    // Step 4: Show Capture Settings mini card after report streams (8s delay)
+                    setTimeout(() => {
+                        const captureCardId = `capture-card-${Date.now()}`;
+                        setActiveCaptureCardId(captureCardId);
+                        setMessages(prev => [...prev, {
+                            id: captureCardId,
+                            sender: 'ai' as const,
+                            artifact: {
+                                type: 'capture_settings_form_card' as const,
+                                data: {
+                                    formId: captureCardId,
+                                    status: 'draft' as const,
+                                    currentSetting: 'manual',
+                                    isLoading: false
+                                }
+                            }
+                        }]);
+                        setIsStreaming(false);
+                    }, 8000);
                 }, 2000); // 2s thinking time
             }, 600);
         }, 600);
@@ -832,74 +852,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
     if (currentPersona.id === 'sarah') {
       // Handle "Yes" button click
       if (suggestion === 'Yes') {
-        if (sarahFlowStep === 1) {
-          // Show user message
-          setMessages(prev => [...prev, {
-            id: `sarah-u-${Date.now()}`,
-            sender: 'user',
-            blocks: [{ type: 'text', content: 'Yes' }]
-          }]);
-
-          // Show thinking, then mini card for capture settings
-          setTimeout(() => {
-            setIsStreaming(true);
-            const thinkingId = `sarah-thinking-${Date.now()}`;
-            setMessages(prev => [...prev, {
-              id: thinkingId,
-              sender: 'ai',
-              isThinking: true
-            }]);
-
-            // Show mini card with skeleton
-            setTimeout(() => {
-              const captureCardId = `capture-card-${Date.now()}`;
-              setActiveCaptureCardId(captureCardId);
-
-              setMessages(prev => {
-                const filtered = prev.filter(m => m.id !== thinkingId);
-                return [...filtered, {
-                  id: captureCardId,
-                  sender: 'ai' as const,
-                  artifact: {
-                    type: 'capture_settings_form_card' as const,
-                    data: {
-                      formId: captureCardId,
-                      status: 'draft' as const,
-                      currentSetting: 'manual',
-                      isLoading: true
-                    }
-                  }
-                }];
-              });
-
-              // Show details after 2s
-              setTimeout(() => {
-                setMessages(prev => prev.map(msg =>
-                  msg.id === captureCardId ? {
-                    ...msg,
-                    artifact: {
-                      ...msg.artifact,
-                      data: {
-                        ...msg.artifact?.data,
-                        isLoading: false
-                      }
-                    }
-                  } : msg
-                ));
-
-                setIsStreaming(false);
-
-                // Open modal after brief delay
-                setTimeout(() => {
-                  setIsCaptureSettingsModalOpen(true);
-                  setSarahFlowStep(2);
-                }, 500);
-              }, 2000);
-            }, 1000);
-          }, 300);
-
-          return;
-        } else if (sarahFlowStep === 2) {
+        if (sarahFlowStep === 2) {
           // Transition from step 2 to step 3 (payment links created)
           handleSarahFlowAdvance("Yes", sarahScript.sarah_step_3, 3);
         } else if (sarahFlowStep === 3) {
