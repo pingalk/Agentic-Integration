@@ -4,6 +4,7 @@ import { RayMessageRenderer, RayResponseData } from './chat/RayMessageRenderer';
 import { AddFundsWidget } from './chat/AddFundsWidget';
 import { PaymentLinkPrefill, parsePaymentLinkIntent } from './chat/PaymentLinkWidget';
 import { PaymentLinkModal } from './chat/PaymentLinkModal';
+import { CaptureSettingsModal } from './chat/CaptureSettingsModal';
 import { TransactionPreviewPane, TransactionData } from './chat/TransactionPreviewPane';
 import { ArrowDown, ArrowUp, Mic, Plus, Sparkles, Square } from 'lucide-react';
 import { useDemo } from '@/context/DemoContext';
@@ -110,6 +111,10 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
   const [isPaymentLinkModalOpen, setIsPaymentLinkModalOpen] = useState(false);
   const [paymentLinkPrefill, setPaymentLinkPrefill] = useState<PaymentLinkPrefill | null>(null);
   const [activeFormCardId, setActiveFormCardId] = useState<string | null>(null);
+
+  // Capture Settings Modal States
+  const [isCaptureSettingsModalOpen, setIsCaptureSettingsModalOpen] = useState(false);
+  const [activeCaptureCardId, setActiveCaptureCardId] = useState<string | null>(null);
 
   // Input Box States
   const [isInputFocused, setIsInputFocused] = useState(false);
@@ -828,8 +833,72 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
       // Handle "Yes" button click
       if (suggestion === 'Yes') {
         if (sarahFlowStep === 1) {
-          // Transition from step 1 to step 2 (auto-capture confirmation)
-          handleSarahFlowAdvance("Yes", sarahScript.sarah_step_2, 2);
+          // Show user message
+          setMessages(prev => [...prev, {
+            id: `sarah-u-${Date.now()}`,
+            sender: 'user',
+            blocks: [{ type: 'text', content: 'Yes' }]
+          }]);
+
+          // Show thinking, then mini card for capture settings
+          setTimeout(() => {
+            setIsStreaming(true);
+            const thinkingId = `sarah-thinking-${Date.now()}`;
+            setMessages(prev => [...prev, {
+              id: thinkingId,
+              sender: 'ai',
+              isThinking: true
+            }]);
+
+            // Show mini card with skeleton
+            setTimeout(() => {
+              const captureCardId = `capture-card-${Date.now()}`;
+              setActiveCaptureCardId(captureCardId);
+
+              setMessages(prev => {
+                const filtered = prev.filter(m => m.id !== thinkingId);
+                return [...filtered, {
+                  id: captureCardId,
+                  sender: 'ai' as const,
+                  artifact: {
+                    type: 'capture_settings_form_card' as const,
+                    data: {
+                      formId: captureCardId,
+                      status: 'draft' as const,
+                      currentSetting: 'manual',
+                      isLoading: true
+                    }
+                  }
+                }];
+              });
+
+              // Show details after 2s
+              setTimeout(() => {
+                setMessages(prev => prev.map(msg =>
+                  msg.id === captureCardId ? {
+                    ...msg,
+                    artifact: {
+                      ...msg.artifact,
+                      data: {
+                        ...msg.artifact?.data,
+                        isLoading: false
+                      }
+                    }
+                  } : msg
+                ));
+
+                setIsStreaming(false);
+
+                // Open modal after brief delay
+                setTimeout(() => {
+                  setIsCaptureSettingsModalOpen(true);
+                  setSarahFlowStep(2);
+                }, 500);
+              }, 2000);
+            }, 1000);
+          }, 300);
+
+          return;
         } else if (sarahFlowStep === 2) {
           // Transition from step 2 to step 3 (payment links created)
           handleSarahFlowAdvance("Yes", sarahScript.sarah_step_3, 3);
@@ -1290,6 +1359,82 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
       return;
     }
 
+    // Handle question while Capture Settings modal is open
+    if (isCaptureSettingsModalOpen) {
+      setInputValue('');
+      setIsCaptureSettingsModalOpen(false);
+
+      // Add user's question to chat
+      setMessages(prev => [...prev, {
+        id: `user-q-${Date.now()}`,
+        sender: 'user',
+        blocks: [{ type: 'text', content: userQuestion }]
+      }]);
+
+      // Show thinking state
+      setTimeout(() => {
+        setIsStreaming(true);
+        const thinkingId = `ai-thinking-${Date.now()}`;
+        setMessages(prev => [...prev, {
+          id: thinkingId,
+          sender: 'ai',
+          isThinking: true
+        }]);
+
+        // Show response after delay
+        setTimeout(() => {
+          const followUp = '\n\nWould you like to continue with the capture settings?';
+          let response = 'Auto-capture automatically captures authorized payments, so you never miss a sale. Manual capture gives you more control but requires action within the capture window.' + followUp;
+
+          const q = userQuestion.toLowerCase();
+          if (q.includes('auto')) {
+            response = 'Auto-capture is the recommended setting for most businesses. It automatically captures payments as soon as they are authorized, ensuring you never miss a sale due to uncaptured payments.' + followUp;
+          } else if (q.includes('manual')) {
+            response = 'Manual capture gives you control over when payments are captured. This is useful if you need to verify orders before capturing payment, but be careful - uncaptured payments are automatically refunded after the capture window.' + followUp;
+          } else if (q.includes('window') || q.includes('time')) {
+            response = 'The capture window determines how long you have to capture a manually authorized payment. If not captured within this time, the payment is automatically refunded to the customer.' + followUp;
+          }
+
+          setMessages(prev => {
+            const withoutThinking = prev.filter(m => !m.isThinking);
+            return [...withoutThinking, {
+              id: `ai-response-${Date.now()}`,
+              sender: 'ai' as const,
+              artifact: {
+                type: 'simple_text',
+                data: {
+                  headline: 'Happy to help!',
+                  body: response,
+                }
+              }
+            }];
+          });
+          setIsStreaming(false);
+
+          // Show mini card to continue after response has fully streamed
+          setTimeout(() => {
+            const continueCardId = `capture-card-${Date.now()}`;
+            setActiveCaptureCardId(continueCardId);
+            setMessages(prev => [...prev, {
+              id: continueCardId,
+              sender: 'ai' as const,
+              artifact: {
+                type: 'capture_settings_form_card' as const,
+                data: {
+                  formId: continueCardId,
+                  status: 'draft' as const,
+                  currentSetting: 'manual',
+                  isLoading: false
+                }
+              }
+            }]);
+          }, 7000);
+        }, 1500);
+      }, 300);
+
+      return;
+    }
+
     // Maya: Handle "double debit" input
     if (currentPersona.id === 'maya' && mayaFlowStep === 1 && text.includes('double debit')) {
       setInputValue('');
@@ -1540,11 +1685,15 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
                         onRowClick={handleRowClick}
                         highlightedSuggestionIndex={highlightedSuggestionIndex}
                         onMiniCardClick={(formId) => {
-                          setActiveFormCardId(formId);
-                          // Check if it's an add funds card or payment link card
+                          // Check which type of card was clicked
                           if (formId.includes('add-funds')) {
+                            setActiveFormCardId(formId);
                             setShowAddFundsWidget(true);
+                          } else if (formId.includes('capture-card')) {
+                            setActiveCaptureCardId(formId);
+                            setIsCaptureSettingsModalOpen(true);
                           } else {
+                            setActiveFormCardId(formId);
                             setIsPaymentLinkModalOpen(true);
                           }
                         }}
@@ -1690,6 +1839,48 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
            prefill={paymentLinkPrefill || undefined}
          />
 
+         {/* Capture Settings Modal */}
+         <CaptureSettingsModal
+           isOpen={isCaptureSettingsModalOpen}
+           onClose={() => {
+             setIsCaptureSettingsModalOpen(false);
+           }}
+           onComplete={(setting) => {
+             setIsCaptureSettingsModalOpen(false);
+
+             // Update mini-card to completed state
+             if (activeCaptureCardId) {
+               setMessages(prev => prev.map(msg =>
+                 msg.id === activeCaptureCardId && msg.artifact?.type === 'capture_settings_form_card'
+                   ? {
+                       ...msg,
+                       artifact: {
+                         ...msg.artifact,
+                         data: {
+                           ...msg.artifact.data,
+                           status: 'completed' as const,
+                           currentSetting: setting
+                         }
+                       }
+                     }
+                   : msg
+               ));
+             }
+
+             // For Sarah flow, show the success message
+             if (currentPersona.id === 'sarah' && setting === 'auto') {
+               setTimeout(() => {
+                 setMessages(prev => [...prev, {
+                   ...sarahScript.sarah_step_2,
+                   id: `sarah-ai-${Date.now()}`,
+                   sender: 'ai' as const
+                 }]);
+                 setSarahFlowStep(3);
+               }, 500);
+             }
+           }}
+         />
+
          {/* Top Fade Gradient */}
          <div className="h-16 w-full bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none z-30" />
 
@@ -1756,8 +1947,8 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
         </div>
       </motion.div>
 
-      {/* Modal Overlay Input - Only shows when modal is open, rendered via portal at z-70 */}
-      {isPaymentLinkModalOpen && createPortal(
+      {/* Modal Overlay Input - Only shows when a modal is open, rendered via portal at z-70 */}
+      {(isPaymentLinkModalOpen || isCaptureSettingsModalOpen) && createPortal(
         <div className="fixed bottom-[58px] left-0 right-0 z-[70] px-3 md:px-4">
           <motion.div
             initial={{ opacity: 0, y: 10 }}

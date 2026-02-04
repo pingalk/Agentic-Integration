@@ -4,6 +4,7 @@ import Ray from '@/imports/Ray';
 import Copy from '@/imports/Copy';
 import { PaymentLinkMiniCard } from './PaymentLinkMiniCard';
 import { AddFundsMiniCard } from './AddFundsMiniCard';
+import { CaptureSettingsMiniCard } from './CaptureSettingsMiniCard';
 import { FundsAddedCard } from './artifacts/FundsAddedCard';
 import { FundsAddedHeader, FundsAddedBody, SettlementCard, RayInsightCard } from './artifacts/FundsAddedComponents';
 import { ConfigurableSettlementCard, SettlementStatusTable, FeeCalculatorCard } from './artifacts/SettlementComponents';
@@ -4238,7 +4239,21 @@ export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast
     );
   }
 
-  // 24. Ray AI Message (Standard Blocks, Max Width 398px)
+  // 24. Capture Settings Form Card (Mini-Card for Modal)
+  if (data.artifact?.type === 'capture_settings_form_card') {
+    return (
+      <div className="w-full animate-fade-in-up">
+        <CaptureSettingsMiniCard
+          status={data.artifact.data.status}
+          currentSetting={data.artifact.data.currentSetting}
+          onClick={() => onMiniCardClick?.(data.artifact.data.formId)}
+          isLoading={data.artifact.data.isLoading}
+        />
+      </div>
+    );
+  }
+
+  // 25. Ray AI Message (Standard Blocks, Max Width 398px)
   return (
     <div className="flex gap-4 items-start w-full max-w-[398px] animate-fade-in-up">
         {/* Content Container - No Avatar */}
