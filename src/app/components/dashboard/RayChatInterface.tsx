@@ -113,8 +113,6 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
 
   // Input Box States
   const [isInputFocused, setIsInputFocused] = useState(false);
-  const [isInputHovered, setIsInputHovered] = useState(false);
-  const isInputExpanded = isInputFocused || isInputHovered || inputValue.length > 0;
 
   // Sarah Flow State
   const [sarahFlowStep, setSarahFlowStep] = useState(0);
@@ -1517,15 +1515,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
 
          {/* Input Container - z-70 (above modal) - separate from footer for stacking context */}
          <div className="fixed bottom-[58px] left-0 right-0 z-[70] px-3 md:px-4 pointer-events-none">
-            <motion.div
-               animate={{
-                 width: isInputExpanded ? "100%" : "475px"
-               }}
-               transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-               className="w-full max-w-full md:max-w-[700px] mx-auto relative group min-w-[475px] pointer-events-auto"
-               onMouseEnter={() => setIsInputHovered(true)}
-               onMouseLeave={() => setIsInputHovered(false)}
-            >
+            <div className="w-full max-w-[475px] mx-auto relative group">
                <input
                   ref={inputRef}
                   type="text"
@@ -1568,7 +1558,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
                     </button>
                   )}
                </div>
-            </motion.div>
+            </div>
          </div>
         </div>
       </motion.div>
@@ -1579,7 +1569,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="w-full max-w-full md:max-w-[700px] mx-auto relative group min-w-[475px]"
+            className="w-full max-w-[475px] mx-auto relative group"
           >
             <input
               type="text"
