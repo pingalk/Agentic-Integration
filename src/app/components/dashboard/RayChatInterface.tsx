@@ -938,7 +938,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
             isThinking: true
           }]);
 
-          // After 2 seconds, remove thinking, add mini-card, and open modal
+          // After 1 second, remove thinking and show mini-card with skeleton
           setTimeout(() => {
             const formCardId = `form-card-${Date.now()}`;
             setActiveFormCardId(formCardId);
@@ -951,7 +951,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
             };
             setPaymentLinkPrefill(prefillData);
 
-            // Remove thinking, add mini-card message
+            // Remove thinking, add mini-card with skeleton loading state
             setMessages(prev => {
               const filtered = prev.filter(m => m.id !== thinkingId);
               return [...filtered, {
@@ -962,17 +962,37 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
                   data: {
                     formId: formCardId,
                     status: 'draft' as const,
-                    prefill: prefillData
+                    prefill: prefillData,
+                    isLoading: true
                   }
                 }
               }];
             });
 
-            setIsStreaming(false);
-            // Open modal automatically
-            setIsPaymentLinkModalOpen(true);
-            setShyamFlowStep(2);
-          }, 2000);
+            // After 2 seconds, show mini-card details
+            setTimeout(() => {
+              setMessages(prev => prev.map(msg =>
+                msg.id === formCardId ? {
+                  ...msg,
+                  artifact: {
+                    ...msg.artifact,
+                    data: {
+                      ...msg.artifact?.data,
+                      isLoading: false
+                    }
+                  }
+                } : msg
+              ));
+
+              setIsStreaming(false);
+
+              // After a brief delay, open the modal
+              setTimeout(() => {
+                setIsPaymentLinkModalOpen(true);
+                setShyamFlowStep(2);
+              }, 500);
+            }, 2000);
+          }, 1000);
         }, 300);
         return;
       }

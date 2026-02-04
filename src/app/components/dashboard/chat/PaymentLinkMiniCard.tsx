@@ -10,12 +10,14 @@ export interface PaymentLinkMiniCardProps {
   };
   status: 'draft' | 'completed';
   onClick: () => void;
+  isLoading?: boolean;
 }
 
 export const PaymentLinkMiniCard: React.FC<PaymentLinkMiniCardProps> = ({
   formData,
   status,
-  onClick
+  onClick,
+  isLoading = false
 }) => {
   const formatAmount = (amount: string) => {
     const num = parseInt(amount.replace(/,/g, ''), 10);
@@ -76,23 +78,37 @@ export const PaymentLinkMiniCard: React.FC<PaymentLinkMiniCardProps> = ({
 
       {/* Content */}
       <div className="px-3 py-2.5 border-t border-[#f1f5f9]">
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-[15px] font-semibold text-[#1e293b]">
-            ₹{formatAmount(formData.amount)}
-          </span>
-          {formData.purpose && (
-            <>
-              <span className="text-[#cbd5e1]">•</span>
-              <span className="text-[13px] text-[#64748b]">
-                {truncatePurpose(formData.purpose)}
-              </span>
-            </>
-          )}
-        </div>
-        {formData.email && (
-          <div className="mt-1 text-[12px] text-[#94a3b8]">
-            {formData.email}
+        {isLoading ? (
+          /* Skeleton State */
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-1.5">
+              <div className="h-[18px] w-[72px] bg-[#e2e8f0] rounded animate-pulse" />
+              <div className="h-[14px] w-[140px] bg-[#e2e8f0] rounded animate-pulse" />
+            </div>
+            <div className="h-[14px] w-[120px] bg-[#e2e8f0] rounded animate-pulse" />
           </div>
+        ) : (
+          /* Actual Content */
+          <>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[15px] font-semibold text-[#1e293b]">
+                ₹{formatAmount(formData.amount)}
+              </span>
+              {formData.purpose && (
+                <>
+                  <span className="text-[#cbd5e1]">•</span>
+                  <span className="text-[13px] text-[#64748b]">
+                    {truncatePurpose(formData.purpose)}
+                  </span>
+                </>
+              )}
+            </div>
+            {formData.email && (
+              <div className="mt-1 text-[12px] text-[#94a3b8]">
+                {formData.email}
+              </div>
+            )}
+          </>
         )}
       </div>
     </motion.button>

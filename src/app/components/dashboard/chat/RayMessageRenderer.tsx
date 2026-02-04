@@ -4217,6 +4217,7 @@ export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast
           formData={data.artifact.data.prefill}
           status={data.artifact.data.status}
           onClick={() => onMiniCardClick?.(data.artifact.data.formId)}
+          isLoading={data.artifact.data.isLoading}
         />
       </div>
     );
