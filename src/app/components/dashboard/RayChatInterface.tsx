@@ -1166,7 +1166,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
           });
           setIsStreaming(false);
 
-          // Show mini card to continue after a brief delay
+          // Show mini card to continue after response has streamed (3.5s delay)
           setTimeout(() => {
             const continueCardId = `continue-card-${Date.now()}`;
             setActiveFormCardId(continueCardId);
@@ -1187,7 +1187,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
                 }
               }
             }]);
-          }, 800);
+          }, 3500);
         }, 1500);
       }, 300);
 
