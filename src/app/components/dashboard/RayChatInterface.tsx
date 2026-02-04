@@ -1499,15 +1499,29 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
          />
 
          {/* Top Fade Gradient */}
-         <div className="h-16 w-full bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
-         
+         <div className="h-16 w-full bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none z-30" />
+
+         {/* Footer Background - z-30 (below scrim) */}
          <div className="bg-white/80 backdrop-blur-xl border-t border-slate-100 px-3 md:px-4 pb-4 md:pb-6 pt-3 md:pt-4 z-30">
+            {/* Spacer for input */}
+            <div className="h-[52px] w-full max-w-full md:max-w-[700px] mx-auto min-w-[475px]" />
+
+            <div className="flex justify-center items-center gap-2 mt-3 opacity-60">
+                <Sparkles size={10} className="text-slate-400" />
+                <p className="text-center text-[11px] text-slate-400 font-medium">
+                   Ray can make mistakes. Please check important info.
+                </p>
+            </div>
+         </div>
+
+         {/* Input Container - z-70 (above modal) - separate from footer for stacking context */}
+         <div className="fixed bottom-[58px] left-0 right-0 z-[70] px-3 md:px-4 pointer-events-none">
             <motion.div
                animate={{
                  width: isInputExpanded ? "100%" : "475px"
                }}
                transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-               className="w-full max-w-full md:max-w-[700px] mx-auto relative group min-w-[475px] z-[70]"
+               className="w-full max-w-full md:max-w-[700px] mx-auto relative group min-w-[475px] pointer-events-auto"
                onMouseEnter={() => setIsInputHovered(true)}
                onMouseLeave={() => setIsInputHovered(false)}
             >
@@ -1527,7 +1541,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
                   placeholder="Ask anything..."
                   className="w-full h-[52px] pl-5 pr-14 bg-white border border-slate-200 hover:border-slate-300 focus:border-blue-500 rounded-full text-[15px] outline-none transition-all shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)] placeholder:text-slate-400"
                />
-               
+
                {/* Right Actions */}
                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                   {!isStreaming && inputValue.length === 0 && (
@@ -1554,13 +1568,6 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
                   )}
                </div>
             </motion.div>
-            
-            <div className="flex justify-center items-center gap-2 mt-3 opacity-60">
-                <Sparkles size={10} className="text-slate-400" />
-                <p className="text-center text-[11px] text-slate-400 font-medium">
-                   Ray can make mistakes. Please check important info.
-                </p>
-            </div>
          </div>
         </div>
       </motion.div>
