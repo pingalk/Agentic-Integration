@@ -1,45 +1,56 @@
 import React from 'react';
 import { PERSONAS } from '../../data/demoConfig';
 import { useDemo } from '../../context/DemoContext';
-import { RotateCcw } from 'lucide-react';
+import { RotateCcw, ChevronDown, Check } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator
+} from './ui/dropdown-menu';
 
 export const DemoControls = () => {
-  const { currentPersonaId, setPersona, resetDemo, isOnRayLandingPage } = useDemo();
+  const { currentPersonaId, setPersona, resetDemo, isOnRayLandingPage, currentPersona } = useDemo();
 
   // Only show on Ray landing page
   if (!isOnRayLandingPage) return null;
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-md text-white px-2 py-2 rounded-full flex gap-4 items-center z-[100] shadow-2xl border border-white/10 ring-1 ring-black/20">
-      
-      <div className="flex items-center px-2">
-        <span className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mr-2">
-          Demo Persona
-        </span>
-        <div className="h-4 w-px bg-white/20 mx-2" />
-      </div>
-      
-      <div className="flex gap-1">
-        {Object.values(PERSONAS).map((p) => (
-          <button
-            key={p.id}
-            onClick={() => setPersona(p.id)}
-            className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
-              currentPersonaId === p.id 
-              ? 'bg-white text-slate-900 shadow-[0_0_10px_rgba(255,255,255,0.3)] scale-105' 
-              : 'text-slate-300 hover:bg-white/10 hover:text-white'
-            }`}
-          >
-            {p.name}
-          </button>
-        ))}
-      </div>
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-md text-white px-3 py-2 rounded-full flex gap-2 items-center z-[100] shadow-2xl border border-white/10 ring-1 ring-black/20">
 
-      <div className="h-4 w-px bg-white/20 mx-1" />
+      <DropdownMenu>
+        <DropdownMenuTrigger className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
+          <span className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">
+            Story
+          </span>
+          <span className="text-xs font-medium text-white max-w-[200px] truncate">
+            {currentPersona.name}
+          </span>
+          <ChevronDown size={14} className="text-slate-400" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-64" align="center" side="top">
+          <DropdownMenuLabel>User Stories</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {Object.values(PERSONAS).map((p) => (
+            <DropdownMenuItem
+              key={p.id}
+              onClick={() => setPersona(p.id)}
+              className="flex items-center justify-between cursor-pointer"
+            >
+              <span className="truncate">{p.name}</span>
+              {currentPersonaId === p.id && <Check size={14} className="text-blue-600 shrink-0 ml-2" />}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
-      <button 
+      <div className="h-4 w-px bg-white/20" />
+
+      <button
         onClick={resetDemo}
-        className="p-2 rounded-full hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-colors mr-1"
+        className="p-2 rounded-full hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-colors"
         title="Reset Flow"
       >
         <RotateCcw size={14} />

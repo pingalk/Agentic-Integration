@@ -232,7 +232,7 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
   },
   varun: {
     id: 'varun',
-    name: 'Varun',
+    name: 'Upcoming Settlement',
     theme: 'neutral',
     landing: {
       greeting: "Good afternoon, Varun!",
