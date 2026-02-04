@@ -1501,13 +1501,13 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
          {/* Top Fade Gradient */}
          <div className="h-16 w-full bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
          
-         <div className="bg-white/80 backdrop-blur-xl border-t border-slate-100 px-3 md:px-4 pb-4 md:pb-6 pt-3 md:pt-4">
+         <div className="bg-white/80 backdrop-blur-xl border-t border-slate-100 px-3 md:px-4 pb-4 md:pb-6 pt-3 md:pt-4 z-30">
             <motion.div
                animate={{
                  width: isInputExpanded ? "100%" : "475px"
                }}
                transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-               className="w-full max-w-full md:max-w-[700px] mx-auto relative group min-w-[475px] z-50"
+               className="w-full max-w-full md:max-w-[700px] mx-auto relative group min-w-[475px] z-[70]"
                onMouseEnter={() => setIsInputHovered(true)}
                onMouseLeave={() => setIsInputHovered(false)}
             >
