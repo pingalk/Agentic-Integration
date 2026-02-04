@@ -123,13 +123,13 @@ export const PaymentLinkModal: React.FC<PaymentLinkModalProps> = ({
 
   const modalContent = (
     <>
-      {/* Scrim */}
+      {/* Scrim - leaves space at bottom for chat input */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
-        className="fixed inset-0 z-30 bg-black/40"
+        className="fixed inset-0 bottom-[120px] z-30 bg-black/40"
         onClick={onClose}
       />
 
