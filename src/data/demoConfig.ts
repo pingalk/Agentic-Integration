@@ -28,7 +28,7 @@ export interface PersonaConfig {
 export const PERSONAS: Record<PersonaId, PersonaConfig> = {
   maya: {
     id: 'maya',
-    name: 'Maya',
+    name: 'Double Debit Scenario',
     theme: 'positive',
     landing: {
       greeting: "Good afternoon, Maya!",
@@ -62,7 +62,7 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
   },
   arjun: {
     id: 'arjun',
-    name: 'Arjun',
+    name: 'Negative Balance & Add Funds',
     theme: 'negative',
     landing: {
       greeting: "Good afternoon, Arjun!",
@@ -96,7 +96,7 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
   },
   sarah: {
     id: 'sarah',
-    name: 'Sarah',
+    name: 'Auto Refunded & Capture Settings',
     theme: 'neutral',
     landing: {
       greeting: "Welcome back, Sarah!",
@@ -130,7 +130,7 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
   },
   sam: {
     id: 'sam',
-    name: 'Sam',
+    name: 'Ticket Status & Escalation',
     theme: 'positive',
     landing: {
       greeting: "Good afternoon, Sam!",
@@ -164,7 +164,7 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
   },
   shyam: {
     id: 'shyam',
-    name: 'Shyam',
+    name: 'Bank Issue & Payment Link',
     theme: 'neutral',
     landing: {
       greeting: "Good afternoon, Shyam!",
@@ -198,7 +198,7 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
   },
   kiara: {
     id: 'kiara',
-    name: 'Kiara',
+    name: 'Customer Transaction Status',
     theme: 'positive',
     landing: {
       greeting: "Good afternoon, Kiara!",
