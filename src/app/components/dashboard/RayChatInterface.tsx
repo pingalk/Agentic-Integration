@@ -1096,11 +1096,103 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
     }, 600);
   };
 
+  // Helper function to generate contextual responses for questions asked during payment link flow
+  const getContextualResponse = (question: string): string => {
+    const q = question.toLowerCase();
+
+    if (q.includes('expire') || q.includes('expiry') || q.includes('valid')) {
+      return 'Payment links can be set to expire after a specific date, or you can choose "No Expiry" to keep them active indefinitely. The customer can pay anytime before the expiry date.';
+    }
+    if (q.includes('partial') || q.includes('part payment')) {
+      return 'Enabling partial payments allows your customer to pay a portion of the total amount. This is useful for installment-based collections or when customers want flexibility in payment.';
+    }
+    if (q.includes('notify') || q.includes('email') || q.includes('sms')) {
+      return 'You can automatically notify your customer via Email or SMS when the payment link is created. They\'ll receive the link directly and can pay with one click.';
+    }
+    if (q.includes('fee') || q.includes('charge') || q.includes('cost')) {
+      return 'Standard payment link transactions have a fee of 2% per transaction. There are no additional charges for creating or sharing payment links.';
+    }
+    if (q.includes('refund')) {
+      return 'Yes, payments collected via payment links can be refunded. You can initiate a full or partial refund from your Razorpay dashboard within 180 days of the transaction.';
+    }
+
+    return 'Great question! Payment links are a simple way to collect payments without any coding. Just create a link, share it with your customer, and they can pay using any method they prefer. Would you like to continue creating your payment link?';
+  };
+
   // Handle input submission
   const handleInputSubmit = () => {
     if (!inputValue.trim()) return;
 
     const text = inputValue.toLowerCase();
+    const userQuestion = inputValue;
+
+    // Handle question while payment link modal is open
+    if (isPaymentLinkModalOpen) {
+      setInputValue('');
+      setIsPaymentLinkModalOpen(false);
+
+      // Add user's question to chat
+      setMessages(prev => [...prev, {
+        id: `user-q-${Date.now()}`,
+        sender: 'user',
+        blocks: [{ type: 'text', content: userQuestion }]
+      }]);
+
+      // Show thinking state
+      setTimeout(() => {
+        setIsStreaming(true);
+        const thinkingId = `ai-thinking-${Date.now()}`;
+        setMessages(prev => [...prev, {
+          id: thinkingId,
+          sender: 'ai',
+          isThinking: true
+        }]);
+
+        // Show response after delay
+        setTimeout(() => {
+          setMessages(prev => {
+            const withoutThinking = prev.filter(m => !m.isThinking);
+            return [...withoutThinking, {
+              id: `ai-response-${Date.now()}`,
+              sender: 'ai' as const,
+              artifact: {
+                type: 'simple_text',
+                data: {
+                  headline: 'Happy to help!',
+                  body: getContextualResponse(userQuestion),
+                }
+              }
+            }];
+          });
+          setIsStreaming(false);
+
+          // Show mini card to continue after a brief delay
+          setTimeout(() => {
+            const continueCardId = `continue-card-${Date.now()}`;
+            setActiveFormCardId(continueCardId);
+            setMessages(prev => [...prev, {
+              id: continueCardId,
+              sender: 'ai' as const,
+              artifact: {
+                type: 'payment_link_form_card' as const,
+                data: {
+                  formId: continueCardId,
+                  status: 'draft' as const,
+                  prefill: paymentLinkPrefill || {
+                    amount: '15000',
+                    purpose: 'Payment retry for failed transaction',
+                    email: 'rahul@gmail.com'
+                  },
+                  isLoading: false
+                }
+              }
+            }]);
+          }, 800);
+        }, 1500);
+      }, 300);
+
+      return;
+    }
 
     // Maya: Handle "double debit" input
     if (currentPersona.id === 'maya' && mayaFlowStep === 1 && text.includes('double debit')) {
