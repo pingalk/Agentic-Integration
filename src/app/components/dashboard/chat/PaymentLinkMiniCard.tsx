@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Link2, Check, ChevronRight } from 'lucide-react';
+import { Link2, Check, ChevronRight, Copy, CheckCircle } from 'lucide-react';
 
 export interface PaymentLinkMiniCardProps {
   formData: {
@@ -9,16 +9,20 @@ export interface PaymentLinkMiniCardProps {
     email?: string;
   };
   status: 'draft' | 'completed';
-  onClick: () => void;
+  onClick?: () => void;
   isLoading?: boolean;
+  linkUrl?: string;
 }
 
 export const PaymentLinkMiniCard: React.FC<PaymentLinkMiniCardProps> = ({
   formData,
   status,
   onClick,
-  isLoading = false
+  isLoading = false,
+  linkUrl
 }) => {
+  const [copied, setCopied] = useState(false);
+
   const formatAmount = (amount: string) => {
     const num = parseInt(amount.replace(/,/g, ''), 10);
     if (isNaN(num)) return amount;
@@ -30,8 +34,85 @@ export const PaymentLinkMiniCard: React.FC<PaymentLinkMiniCardProps> = ({
     return purpose.substring(0, maxLength) + '...';
   };
 
-  const isDraft = status === 'draft';
+  const handleCopyLink = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (linkUrl) {
+      navigator.clipboard.writeText(linkUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
+  const isDraft = status === 'draft';
+  const isCompleted = status === 'completed';
+
+  // When completed, render as a div (non-clickable)
+  if (isCompleted) {
+    return (
+      <motion.div
+        className="w-full max-w-[320px] text-left bg-white border border-[#22c55e]/30 rounded-[12px] overflow-hidden"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-3 py-2 bg-[#22c55e]/5">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-6 h-6 rounded-full bg-[#22c55e]/10">
+              <Check size={14} className="text-[#22c55e]" />
+            </div>
+            <span className="text-[13px] font-medium text-[#22c55e]">
+              Payment Link Created
+            </span>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="px-3 py-2.5 border-t border-[#f1f5f9]">
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-[15px] font-semibold text-[#1e293b]">
+              ₹{formatAmount(formData.amount)}
+            </span>
+            {formData.purpose && (
+              <>
+                <span className="text-[#cbd5e1]">•</span>
+                <span className="text-[13px] text-[#64748b]">
+                  {truncatePurpose(formData.purpose)}
+                </span>
+              </>
+            )}
+          </div>
+          {formData.email && (
+            <div className="mt-1 text-[12px] text-[#94a3b8]">
+              {formData.email}
+            </div>
+          )}
+
+          {/* Link URL with copy button */}
+          {linkUrl && (
+            <div className="mt-3 flex items-center gap-2 p-2 bg-[#f8fafc] rounded-[6px] border border-[#e2e8f0]">
+              <Link2 size={14} className="text-[#64748b] flex-shrink-0" />
+              <span className="text-[13px] text-[#305EFF] truncate flex-1">
+                {linkUrl}
+              </span>
+              <button
+                onClick={handleCopyLink}
+                className="flex items-center justify-center w-7 h-7 rounded-[4px] hover:bg-[#e2e8f0] transition-colors flex-shrink-0"
+              >
+                {copied ? (
+                  <CheckCircle size={14} className="text-[#22c55e]" />
+                ) : (
+                  <Copy size={14} className="text-[#64748b]" />
+                )}
+              </button>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Draft state - clickable button
   return (
     <motion.button
       onClick={onClick}
@@ -39,10 +120,7 @@ export const PaymentLinkMiniCard: React.FC<PaymentLinkMiniCardProps> = ({
         w-full max-w-[320px] text-left
         bg-white border rounded-[12px] overflow-hidden
         transition-shadow duration-200
-        ${isDraft
-          ? 'border-[#305EFF]/30 hover:border-[#305EFF]/50 hover:shadow-md'
-          : 'border-[#22c55e]/30 hover:border-[#22c55e]/50 hover:shadow-md'
-        }
+        border-[#305EFF]/30 hover:border-[#305EFF]/50 hover:shadow-md
       `}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
@@ -51,26 +129,13 @@ export const PaymentLinkMiniCard: React.FC<PaymentLinkMiniCardProps> = ({
       transition={{ type: 'spring', damping: 20, stiffness: 300 }}
     >
       {/* Header */}
-      <div className={`
-        flex items-center justify-between px-3 py-2
-        ${isDraft ? 'bg-[#305EFF]/5' : 'bg-[#22c55e]/5'}
-      `}>
+      <div className="flex items-center justify-between px-3 py-2 bg-[#305EFF]/5">
         <div className="flex items-center gap-2">
-          <div className={`
-            flex items-center justify-center w-6 h-6 rounded-full
-            ${isDraft ? 'bg-[#305EFF]/10' : 'bg-[#22c55e]/10'}
-          `}>
-            {isDraft ? (
-              <Link2 size={14} className="text-[#305EFF]" />
-            ) : (
-              <Check size={14} className="text-[#22c55e]" />
-            )}
+          <div className="flex items-center justify-center w-6 h-6 rounded-full bg-[#305EFF]/10">
+            <Link2 size={14} className="text-[#305EFF]" />
           </div>
-          <span className={`
-            text-[13px] font-medium
-            ${isDraft ? 'text-[#305EFF]' : 'text-[#22c55e]'}
-          `}>
-            {isDraft ? 'Payment Link Draft' : 'Payment Link Created'}
+          <span className="text-[13px] font-medium text-[#305EFF]">
+            Payment Link Draft
           </span>
         </div>
         <ChevronRight size={16} className="text-[#94a3b8]" />

@@ -4218,6 +4218,7 @@ export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast
           status={data.artifact.data.status}
           onClick={() => onMiniCardClick?.(data.artifact.data.formId)}
           isLoading={data.artifact.data.isLoading}
+          linkUrl={data.artifact.data.linkUrl}
         />
       </div>
     );

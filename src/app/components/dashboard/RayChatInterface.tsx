@@ -1379,8 +1379,8 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
       </AnimatePresence>
 
       {/* 2. Pinned Glass Input (Bottom) */}
-      <div className="absolute bottom-0 left-0 right-0 z-50">
-         
+      <div className="absolute bottom-0 left-0 right-0">
+
          {/* Add Funds Widget - Floats above input */}
          <AnimatePresence>
            {showAddFundsWidget && (
@@ -1443,7 +1443,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
              setPaymentLinkPrefill(null);
              setInputValue('');
 
-             // Update mini-card status to completed if it exists
+             // Update mini-card status to completed with linkUrl if it exists
              if (activeFormCardId) {
                setMessages(prev => prev.map(msg =>
                  msg.id === activeFormCardId && msg.artifact?.type === 'payment_link_form_card'
@@ -1451,20 +1451,31 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
                        ...msg,
                        artifact: {
                          ...msg.artifact,
-                         data: { ...msg.artifact.data, status: 'completed' as const }
+                         data: {
+                           ...msg.artifact.data,
+                           status: 'completed' as const,
+                           linkUrl: result.linkUrl
+                         }
                        }
                      }
                    : msg
                ));
              }
 
-             // For Shyam flow, show the payment link created success card
+             // For Shyam flow, show a simple follow-up message
              if (currentPersona.id === 'shyam') {
                setTimeout(() => {
                  setMessages(prev => [...prev, {
-                   ...shyamScript.shyam_step_2,
                    id: `ai-${Date.now()}`,
-                   sender: 'ai' as const
+                   sender: 'ai' as const,
+                   artifact: {
+                     type: 'simple_text',
+                     data: {
+                       headline: 'Your payment link is ready!',
+                       body: 'I\'ve created the payment link above. You can copy it and share with Rahul to collect the payment.',
+                       suggestions: ['Send this link via WhatsApp', 'Send this link via Email', 'View all payment links']
+                     }
+                   }
                  }]);
                }, 500);
                return;
@@ -1496,7 +1507,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
                  width: isInputExpanded ? "100%" : "475px"
                }}
                transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-               className="w-full max-w-full md:max-w-[700px] mx-auto relative group min-w-[475px]"
+               className="w-full max-w-full md:max-w-[700px] mx-auto relative group min-w-[475px] z-50"
                onMouseEnter={() => setIsInputHovered(true)}
                onMouseLeave={() => setIsInputHovered(false)}
             >

@@ -24,7 +24,11 @@
       "Bash(export AGENT_BROWSER_HOME=\"/opt/homebrew/lib/node_modules/agent-browser\")",
       "Bash(curl:*)",
       "Bash(npx tsc:*)",
-      "Bash(./node_modules/.bin/tsc:*)"
+      "Bash(./node_modules/.bin/tsc:*)",
+      "Bash(lsof:*)",
+      "Bash(cd:*)",
+      "Bash(open -a \"Cursor\":*)",
+      "Bash(open \"http://localhost:5173/\")"
     ]
   }
 }

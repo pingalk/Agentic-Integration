@@ -133,14 +133,14 @@ export const PaymentLinkModal: React.FC<PaymentLinkModalProps> = ({
         onClick={onClose}
       />
 
-      {/* Modal Container */}
-      <div className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none p-4">
+      {/* Modal Container - positioned higher to leave room for chat input */}
+      <div className="fixed inset-0 bottom-[130px] z-[60] flex items-center justify-center pointer-events-none p-4">
         <motion.div
           initial={{ opacity: 0, y: 20, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.98 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="pointer-events-auto w-full max-w-[520px] bg-white rounded-[8px] shadow-2xl flex flex-col max-h-[90vh]"
+          className="pointer-events-auto w-full max-w-[520px] bg-white rounded-[8px] shadow-2xl flex flex-col max-h-[65vh]"
         >
           <AnimatePresence mode="wait">
             {status === 'success' ? (
