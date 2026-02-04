@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { createPortal } from 'react-dom';
-import { Check, Loader2, X } from 'lucide-react';
+import { Check, Loader2, X, Mail, Phone, Calendar, ExternalLink } from 'lucide-react';
 import { PaymentLinkPrefill } from './PaymentLinkWidget';
 
 export interface PaymentLinkModalProps {
@@ -11,64 +11,20 @@ export interface PaymentLinkModalProps {
   prefill?: PaymentLinkPrefill;
 }
 
-// --- Helper: Calculate initial step based on prefilled data ---
-const calculateInitialStep = (prefill?: PaymentLinkPrefill): number => {
-  if (!prefill) return 0;
-
-  const hasAmount = !!prefill.amount;
-  const hasPurpose = !!prefill.purpose;
-  const hasContact = !!prefill.email || !!prefill.phone;
-
-  if (hasAmount && hasPurpose && hasContact) return 2;
-  if (hasAmount && hasPurpose) return 1;
-  return 0;
-};
-
-// --- Visual Components ---
-const StepperIcon = ({ state, stepNumber, isLast }: { state: 'completed' | 'active' | 'pending', stepNumber: number, isLast: boolean }) => {
-  return (
-    <div className="relative flex flex-col items-center h-full w-[24px]">
-      <div className={`
-        relative z-10 flex items-center justify-center w-[24px] h-[24px] rounded-full text-[12px] font-bold transition-colors duration-300
-        ${state === 'completed' ? 'bg-black text-white' : ''}
-        ${state === 'active' ? 'bg-black text-white' : ''}
-        ${state === 'pending' ? 'bg-transparent border border-[#cbd5e1] text-[#94a3b8]' : ''}
-      `}>
-        {state === 'completed' ? (
-          <Check size={14} strokeWidth={3} />
-        ) : (
-          <span>{stepNumber}</span>
-        )}
-      </div>
-
-      {!isLast && (
-        <div className={`
-          absolute top-[24px] bottom-[-4px] w-[1px]
-          ${state === 'completed' ? 'bg-black' : ''}
-          ${state === 'active' ? 'border-l border-dashed border-gray-400' : ''}
-          ${state === 'pending' ? 'bg-[#cbd5e1]' : ''}
-        `}></div>
-      )}
+// Checkbox component
+const Checkbox = ({ checked, onChange, label }: { checked: boolean; onChange: (checked: boolean) => void; label: string }) => (
+  <label className="flex items-center gap-2 cursor-pointer select-none">
+    <div
+      onClick={() => onChange(!checked)}
+      className={`
+        w-[18px] h-[18px] rounded-[4px] border-[1.5px] flex items-center justify-center transition-all
+        ${checked ? 'bg-[#305EFF] border-[#305EFF]' : 'bg-white border-[#cbd5e1] hover:border-[#94a3b8]'}
+      `}
+    >
+      {checked && <Check size={12} strokeWidth={3} className="text-white" />}
     </div>
-  );
-};
-
-// Radio button components
-const RadioSelected = () => (
-  <div className="relative shrink-0 size-[16px]">
-    <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 16 16">
-      <circle cx="8" cy="8" fill="#305EFF" r="8" />
-      <circle cx="8" cy="8" fill="white" r="3" />
-    </svg>
-  </div>
-);
-
-const RadioUnselected = () => (
-  <div className="relative shrink-0 size-[16px]">
-    <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 16 16">
-      <circle cx="8" cy="8" r="7.25" stroke="#CBD5E2" strokeWidth="1.5" />
-    </svg>
-  </div>
+    <span className="text-[14px] text-[#40566d]">{label}</span>
+  </label>
 );
 
 // --- Main Modal Component ---
@@ -84,19 +40,18 @@ export const PaymentLinkModal: React.FC<PaymentLinkModalProps> = ({
     purpose: prefill?.purpose || '',
     email: prefill?.email || '',
     phone: prefill?.phone || '',
-    shouldExpire: false,
-    reminder: false
+    notifyEmail: false,
+    notifySms: false,
+    referenceId: '',
+    noExpiry: true,
+    expiryDate: '',
+    enablePartialPayment: false
   });
 
-  // Step State: 0=Payment Details, 1=Customer Details, 2=Other Details, 3=Review
-  const [activeStep, setActiveStep] = useState(() => calculateInitialStep(prefill));
   const [status, setStatus] = useState<'editing' | 'submitting' | 'success'>('editing');
 
   // Refs for focus management
   const amountRef = useRef<HTMLInputElement>(null);
-  const purposeRef = useRef<HTMLInputElement>(null);
-  const emailRef = useRef<HTMLInputElement>(null);
-  const phoneRef = useRef<HTMLInputElement>(null);
 
   // Update form data when prefill changes
   useEffect(() => {
@@ -108,67 +63,25 @@ export const PaymentLinkModal: React.FC<PaymentLinkModalProps> = ({
         email: prefill.email || prev.email,
         phone: prefill.phone || prev.phone
       }));
-      setActiveStep(calculateInitialStep(prefill));
     }
   }, [prefill]);
 
-  // Focus first empty field in active step
+  // Focus amount field on open
   useEffect(() => {
-    if (!isOpen || status !== 'editing') return;
-
-    setTimeout(() => {
-      if (activeStep === 0) {
-        if (!formData.amount) {
-          amountRef.current?.focus();
-        } else if (!formData.purpose) {
-          purposeRef.current?.focus();
-        } else {
-          amountRef.current?.focus();
-        }
-      } else if (activeStep === 1) {
-        if (!formData.email) {
-          emailRef.current?.focus();
-        } else {
-          phoneRef.current?.focus();
-        }
-      }
-    }, 100);
-  }, [activeStep, status, isOpen]);
+    if (isOpen && status === 'editing') {
+      setTimeout(() => {
+        amountRef.current?.focus();
+      }, 100);
+    }
+  }, [isOpen, status]);
 
   // Update field helper
   const updateField = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  // Step validation
-  const isStep0Valid = !!formData.amount && !!formData.purpose;
-  const isFormValid = isStep0Valid;
-
-  // Check if all steps have been visited (for review state)
-  const allStepsComplete = activeStep === 3;
-
-  // Get step state
-  const getStepState = (stepId: number): 'completed' | 'active' | 'pending' => {
-    if (activeStep === stepId) return 'active';
-    if (activeStep > stepId) return 'completed';
-    return 'pending';
-  };
-
-  // Handle step completion
-  const handleNextStep = (currentStep: number) => {
-    if (currentStep === 0) {
-      setActiveStep(1);
-    } else if (currentStep === 1) {
-      setActiveStep(2);
-    } else if (currentStep === 2) {
-      setActiveStep(3);
-    }
-  };
-
-  // Handle "Change" click from review
-  const handleEdit = (stepId: number) => {
-    setActiveStep(stepId);
-  };
+  // Form validation
+  const isFormValid = !!formData.amount;
 
   // Handle form submission
   const handleSubmit = () => {
@@ -192,75 +105,25 @@ export const PaymentLinkModal: React.FC<PaymentLinkModalProps> = ({
     }, 800);
   };
 
-  // Render summary for completed steps
-  const renderSummary = (stepId: number) => {
-    if (stepId === 0) {
-      if (!formData.amount && !formData.purpose) return null;
-      return `₹${formData.amount || '0'} • ${formData.purpose || '-'}`;
-    }
-    if (stepId === 1) {
-      if (!formData.email && !formData.phone) return "Not added";
-      return [formData.email, formData.phone].filter(Boolean).join(" • ");
-    }
-    if (stepId === 2) {
-      return `Expiry: ${formData.shouldExpire ? 'Yes' : 'No'} • Reminder: ${formData.reminder ? 'Yes' : 'No'}`;
-    }
-    return null;
-  };
-
-  // Handle key navigation
-  const handleKeyDown = (
-    e: React.KeyboardEvent,
-    currentRef: React.RefObject<HTMLInputElement>,
-    prevRef?: React.RefObject<HTMLInputElement>,
-    nextRef?: React.RefObject<HTMLInputElement>,
-    isLastInStep?: boolean,
-    stepValidation?: boolean,
-    currentStep?: number
-  ) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      if (isLastInStep && stepValidation !== false && currentStep !== undefined) {
-        handleNextStep(currentStep);
-      } else if (nextRef?.current) {
-        nextRef.current.focus();
-      }
-    } else if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      if (nextRef?.current) {
-        nextRef.current.focus();
-      }
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      if (prevRef?.current) {
-        prevRef.current.focus();
-      }
-    }
-  };
-
-  // Global keyboard listener for review screen
+  // Handle escape key
   useEffect(() => {
-    const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      if (activeStep === 3 && e.key === 'Enter' && isFormValid && status === 'editing') {
-        e.preventDefault();
-        handleSubmit();
-      }
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose();
       }
     };
 
     if (isOpen) {
-      window.addEventListener('keydown', handleGlobalKeyDown);
-      return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
     }
-  }, [activeStep, isFormValid, status, isOpen]);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
   const modalContent = (
     <>
-      {/* Scrim - z-30 so chat input (z-50) stays above */}
+      {/* Scrim */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -270,30 +133,22 @@ export const PaymentLinkModal: React.FC<PaymentLinkModalProps> = ({
         onClick={onClose}
       />
 
-      {/* Modal Container - z-60 so it's above chat input */}
+      {/* Modal Container */}
       <div className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none p-4">
         <motion.div
           initial={{ opacity: 0, y: 20, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.98 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="pointer-events-auto w-full max-w-[480px] bg-[#EAEEFF] rounded-[12px] p-[4px] shadow-2xl border border-white/50"
+          className="pointer-events-auto w-full max-w-[520px] bg-white rounded-[8px] shadow-2xl flex flex-col max-h-[90vh]"
         >
-          {/* Close Button */}
-          <button
-            onClick={onClose}
-            className="absolute top-[16px] right-[16px] size-[24px] flex items-center justify-center opacity-50 hover:opacity-100 transition-opacity z-50 rounded-full hover:bg-black/5"
-          >
-            <X size={18} className="text-[#192839]" />
-          </button>
-
           <AnimatePresence mode="wait">
             {status === 'success' ? (
               <motion.div
                 key="success"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-white rounded-[8px] p-6 flex flex-col items-center justify-center min-h-[160px]"
+                className="p-8 flex flex-col items-center justify-center min-h-[200px]"
               >
                 <motion.div
                   initial={{ scale: 0 }}
@@ -307,7 +162,7 @@ export const PaymentLinkModal: React.FC<PaymentLinkModalProps> = ({
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="font-['TASA_Orbiter_Display',sans-serif] font-semibold text-[18px] text-[#192839]"
+                  className="font-semibold text-[18px] text-[#192839]"
                 >
                   Payment Link Created!
                 </motion.p>
@@ -320,323 +175,218 @@ export const PaymentLinkModal: React.FC<PaymentLinkModalProps> = ({
                 className="flex flex-col w-full"
               >
                 {/* Header */}
-                <div className="p-[12px] pb-0">
-                  <p className="font-['TASA_Orbiter_Display',sans-serif] font-semibold text-[18px] text-[#192839] leading-[24px]">
-                    Let's create a payment link
-                  </p>
+                <div className="px-6 pt-6 pb-4">
+                  <h2 className="text-[22px] font-semibold text-[#3a4755]">
+                    Standard Payment Link
+                  </h2>
                 </div>
 
-                {/* Steps Container */}
-                <div className="bg-white rounded-[8px] m-[4px] mt-[12px] p-[20px] flex flex-col border border-[rgba(108,132,157,0.12)]">
+                {/* Scrollable Form Content */}
+                <div className="flex-1 overflow-y-auto px-6 pb-4">
+                  <div className="flex flex-col gap-5">
 
-                  {/* Step 0: Payment Link Details */}
-                  <div className="flex gap-3 w-full">
-                    <div className="flex flex-col items-center min-w-[32px]">
-                      <StepperIcon state={getStepState(0)} stepNumber={1} isLast={false} />
-                    </div>
-                    <div className="flex-1 flex flex-col gap-3 pb-6">
-                      <div className="flex flex-col justify-center min-h-[24px]">
-                        <div className="flex items-center justify-between">
-                          <p className={`font-['Inter',sans-serif] font-semibold text-[14px] transition-colors ${getStepState(0) === 'pending' ? 'text-slate-400' : 'text-[#192839]'}`}>
-                            Payment link Details
-                          </p>
-                          {getStepState(0) === 'completed' && (
-                            <button
-                              onClick={() => handleEdit(0)}
-                              className="font-['Inter',sans-serif] text-[13px] font-medium text-[#305EFF] hover:text-[#1a4cd6] transition-colors"
-                            >
-                              Change
-                            </button>
-                          )}
+                    {/* Amount */}
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[14px] font-semibold text-[#3a4755]">
+                        Amount<span className="text-red-500">*</span>
+                      </label>
+                      <div className="flex items-center h-[44px] border border-[#e2e8f0] rounded-[6px] bg-white focus-within:border-[#305EFF] focus-within:ring-1 focus-within:ring-[#305EFF] transition-all">
+                        <div className="flex items-center justify-center w-[44px] h-full border-r border-[#e2e8f0] bg-[#f8fafc]">
+                          <span className="text-[16px] font-medium text-[#64748b]">₹</span>
                         </div>
-                        {getStepState(0) === 'completed' && (
-                          <p className="text-[13px] text-gray-500 mt-1">{renderSummary(0)}</p>
-                        )}
+                        <input
+                          ref={amountRef}
+                          type="text"
+                          value={formData.amount}
+                          onChange={(e) => updateField('amount', e.target.value)}
+                          className="flex-1 h-full px-3 text-[15px] text-[#1e293b] outline-none bg-transparent placeholder:text-[#94a3b8]"
+                          placeholder="100.00"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Payment For */}
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[14px] font-semibold text-[#3a4755]">
+                        Payment For
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.purpose}
+                        onChange={(e) => updateField('purpose', e.target.value)}
+                        className="h-[44px] px-3 border border-[#e2e8f0] rounded-[6px] text-[15px] text-[#1e293b] outline-none bg-white focus:border-[#305EFF] focus:ring-1 focus:ring-[#305EFF] transition-all placeholder:text-[#94a3b8]"
+                        placeholder="Payment description"
+                      />
+                    </div>
+
+                    {/* Customer Details */}
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[14px] font-semibold text-[#3a4755]">
+                        Customer Details
+                      </label>
+                      <div className="flex gap-3">
+                        {/* Email */}
+                        <div className="flex-1 flex items-center h-[44px] border border-[#e2e8f0] rounded-[6px] bg-white focus-within:border-[#305EFF] focus-within:ring-1 focus-within:ring-[#305EFF] transition-all">
+                          <div className="flex items-center justify-center w-[40px] h-full">
+                            <Mail size={16} className="text-[#94a3b8]" />
+                          </div>
+                          <input
+                            type="email"
+                            value={formData.email}
+                            onChange={(e) => updateField('email', e.target.value)}
+                            className="flex-1 h-full pr-3 text-[15px] text-[#1e293b] outline-none bg-transparent placeholder:text-[#94a3b8]"
+                            placeholder="john@example.c"
+                          />
+                        </div>
+                        {/* Phone */}
+                        <div className="flex-1 flex items-center h-[44px] border border-[#e2e8f0] rounded-[6px] bg-white focus-within:border-[#305EFF] focus-within:ring-1 focus-within:ring-[#305EFF] transition-all">
+                          <div className="flex items-center justify-center w-[40px] h-full">
+                            <Phone size={16} className="text-[#94a3b8]" />
+                          </div>
+                          <input
+                            type="text"
+                            value={formData.phone}
+                            onChange={(e) => updateField('phone', e.target.value)}
+                            className="flex-1 h-full pr-3 text-[15px] text-[#1e293b] outline-none bg-transparent placeholder:text-[#94a3b8]"
+                            placeholder="+91 9876543210"
+                          />
+                        </div>
                       </div>
 
-                      <AnimatePresence mode="wait">
-                        {activeStep === 0 && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ type: 'spring', damping: 30, stiffness: 350 }}
-                            className="overflow-hidden"
-                          >
-                            <div className="flex flex-col">
-                              <div className="group bg-white h-[48px] rounded-t-[4px] w-full border border-[#e3eaf3] flex items-center transition-all duration-200 focus-within:border-[#305EFF] focus-within:ring-1 focus-within:ring-[#305EFF] focus-within:z-10">
-                                <div className="flex items-center px-[12px] w-full">
-                                  <span className="font-['Inter',sans-serif] font-bold text-[16px] text-[#40566d] mr-1">₹</span>
-                                  <input
-                                    ref={amountRef}
-                                    type="text"
-                                    value={formData.amount}
-                                    onChange={(e) => updateField('amount', e.target.value)}
-                                    onKeyDown={(e) => handleKeyDown(e, amountRef, undefined, purposeRef, false)}
-                                    className="font-['Inter',sans-serif] font-bold text-[16px] text-[#40566d] w-full outline-none bg-transparent placeholder:text-slate-300"
-                                    placeholder="0.00"
-                                  />
-                                </div>
-                              </div>
-
-                              <div className="group bg-white h-[48px] rounded-b-[4px] w-full border border-[#e3eaf3] border-t-0 flex items-center transition-all duration-200 focus-within:border-[#305EFF] focus-within:ring-1 focus-within:ring-[#305EFF] focus-within:z-10 -mt-[1px]">
-                                <div className="flex items-center px-[12px] w-full">
-                                  <input
-                                    ref={purposeRef}
-                                    type="text"
-                                    value={formData.purpose}
-                                    onChange={(e) => updateField('purpose', e.target.value)}
-                                    onKeyDown={(e) => handleKeyDown(e, purposeRef, amountRef, undefined, true, isStep0Valid, 0)}
-                                    className="font-['Inter',sans-serif] text-[16px] text-[#40566d] w-full outline-none bg-transparent placeholder:text-[#40566d]/40"
-                                    placeholder="Payment for"
-                                  />
-                                </div>
-                              </div>
-
-                              <button
-                                onClick={() => handleNextStep(0)}
-                                disabled={!isStep0Valid}
-                                className={`mt-3 h-[36px] w-full rounded-[6px] font-['Inter',sans-serif] font-semibold text-[14px] transition-all duration-200 relative overflow-hidden
-                                  ${isStep0Valid
-                                    ? 'text-white cursor-pointer shadow-[0px_2px_4px_0px_rgba(0,0,0,0.1)] active:scale-[0.98]'
-                                    : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                                  }`}
-                                style={isStep0Valid ? {
-                                  background: 'linear-gradient(-73deg, #1566f1 54.84%, #4793fd 98.57%)',
-                                  boxShadow: 'inset 0px 2px 0px 0px rgba(255,255,255,0.2)'
-                                } : undefined}
-                              >
-                                Proceed
-                              </button>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  </div>
-
-                  {/* Step 1: Customer Details */}
-                  <div className="flex gap-3 w-full">
-                    <div className="flex flex-col items-center min-w-[32px]">
-                      <StepperIcon state={getStepState(1)} stepNumber={2} isLast={false} />
-                    </div>
-                    <div className="flex-1 flex flex-col gap-3 pb-6">
-                      <div className="flex flex-col justify-center min-h-[24px]">
-                        <div className="flex items-center justify-between">
-                          <p className={`font-['Inter',sans-serif] font-semibold text-[14px] transition-colors ${getStepState(1) === 'pending' ? 'text-slate-400' : 'text-[#192839]'}`}>
-                            Customer Details
-                          </p>
-                          {getStepState(1) === 'completed' && (
-                            <button
-                              onClick={() => handleEdit(1)}
-                              className="font-['Inter',sans-serif] text-[13px] font-medium text-[#305EFF] hover:text-[#1a4cd6] transition-colors"
-                            >
-                              Change
-                            </button>
-                          )}
-                        </div>
-                        {getStepState(1) === 'completed' && (
-                          <p className="text-[13px] text-gray-500 mt-1">{renderSummary(1)}</p>
-                        )}
+                      {/* Notify checkboxes */}
+                      <div className="flex gap-6 mt-2">
+                        <Checkbox
+                          checked={formData.notifyEmail}
+                          onChange={(checked) => updateField('notifyEmail', checked)}
+                          label="Notify via Email"
+                        />
+                        <Checkbox
+                          checked={formData.notifySms}
+                          onChange={(checked) => updateField('notifySms', checked)}
+                          label="Notify via SMS"
+                        />
                       </div>
 
-                      <AnimatePresence mode="wait">
-                        {activeStep === 1 && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ type: 'spring', damping: 30, stiffness: 350 }}
-                            className="overflow-hidden"
-                          >
-                            <div className="flex flex-col">
-                              <div className="group bg-white h-[48px] rounded-t-[4px] w-full border border-[#e3eaf3] flex items-center transition-all duration-200 focus-within:border-[#305EFF] focus-within:ring-1 focus-within:ring-[#305EFF] focus-within:z-10">
-                                <div className="flex items-center px-[12px] w-full">
-                                  <input
-                                    ref={emailRef}
-                                    type="email"
-                                    value={formData.email}
-                                    onChange={(e) => updateField('email', e.target.value)}
-                                    onKeyDown={(e) => handleKeyDown(e, emailRef, undefined, phoneRef, false)}
-                                    className="font-['Inter',sans-serif] text-[16px] text-[#40566d] w-full outline-none bg-transparent placeholder:text-[#40566d]/40"
-                                    placeholder="customer@example.com"
-                                  />
-                                </div>
-                              </div>
-
-                              <div className="group bg-white h-[48px] rounded-b-[4px] w-full border border-[#e3eaf3] border-t-0 flex items-center transition-all duration-200 focus-within:border-[#305EFF] focus-within:ring-1 focus-within:ring-[#305EFF] focus-within:z-10 -mt-[1px]">
-                                <div className="flex items-center px-[12px] w-full">
-                                  <span className="font-['Inter',sans-serif] text-[16px] text-[#40566d]/60 mr-2">+91</span>
-                                  <input
-                                    ref={phoneRef}
-                                    type="text"
-                                    value={formData.phone}
-                                    onChange={(e) => updateField('phone', e.target.value)}
-                                    onKeyDown={(e) => handleKeyDown(e, phoneRef, emailRef, undefined, true, true, 1)}
-                                    className="font-['Inter',sans-serif] text-[16px] text-[#40566d] w-full outline-none bg-transparent placeholder:text-[#40566d]/40"
-                                    placeholder="Phone number (optional)"
-                                  />
-                                </div>
-                              </div>
-
-                              <div className="flex flex-col gap-1 mt-3">
-                                <button
-                                  onClick={() => handleNextStep(1)}
-                                  className="h-[36px] w-full rounded-[6px] text-white font-['Inter',sans-serif] font-semibold text-[14px] transition-all shadow-[0px_2px_4px_0px_rgba(0,0,0,0.1)] active:scale-[0.98]"
-                                  style={{
-                                    background: 'linear-gradient(-73deg, #1566f1 54.84%, #4793fd 98.57%)',
-                                    boxShadow: 'inset 0px 2px 0px 0px rgba(255,255,255,0.2)'
-                                  }}
-                                >
-                                  Proceed
-                                </button>
-                                <button
-                                  onClick={() => handleNextStep(1)}
-                                  className="h-[32px] w-full rounded-[4px] hover:bg-slate-50 font-['Inter',sans-serif] font-semibold text-[13px] text-[#768ea7] transition-colors"
-                                >
-                                  Skip
-                                </button>
-                              </div>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  </div>
-
-                  {/* Step 2: Other Details */}
-                  <div className="flex gap-3 w-full">
-                    <div className="flex flex-col items-center min-w-[32px]">
-                      <StepperIcon state={getStepState(2)} stepNumber={3} isLast={true} />
-                    </div>
-                    <div className="flex-1 flex flex-col gap-3">
-                      <div className="flex flex-col justify-center min-h-[24px]">
-                        <div className="flex items-center justify-between">
-                          <p className={`font-['Inter',sans-serif] font-semibold text-[14px] transition-colors ${getStepState(2) === 'pending' ? 'text-slate-400' : 'text-[#192839]'}`}>
-                            Other Details
-                          </p>
-                          {getStepState(2) === 'completed' && (
-                            <button
-                              onClick={() => handleEdit(2)}
-                              className="font-['Inter',sans-serif] text-[13px] font-medium text-[#305EFF] hover:text-[#1a4cd6] transition-colors"
-                            >
-                              Change
-                            </button>
-                          )}
-                        </div>
-                        {getStepState(2) === 'completed' && (
-                          <p className="text-[13px] text-gray-500 mt-1">{renderSummary(2)}</p>
-                        )}
-                      </div>
-
-                      <AnimatePresence mode="wait">
-                        {activeStep === 2 && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ type: 'spring', damping: 30, stiffness: 350 }}
-                            className="overflow-hidden"
-                          >
-                            <div className="flex flex-col gap-[20px]">
-                              <div className="flex flex-col gap-[8px]">
-                                <p className="font-['Inter',sans-serif] font-semibold text-[12px] text-[#768ea7] leading-[18px]">
-                                  Should the link expire?
-                                </p>
-                                <div className="flex gap-[15px]">
-                                  <div
-                                    className="flex gap-[4px] items-center cursor-pointer w-[120px]"
-                                    onClick={() => updateField('shouldExpire', true)}
-                                  >
-                                    <div className="p-[2px]">{formData.shouldExpire ? <RadioSelected /> : <RadioUnselected />}</div>
-                                    <span className="font-['Inter',sans-serif] text-[14px] text-[#40566d]">Yes</span>
-                                  </div>
-                                  <div
-                                    className="flex gap-[4px] items-center cursor-pointer w-[120px]"
-                                    onClick={() => updateField('shouldExpire', false)}
-                                  >
-                                    <div className="p-[2px]">{!formData.shouldExpire ? <RadioSelected /> : <RadioUnselected />}</div>
-                                    <span className="font-['Inter',sans-serif] text-[14px] text-[#40566d]">No</span>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="flex flex-col gap-[8px]">
-                                <p className="font-['Inter',sans-serif] font-semibold text-[12px] text-[#768ea7] leading-[18px]">
-                                  Is a reminder required?
-                                </p>
-                                <div className="flex gap-[15px]">
-                                  <div
-                                    className="flex gap-[4px] items-center cursor-pointer w-[120px]"
-                                    onClick={() => updateField('reminder', true)}
-                                  >
-                                    <div className="p-[2px]">{formData.reminder ? <RadioSelected /> : <RadioUnselected />}</div>
-                                    <span className="font-['Inter',sans-serif] text-[14px] text-[#40566d]">Yes</span>
-                                  </div>
-                                  <div
-                                    className="flex gap-[4px] items-center cursor-pointer w-[120px]"
-                                    onClick={() => updateField('reminder', false)}
-                                  >
-                                    <div className="p-[2px]">{!formData.reminder ? <RadioSelected /> : <RadioUnselected />}</div>
-                                    <span className="font-['Inter',sans-serif] text-[14px] text-[#40566d]">No</span>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="flex flex-col gap-1">
-                                <button
-                                  onClick={() => handleNextStep(2)}
-                                  className="h-[36px] w-full rounded-[6px] text-white font-['Inter',sans-serif] font-semibold text-[14px] transition-all shadow-[0px_2px_4px_0px_rgba(0,0,0,0.1)] active:scale-[0.98]"
-                                  style={{
-                                    background: 'linear-gradient(-73deg, #1566f1 54.84%, #4793fd 98.57%)',
-                                    boxShadow: 'inset 0px 2px 0px 0px rgba(255,255,255,0.2)'
-                                  }}
-                                >
-                                  Proceed
-                                </button>
-                                <button
-                                  onClick={() => handleNextStep(2)}
-                                  className="h-[32px] w-full rounded-[4px] hover:bg-slate-50 font-['Inter',sans-serif] font-semibold text-[13px] text-[#768ea7] transition-colors"
-                                >
-                                  Skip
-                                </button>
-                              </div>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Review Footer */}
-                <AnimatePresence>
-                  {allStepsComplete && (
-                    <motion.div
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      exit={{ y: 20, opacity: 0 }}
-                      transition={{ delay: 0.2 }}
-                      className="px-[16px] pb-[16px] pt-[4px]"
-                    >
-                      <button
-                        disabled={!isFormValid || status === 'submitting'}
-                        onClick={handleSubmit}
-                        className={`w-full h-[40px] rounded-[8px] font-['Inter',sans-serif] font-semibold text-[14px] transition-all duration-200 flex items-center justify-center
-                          ${isFormValid
-                            ? 'bg-gradient-to-r from-[#1566f1] to-[#4793fd] text-white hover:opacity-90 shadow-[inset_0px_2px_0px_0px_rgba(255,255,255,0.2)] active:scale-[0.98]'
-                            : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                          }`}
+                      {/* More ways to notify */}
+                      <a
+                        href="#"
+                        className="flex items-center gap-1 text-[14px] text-[#305EFF] hover:text-[#1a4cd6] mt-1 w-fit"
+                        onClick={(e) => e.preventDefault()}
                       >
-                        {status === 'submitting' ? (
-                          <Loader2 className="animate-spin" size={18} />
-                        ) : (
-                          'Confirm & Create Link'
-                        )}
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                        More ways to notify
+                        <ExternalLink size={14} />
+                      </a>
+                    </div>
+
+                    {/* Reference Id */}
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[14px] font-semibold text-[#3a4755]">
+                        Reference Id
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.referenceId}
+                        onChange={(e) => updateField('referenceId', e.target.value)}
+                        className="h-[44px] px-3 border border-[#e2e8f0] rounded-[6px] text-[15px] text-[#1e293b] outline-none bg-white focus:border-[#305EFF] focus:ring-1 focus:ring-[#305EFF] transition-all placeholder:text-[#94a3b8]"
+                        placeholder="123456"
+                      />
+                    </div>
+
+                    {/* Link Expiry */}
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[14px] font-semibold text-[#3a4755]">
+                        Link Expiry
+                      </label>
+                      <Checkbox
+                        checked={formData.noExpiry}
+                        onChange={(checked) => updateField('noExpiry', checked)}
+                        label="No Expiry"
+                      />
+                      <div className="flex items-center h-[44px] w-[180px] border border-[#e2e8f0] rounded-[6px] bg-white">
+                        <input
+                          type="text"
+                          value={formData.expiryDate}
+                          onChange={(e) => updateField('expiryDate', e.target.value)}
+                          disabled={formData.noExpiry}
+                          className={`flex-1 h-full px-3 text-[15px] outline-none bg-transparent placeholder:text-[#94a3b8] ${formData.noExpiry ? 'text-[#94a3b8]' : 'text-[#1e293b]'}`}
+                          placeholder="DD-MM-YYYY"
+                        />
+                        <div className="flex items-center justify-center w-[40px] h-full border-l border-[#e2e8f0] bg-[#f8fafc] rounded-r-[6px]">
+                          <Calendar size={16} className="text-[#64748b]" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Reminders */}
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[14px] font-semibold text-[#3a4755]">
+                        Reminders
+                      </label>
+                      <p className="text-[14px] text-[#64748b]">
+                        Reminders is not set to payment links with no expiry date.
+                      </p>
+                      <a
+                        href="#"
+                        className="text-[14px] text-[#305EFF] hover:text-[#1a4cd6] w-fit"
+                        onClick={(e) => e.preventDefault()}
+                      >
+                        Set it up here
+                      </a>
+                    </div>
+
+                    {/* Partial Payment */}
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[14px] font-semibold text-[#3a4755]">
+                        Partial Payment
+                      </label>
+                      <Checkbox
+                        checked={formData.enablePartialPayment}
+                        onChange={(checked) => updateField('enablePartialPayment', checked)}
+                        label="Enable Partial Payment"
+                      />
+                    </div>
+
+                    {/* Notes */}
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[14px] font-semibold text-[#3a4755]">
+                        Notes
+                      </label>
+                      <a
+                        href="#"
+                        className="text-[14px] text-[#305EFF] hover:text-[#1a4cd6] w-fit"
+                        onClick={(e) => e.preventDefault()}
+                      >
+                        + Add New
+                      </a>
+                    </div>
+
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="px-6 py-4 bg-[#f8fafc] border-t border-[#e2e8f0] flex gap-3 justify-end rounded-b-[8px]">
+                  <button
+                    onClick={onClose}
+                    className="h-[42px] px-6 rounded-[6px] text-[14px] font-semibold text-[#64748b] bg-white border border-[#e2e8f0] hover:bg-[#f1f5f9] transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSubmit}
+                    disabled={!isFormValid || status === 'submitting'}
+                    className={`h-[42px] px-6 rounded-[6px] text-[14px] font-semibold transition-all flex items-center justify-center min-w-[160px]
+                      ${isFormValid
+                        ? 'bg-[#5B7FFF] text-white hover:bg-[#4a6ee8]'
+                        : 'bg-[#cbd5e1] text-white cursor-not-allowed'
+                      }`}
+                  >
+                    {status === 'submitting' ? (
+                      <Loader2 className="animate-spin" size={18} />
+                    ) : (
+                      'Create Payment Link'
+                    )}
+                  </button>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
