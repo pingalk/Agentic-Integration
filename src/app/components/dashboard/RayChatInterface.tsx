@@ -1099,24 +1099,25 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
   // Helper function to generate contextual responses for questions asked during payment link flow
   const getContextualResponse = (question: string): string => {
     const q = question.toLowerCase();
+    const followUp = '\n\nWould you like to continue creating your payment link?';
 
     if (q.includes('expire') || q.includes('expiry') || q.includes('valid')) {
-      return 'Payment links can be set to expire after a specific date, or you can choose "No Expiry" to keep them active indefinitely. The customer can pay anytime before the expiry date.';
+      return 'Payment links can be set to expire after a specific date, or you can choose "No Expiry" to keep them active indefinitely. The customer can pay anytime before the expiry date.' + followUp;
     }
     if (q.includes('partial') || q.includes('part payment')) {
-      return 'Enabling partial payments allows your customer to pay a portion of the total amount. This is useful for installment-based collections or when customers want flexibility in payment.';
+      return 'Enabling partial payments allows your customer to pay a portion of the total amount. This is useful for installment-based collections or when customers want flexibility in payment.' + followUp;
     }
     if (q.includes('notify') || q.includes('email') || q.includes('sms')) {
-      return 'You can automatically notify your customer via Email or SMS when the payment link is created. They\'ll receive the link directly and can pay with one click.';
+      return 'You can automatically notify your customer via Email or SMS when the payment link is created. They\'ll receive the link directly and can pay with one click.' + followUp;
     }
     if (q.includes('fee') || q.includes('charge') || q.includes('cost')) {
-      return 'Standard payment link transactions have a fee of 2% per transaction. There are no additional charges for creating or sharing payment links.';
+      return 'Standard payment link transactions have a fee of 2% per transaction. There are no additional charges for creating or sharing payment links.' + followUp;
     }
     if (q.includes('refund')) {
-      return 'Yes, payments collected via payment links can be refunded. You can initiate a full or partial refund from your Razorpay dashboard within 180 days of the transaction.';
+      return 'Yes, payments collected via payment links can be refunded. You can initiate a full or partial refund from your Razorpay dashboard within 180 days of the transaction.' + followUp;
     }
 
-    return 'Great question! Payment links are a simple way to collect payments without any coding. Just create a link, share it with your customer, and they can pay using any method they prefer. Would you like to continue creating your payment link?';
+    return 'Great question! Payment links are a simple way to collect payments without any coding. Just create a link, share it with your customer, and they can pay using any method they prefer.' + followUp;
   };
 
   // Handle input submission
@@ -1128,6 +1129,13 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
 
     // Handle question while payment link modal is open
     if (isPaymentLinkModalOpen) {
+      // Capture prefill data before closing modal
+      const savedPrefill = paymentLinkPrefill || {
+        amount: '15000',
+        purpose: 'Payment retry for failed transaction',
+        email: 'rahul@gmail.com'
+      };
+
       setInputValue('');
       setIsPaymentLinkModalOpen(false);
 
@@ -1178,11 +1186,7 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
                 data: {
                   formId: continueCardId,
                   status: 'draft' as const,
-                  prefill: paymentLinkPrefill || {
-                    amount: '15000',
-                    purpose: 'Payment retry for failed transaction',
-                    email: 'rahul@gmail.com'
-                  },
+                  prefill: savedPrefill,
                   isLoading: false
                 }
               }
