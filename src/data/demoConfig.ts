@@ -17,6 +17,7 @@ export interface DashboardCard {
 export interface PersonaConfig {
   id: PersonaId;
   name: string;
+  subtitle: string;  // One-line user story description
   theme: Theme;
   landing: {
     greeting: string;
@@ -29,6 +30,7 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
   maya: {
     id: 'maya',
     name: 'Double Debit Scenario',
+    subtitle: 'Customer claims they were charged twice for the same order',
     theme: 'positive',
     landing: {
       greeting: "Good afternoon, Maya!",
@@ -63,6 +65,7 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
   arjun: {
     id: 'arjun',
     name: 'Negative Balance & Add Funds',
+    subtitle: 'Settlements paused due to high refunds, need to add funds via UPI',
     theme: 'negative',
     landing: {
       greeting: "Good afternoon, Arjun!",
@@ -97,6 +100,7 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
   sarah: {
     id: 'sarah',
     name: 'Auto Refunded & Capture Settings',
+    subtitle: 'Customer says payment was refunded but I didn\'t initiate it',
     theme: 'neutral',
     landing: {
       greeting: "Welcome back, Sarah!",
@@ -131,6 +135,7 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
   sam: {
     id: 'sam',
     name: 'Ticket Status & Escalation',
+    subtitle: 'Need to check and escalate my pending support ticket',
     theme: 'positive',
     landing: {
       greeting: "Good afternoon, Sam!",
@@ -165,6 +170,7 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
   shyam: {
     id: 'shyam',
     name: 'Bank Issue & Payment Link',
+    subtitle: 'Client sent me a WhatsApp screenshot of their failed payment',
     theme: 'neutral',
     landing: {
       greeting: "Good afternoon, Shyam!",
@@ -199,6 +205,7 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
   kiara: {
     id: 'kiara',
     name: 'Customer Transaction Status',
+    subtitle: 'Need to check the status of my customer Rohan\'s last transaction',
     theme: 'positive',
     landing: {
       greeting: "Good afternoon, Kiara!",
@@ -233,6 +240,7 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
   varun: {
     id: 'varun',
     name: 'Upcoming Settlement',
+    subtitle: 'Want to know when my next settlement is coming',
     theme: 'neutral',
     landing: {
       greeting: "Good afternoon, Varun!",

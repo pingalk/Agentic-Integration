@@ -5,7 +5,7 @@ import { DemoProvider } from '../context/DemoContext';
 import { DemoControls } from './components/DemoControls';
 
 function AppContent() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true); // Skip login, go directly to Ray AI
   const [initialViewConfig, setInitialViewConfig] = useState<{
     view: string;
     variants: { home: string; transactions: string };

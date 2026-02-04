@@ -30,17 +30,20 @@ export const DemoControls = () => {
           </span>
           <ChevronDown size={14} className="text-slate-400" />
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-64" align="center" side="top">
+        <DropdownMenuContent className="w-80" align="center" side="top">
           <DropdownMenuLabel>User Stories</DropdownMenuLabel>
           <DropdownMenuSeparator />
           {Object.values(PERSONAS).map((p) => (
             <DropdownMenuItem
               key={p.id}
               onClick={() => setPersona(p.id)}
-              className="flex items-center justify-between cursor-pointer"
+              className="flex items-start justify-between cursor-pointer py-2.5"
             >
-              <span className="truncate">{p.name}</span>
-              {currentPersonaId === p.id && <Check size={14} className="text-blue-600 shrink-0 ml-2" />}
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <span className="text-sm font-medium truncate">{p.name}</span>
+                <span className="text-xs text-slate-500 line-clamp-2">{p.subtitle}</span>
+              </div>
+              {currentPersonaId === p.id && <Check size={14} className="text-blue-600 shrink-0 ml-2 mt-0.5" />}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
