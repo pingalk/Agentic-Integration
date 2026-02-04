@@ -123,13 +123,13 @@ export const PaymentLinkModal: React.FC<PaymentLinkModalProps> = ({
 
   const modalContent = (
     <>
-      {/* Scrim - leaves space at bottom for chat input */}
+      {/* Scrim - covers everything, input floats above via z-index */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
-        className="fixed inset-0 bottom-[120px] z-30 bg-black/40"
+        className="fixed inset-0 z-40 bg-black/40"
         onClick={onClose}
       />
 
@@ -172,7 +172,7 @@ export const PaymentLinkModal: React.FC<PaymentLinkModalProps> = ({
                 key="form"
                 initial={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex flex-col w-full h-full max-h-[90vh]"
+                className="flex flex-col w-full overflow-hidden"
               >
                 {/* Header - Fixed */}
                 <div className="flex-shrink-0 px-6 pt-6 pb-4 border-b border-[#e2e8f0]">
