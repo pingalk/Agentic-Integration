@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { RayMessageRenderer, RayResponseData } from './chat/RayMessageRenderer';
 import { AddFundsWidget } from './chat/AddFundsWidget';
 import { PaymentLinkPrefill, parsePaymentLinkIntent } from './chat/PaymentLinkWidget';
@@ -1571,6 +1572,56 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
          </div>
         </div>
       </motion.div>
+
+      {/* Modal Overlay Input - Only shows when modal is open, rendered via portal at z-70 */}
+      {isPaymentLinkModalOpen && createPortal(
+        <div className="fixed bottom-[58px] left-0 right-0 z-[70] px-3 md:px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-full max-w-full md:max-w-[700px] mx-auto relative group min-w-[475px]"
+          >
+            <input
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && inputValue.trim()) {
+                  e.preventDefault();
+                  handleInputSubmit();
+                }
+              }}
+              placeholder="Ask anything..."
+              className="w-full h-[52px] pl-5 pr-14 bg-white border border-slate-200 hover:border-slate-300 focus:border-blue-500 rounded-full text-[15px] outline-none transition-all shadow-[0_4px_20px_-2px_rgba(0,0,0,0.15)] placeholder:text-slate-400"
+            />
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+              {!isStreaming && inputValue.length === 0 && (
+                <>
+                  <button className="p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-full hover:bg-slate-100"><Plus size={20} /></button>
+                  <button className="p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-full hover:bg-slate-100"><Mic size={20} /></button>
+                </>
+              )}
+              {isStreaming ? (
+                <button
+                  onClick={() => setIsStreaming(false)}
+                  className="w-9 h-9 flex items-center justify-center bg-[#0a0a0a] text-white rounded-full hover:bg-black transition-all shadow-sm active:scale-95"
+                >
+                  <Square size={14} fill="white" />
+                </button>
+              ) : (
+                <button
+                  disabled={!inputValue}
+                  onClick={handleInputSubmit}
+                  className="w-9 h-9 flex items-center justify-center bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:bg-slate-300 transition-all shadow-sm active:scale-95"
+                >
+                  <ArrowUp size={18} strokeWidth={2.5} />
+                </button>
+              )}
+            </div>
+          </motion.div>
+        </div>,
+        document.body
+      )}
 
       {/* Transaction Preview Pane - slides in from the right */}
       <AnimatePresence mode="popLayout">
