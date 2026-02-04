@@ -1120,6 +1120,30 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
     return 'Great question! Payment links are a simple way to collect payments without any coding. Just create a link, share it with your customer, and they can pay using any method they prefer.' + followUp;
   };
 
+  // Helper function to generate contextual responses for questions asked during add funds flow
+  const getAddFundsContextualResponse = (question: string): string => {
+    const q = question.toLowerCase();
+    const followUp = '\n\nWould you like to continue adding funds?';
+
+    if (q.includes('upi') || q.includes('how')) {
+      return 'Adding funds via UPI is instant and secure. Once you confirm, a UPI payment request will be generated. You can complete it using any UPI app like Google Pay, PhonePe, or Paytm.' + followUp;
+    }
+    if (q.includes('fee') || q.includes('charge') || q.includes('cost')) {
+      return 'There are no additional fees for adding funds via UPI. The full amount you add will be credited to your Razorpay balance.' + followUp;
+    }
+    if (q.includes('time') || q.includes('long') || q.includes('instant')) {
+      return 'UPI transfers are instant! Once you complete the payment in your UPI app, the funds will be credited to your Razorpay balance within seconds.' + followUp;
+    }
+    if (q.includes('limit') || q.includes('maximum') || q.includes('minimum')) {
+      return 'You can add anywhere from ₹1 to ₹1,00,000 per transaction via UPI. For larger amounts, you may need to do multiple transactions or use NEFT/RTGS.' + followUp;
+    }
+    if (q.includes('safe') || q.includes('secure')) {
+      return 'Absolutely! UPI is one of the most secure payment methods. All transactions are encrypted and protected by your UPI PIN. Razorpay is also PCI-DSS compliant.' + followUp;
+    }
+
+    return 'Adding funds to your Razorpay balance helps ensure smooth settlements and instant refunds for your customers. You can add any amount via UPI instantly.' + followUp;
+  };
+
   // Handle input submission
   const handleInputSubmit = () => {
     if (!inputValue.trim()) return;
@@ -1187,6 +1211,74 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
                   formId: continueCardId,
                   status: 'draft' as const,
                   prefill: savedPrefill,
+                  isLoading: false
+                }
+              }
+            }]);
+          }, 7000);
+        }, 1500);
+      }, 300);
+
+      return;
+    }
+
+    // Handle question while Add Funds widget is open
+    if (showAddFundsWidget) {
+      // Capture widget data before closing
+      const savedAddFundsData = {
+        amount: widgetAmount || '46000',
+        purpose: ''
+      };
+
+      setInputValue('');
+      setShowAddFundsWidget(false);
+
+      // Add user's question to chat
+      setMessages(prev => [...prev, {
+        id: `user-q-${Date.now()}`,
+        sender: 'user',
+        blocks: [{ type: 'text', content: userQuestion }]
+      }]);
+
+      // Show thinking state
+      setTimeout(() => {
+        setIsStreaming(true);
+        const thinkingId = `ai-thinking-${Date.now()}`;
+        setMessages(prev => [...prev, {
+          id: thinkingId,
+          sender: 'ai',
+          isThinking: true
+        }]);
+
+        // Show response after delay
+        setTimeout(() => {
+          setMessages(prev => {
+            const withoutThinking = prev.filter(m => !m.isThinking);
+            return [...withoutThinking, {
+              id: `ai-response-${Date.now()}`,
+              sender: 'ai' as const,
+              artifact: {
+                type: 'simple_text',
+                data: {
+                  headline: 'Happy to help!',
+                  body: getAddFundsContextualResponse(userQuestion),
+                }
+              }
+            }];
+          });
+          setIsStreaming(false);
+
+          // Show mini card to continue after response has fully streamed (7s delay)
+          setTimeout(() => {
+            const continueCardId = `continue-add-funds-${Date.now()}`;
+            setMessages(prev => [...prev, {
+              id: continueCardId,
+              sender: 'ai' as const,
+              artifact: {
+                type: 'add_funds_form_card' as const,
+                data: {
+                  formId: continueCardId,
+                  prefill: savedAddFundsData,
                   isLoading: false
                 }
               }
@@ -1449,7 +1541,12 @@ export const RayChatInterface = ({ initialQuery, isSplit }: RayChatInterfaceProp
                         highlightedSuggestionIndex={highlightedSuggestionIndex}
                         onMiniCardClick={(formId) => {
                           setActiveFormCardId(formId);
-                          setIsPaymentLinkModalOpen(true);
+                          // Check if it's an add funds card or payment link card
+                          if (formId.includes('add-funds')) {
+                            setShowAddFundsWidget(true);
+                          } else {
+                            setIsPaymentLinkModalOpen(true);
+                          }
                         }}
                       />
                    </motion.div>
