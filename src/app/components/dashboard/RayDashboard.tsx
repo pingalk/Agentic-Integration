@@ -590,22 +590,6 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
             <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
                {/* Base background - solid color */}
                <div className="absolute inset-0 bg-[#F6F6F6]" />
-
-               {/* Razorsense video background - only on landing view */}
-               {view === 'landing' && (
-                  <div className="absolute inset-0">
-                     <video
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        className="w-full h-full object-cover opacity-40"
-                        src="/rzrsense.mov"
-                     />
-                     {/* Gradient overlay for better text readability */}
-                     <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-white/50 to-white/70" />
-                  </div>
-               )}
             </div>
 
             {view === 'landing' ? (
