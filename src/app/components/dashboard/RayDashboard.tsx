@@ -617,34 +617,6 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
                         }}
                         transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
                      >
-                        {/* Ray Logo - Larger, with KYC-style animation */}
-                        <motion.div
-                            className="relative shrink-0 size-[64px]"
-                            style={{ '--fill-0': currentMagicColor.primary } as React.CSSProperties}
-                            initial={{ opacity: 0, rotate: -90, scale: 0.3 }}
-                            animate={{
-                                opacity: animPhase >= 1 ? 1 : 0,
-                                rotate: animPhase >= 1 ? 0 : -90,
-                                scale: animPhase >= 1 ? 1 : 0.3
-                            }}
-                            transition={{
-                                opacity: { duration: 0.5 },
-                                rotate: {
-                                    type: "spring",
-                                    stiffness: 100,
-                                    damping: 10,
-                                    duration: 1.5
-                                },
-                                scale: {
-                                    type: "spring",
-                                    stiffness: 100,
-                                    damping: 12,
-                                    duration: 1.2
-                                }
-                            }}
-                        >
-                            <Ray static />
-                        </motion.div>
                         {/* Greeting text with KYC-style typography */}
                         <div className="space-y-3">
                         <p className={`font-sans font-normal text-[16px] leading-[26px] text-[#050505] transition-colors duration-300`}>
@@ -680,14 +652,35 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
                                 </motion.span>
                             )}
                         </p>
-                        {/* Tagline with green icon and black text */}
+                        {/* Tagline with Ray icon and black text */}
                         <div className="flex items-center justify-center gap-3">
-                          <div className="size-10 flex items-center justify-center">
-                            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                              <rect width="40" height="40" rx="8" fill="#10B981"/>
-                              <path d="M12 20L18 26L28 14" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </div>
+                          <motion.div
+                            className="relative shrink-0 size-10"
+                            style={{ '--fill-0': currentMagicColor.primary } as React.CSSProperties}
+                            initial={{ opacity: 0, rotate: -90, scale: 0.3 }}
+                            animate={{
+                                opacity: animPhase >= 1 ? 1 : 0,
+                                rotate: animPhase >= 1 ? 0 : -90,
+                                scale: animPhase >= 1 ? 1 : 0.3
+                            }}
+                            transition={{
+                                opacity: { duration: 0.5 },
+                                rotate: {
+                                    type: "spring",
+                                    stiffness: 100,
+                                    damping: 10,
+                                    duration: 1.5
+                                },
+                                scale: {
+                                    type: "spring",
+                                    stiffness: 100,
+                                    damping: 12,
+                                    duration: 1.2
+                                }
+                            }}
+                          >
+                            <Ray static />
+                          </motion.div>
                           <h1 className="font-sans font-normal text-[32px] leading-[46px] text-[#050505]">
                             {landingVariant === 'default' ? (
                                 // Staggered character animation for default mode - starts after greeting finishes
