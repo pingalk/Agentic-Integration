@@ -130,15 +130,25 @@ export const RayInputBox: React.FC<RayInputBoxProps> = ({
     }
   };
 
-  // Background color: white for compact (chat), slate-50 for hero (landing)
-  const bgColor = isHero ? 'bg-[#f8fafc]' : 'bg-white';
+  // Glass morphism styling matching KYC interface
+  const bgColor = isHero
+    ? 'backdrop-blur-[5.5px] bg-gradient-to-b from-white to-[#f0f0f0]'
+    : 'bg-white backdrop-blur-sm';
+  const borderStyle = isHero
+    ? 'border-[1.5px] border-[rgba(0,0,0,0.1)]'
+    : 'border-[1.5px] border-[rgba(0,0,0,0.08)]';
+  const shadowStyle = isHero
+    ? 'shadow-[0px_8px_48px_4px_rgba(59,96,181,0.1)]'
+    : 'shadow-[0px_4px_16px_2px_rgba(59,96,181,0.08)]';
 
   return (
     <motion.div
       layout
       transition={{ type: "spring", bounce: 0, duration: 0.3 }}
-      className={`${bgColor} relative rounded-[20px] w-full`}
+      className={`${bgColor} ${borderStyle} ${shadowStyle} relative rounded-[20px] w-full`}
     >
+      {/* Inner shadow for depth - matching KYC style */}
+      <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_-2px_0px_1px_white]" />
       {/* Attachment Chip - displayed above the main input when present */}
       <AnimatePresence>
         {attachmentChip && (
@@ -315,7 +325,6 @@ export const RayInputBox: React.FC<RayInputBoxProps> = ({
         </div>
       )}
 
-      <div aria-hidden="true" className={clsx("absolute border border-[#6db7e8] border-solid inset-0 pointer-events-none rounded-[20px] transition-shadow duration-300", (showShadow || isFocused) && "shadow-[0px_6px_32px_4px_rgba(25,40,57,0.09)]")} />
     </motion.div>
   );
 };

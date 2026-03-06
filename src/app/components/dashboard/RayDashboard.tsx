@@ -608,9 +608,9 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
                     onScroll={(e) => setScrollY((e.target as HTMLDivElement).scrollTop)}
                     className="relative z-10 h-full overflow-y-auto flex flex-col items-center p-4 md:p-8 px-4 md:px-[32px] pt-[15vh] md:pt-[20vh] pb-[100px] scrollbar-hide"
                 >
-                     {/* Greeting Section - Stacked Layout */}
+                     {/* Greeting Section - Stacked Layout with KYC-style polish */}
                      <motion.div
-                        className="flex flex-col items-center gap-4 mb-8 group cursor-default text-center"
+                        className="flex flex-col items-center gap-6 mb-10 group cursor-default text-center"
                         animate={{
                             opacity: viewTransition === 'exiting' ? 0 : 1,
                             filter: viewTransition === 'exiting' ? 'blur(8px)' : 'blur(0px)',
@@ -618,9 +618,9 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
                         }}
                         transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
                      >
-                        {/* Ray Logo - Centered, Blue, Static with Entry Spin (overshoot settle) */}
+                        {/* Ray Logo - Larger, with KYC-style animation */}
                         <motion.div
-                            className="relative shrink-0 size-[48px]"
+                            className="relative shrink-0 size-[64px]"
                             style={{ '--fill-0': currentMagicColor.primary } as React.CSSProperties}
                             initial={{ opacity: 0, rotate: -90, scale: 0.3 }}
                             animate={{
@@ -646,8 +646,9 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
                         >
                             <Ray static />
                         </motion.div>
-                        {/* Small Greeting - staggered characters in default mode */}
-                        <p className={`font-sans font-normal text-[16px] md:text-[18px] leading-[24px] tracking-[-0.2px] transition-colors duration-300 ${greetingColor}`}>
+                        {/* Greeting text with KYC-style typography */}
+                        <div className="space-y-3">
+                        <p className={`font-sans font-normal text-[14px] leading-[20px] tracking-[-0.182px] text-[rgba(0,0,0,0.56)] transition-colors duration-300`}>
                             {landingVariant === 'default' ? (
                                 // Staggered character animation for default mode - starts after Ray appears
                                 LANDING_CONFIG.greeting.split('').map((char: string, i: number) => (
@@ -680,8 +681,13 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
                                 </motion.span>
                             )}
                         </p>
-                        {/* Tagline - Large Text with magic color - staggered characters in default mode */}
-                        <h1 className="font-sans font-normal text-[28px] md:text-[40px] leading-[36px] md:leading-[48px] tracking-[-0.5px] text-[#2563EB]">
+                        {/* Tagline with KYC-style gradient text */}
+                        <h1
+                          className="font-sans font-normal text-[32px] leading-[38px] text-transparent bg-clip-text text-center"
+                          style={{
+                            backgroundImage: 'linear-gradient(90deg, rgb(5, 5, 5) 0%, rgb(46, 66, 165) 37.048%, rgb(46, 66, 165) 73.478%, rgb(5, 5, 5) 100%)'
+                          }}
+                        >
                             {landingVariant === 'default' ? (
                                 // Staggered character animation for default mode - starts after greeting finishes
                                 "What can I do for you today?".split('').map((char, i) => (
@@ -714,6 +720,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
                                 </motion.span>
                             )}
                         </h1>
+                        </div>
                      </motion.div>
 
                      {/* Input Box with Spotlight Animation - moves to bottom and fades out during transition */}
