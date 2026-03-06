@@ -806,8 +806,9 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
                             >
                                 {/* Glass effect inset shadows */}
                                 <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_-1.5px_0px_0px_#0e54cc,inset_0px_0px_0px_0.5px_#1566f1,inset_0px_-2px_0px_0px_rgba(255,255,255,0.18),inset_0px_1.5px_0px_0px_rgba(255,255,255,0.32)]" />
-                                <svg width="17" height="20" viewBox="0 0 17 20" fill="none">
-                                    <path d="M8.5 0L0 6V14L8.5 20L17 14V6L8.5 0Z" fill="white"/>
+                                {/* Replit Logo */}
+                                <svg width="16" height="16" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" fillRule="evenodd" clipRule="evenodd" strokeLinejoin="round" strokeMiterlimit="2">
+                                    <path d="M253.397 165.568H74.005c-17.088 0-31.189-13.995-31.338-31.083V31.083C42.667 13.739 56.96 0 74.283 0H221.76c17.643 0 31.637 14.037 31.637 31.083v134.485zM445.483 345.92H253.589V165.333h191.894c18.56 0 33.877 15.296 33.877 33.835v112.939c0 18.88-15.296 33.835-33.877 33.835v-.022zM221.76 512H74.283c-17.323 0-31.616-14.016-31.616-31.018V377.45c0-17.003 14.293-31.019 31.616-31.019h179.114v134.55c0 17.002-14.293 31.018-31.637 31.018z" fill="white" fillRule="nonzero"/>
                                 </svg>
                                 Integrate payments with Replit
                             </button>
