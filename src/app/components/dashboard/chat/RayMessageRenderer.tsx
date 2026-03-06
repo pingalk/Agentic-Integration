@@ -4360,7 +4360,7 @@ const ReplitIntegrationArtifact = ({ data, onSuggestionClick, isLast, highlighte
             playsInline
             onEnded={handleVideoEnd}
             className="w-full h-full object-contain"
-            src="/replit-copy-prompt.mp4"
+            src="/replit-copy-prompt.mov"
           />
         </motion.div>,
         document.body
