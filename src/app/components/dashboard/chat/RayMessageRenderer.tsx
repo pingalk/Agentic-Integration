@@ -18,6 +18,7 @@ import clsx from 'clsx';
 import { PerplexityStreamText } from './PerplexityStreamingTypography';
 import { ChainOfThought } from '../ChainOfThought';
 import { KYCLoadingState } from '../KYCLoadingState';
+import { ReplitLoadingState } from '../ReplitLoadingState';
 import { BusinessCategoryLoadingState } from '../BusinessCategoryLoadingState';
 import { useStreamSequencer } from '../useStreamSequencer';
 import { thinkingSteps } from '../useDemoScript';
@@ -142,6 +143,7 @@ export interface RayResponseData {
   suggestions?: string[];
   isThinking?: boolean;
   kycLoading?: boolean; // When true, shows KYC-specific loading steps
+  replitLoading?: boolean; // When true, shows Replit integration loading steps
   isBusinessCategoryLoading?: boolean; // When true, shows business category identification loading steps
   skipAutoScroll?: boolean; // When true, global scroll effects will skip this message
   resolution?: { title: string; content: string };
@@ -4433,6 +4435,10 @@ export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast
     // Show KYC-specific loading state if flagged
     if (data.kycLoading) {
       return <KYCLoadingState />;
+    }
+    // Show Replit integration loading state if flagged
+    if (data.replitLoading) {
+      return <ReplitLoadingState />;
     }
     // Use persona-specific thinking steps if available
     const steps = personaId && thinkingSteps[personaId] ? thinkingSteps[personaId] : undefined;

@@ -649,7 +649,8 @@ export const RayChatInterface = ({ initialQuery, isSplit, isEntering, onGoHome, 
         const thinkingMsg: RayResponseData = {
           id: 'replit-ai-1',
           sender: 'ai',
-          isThinking: true
+          isThinking: true,
+          replitLoading: true
         };
         setMessages(prev => [...prev, thinkingMsg]);
 
