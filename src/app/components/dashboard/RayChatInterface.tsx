@@ -454,7 +454,7 @@ export const RayChatInterface = ({ initialQuery, isSplit, isEntering, onGoHome, 
               } : msg
             ));
             setTimeout(() => setIsStreaming(false), 3000);
-          }, 15000);
+          }, 3500);
         });
       }, 100);
     }, 600);
@@ -574,7 +574,7 @@ export const RayChatInterface = ({ initialQuery, isSplit, isEntering, onGoHome, 
             } : msg
           ));
           setSarahFlowStep(1);
-        }, 15000);
+        }, 3500);
       }, 600);
     }, 600);
   };
@@ -661,7 +661,7 @@ export const RayChatInterface = ({ initialQuery, isSplit, isEntering, onGoHome, 
                 } : msg
             ));
             setTimeout(() => setIsStreaming(false), 3000);
-        }, 15000); // 15s thinking time
+        }, 3500); // 3.5s thinking time
     }, 600);
   }, [initialQuery, shyamScript]);
 
@@ -723,7 +723,7 @@ export const RayChatInterface = ({ initialQuery, isSplit, isEntering, onGoHome, 
               sender: 'ai' as const
             } : msg
           ));
-        }, 15000); // 15s thinking time
+        }, 3500); // 3.5s thinking time
       }, 600);
     }, 400);
   }, [initialQuery, briefingReviewHandled, messages.length, briefingReviewResponses]);
@@ -1127,7 +1127,7 @@ export const RayChatInterface = ({ initialQuery, isSplit, isEntering, onGoHome, 
             });
 
             setIsStreaming(false);
-          }, 15000);
+          }, 3500);
         }, 300);
         return;
       }
