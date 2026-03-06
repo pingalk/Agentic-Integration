@@ -4239,29 +4239,29 @@ const ReplitIntegrationArtifact = ({ data, onSuggestionClick, isLast, highlighte
       </div>
 
       {/* Code Card */}
-      <div className="bg-white border border-[rgba(67,75,81,0.12)] rounded-[12px] overflow-hidden shadow-[0px_2px_2px_0px_rgba(237,236,236,0.16)]">
-        {/* Card Header */}
-        <div className="px-4 py-3 border-b border-[rgba(67,75,81,0.12)]">
-          <p className="text-[14px] font-medium text-[#050505]">Your Custom Integration Prompt</p>
+      <div className="flex flex-col gap-3">
+        <div className="bg-white border border-[rgba(67,75,81,0.12)] rounded-[12px] overflow-hidden shadow-[0px_2px_2px_0px_rgba(237,236,236,0.16)]">
+          {/* Card Header */}
+          <div className="px-4 py-3 border-b border-[rgba(67,75,81,0.12)]">
+            <p className="text-[14px] font-medium text-[#050505]">Your Custom Integration Prompt</p>
+          </div>
+
+          {/* Code Content - Dark Background */}
+          <div className="p-4 bg-[#0d1117]">
+            <pre className="text-[12px] font-['Monaco','Courier_New',monospace] leading-[17px] tracking-[-0.156px] text-[#e6edf3] whitespace-pre-wrap">
+              {data.prompt}
+            </pre>
+          </div>
         </div>
 
-        {/* Code Content */}
-        <div className="p-4 bg-[#fafafa]">
-          <pre className="text-[12px] font-['Monaco','Courier_New',monospace] leading-[17px] tracking-[-0.156px] text-[#050505] whitespace-pre-wrap">
-            {data.prompt}
-          </pre>
-        </div>
-
-        {/* Card Footer */}
-        <div className="px-4 py-3 border-t border-[rgba(67,75,81,0.12)] flex items-center justify-center">
-          <button
-            onClick={handleCopy}
-            className="relative h-10 px-5 bg-gradient-to-b from-[#1566f1] to-[#4793fd] text-white rounded-[8px] text-[14px] font-medium tracking-[-0.112px] overflow-hidden border border-[#0354e0] transition-all hover:shadow-md"
-          >
-            <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_1.5px_0px_0px_rgba(255,255,255,0.32),inset_0px_-2px_0px_0px_rgba(255,255,255,0.18),inset_0px_0px_0px_0.5px_#1566f1,inset_0px_-1.5px_0px_0px_#0e54cc]" />
-            {copied ? 'Copied!' : 'Copy Prompt'}
-          </button>
-        </div>
+        {/* Copy Button - Left Aligned */}
+        <button
+          onClick={handleCopy}
+          className="relative h-10 px-5 bg-gradient-to-b from-[#1566f1] to-[#4793fd] text-white rounded-[8px] text-[14px] font-medium tracking-[-0.112px] overflow-hidden border border-[#0354e0] transition-all hover:shadow-md w-fit"
+        >
+          <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_1.5px_0px_0px_rgba(255,255,255,0.32),inset_0px_-2px_0px_0px_rgba(255,255,255,0.18),inset_0px_0px_0px_0.5px_#1566f1,inset_0px_-1.5px_0px_0px_#0e54cc]" />
+          {copied ? 'Copied!' : 'Copy Prompt'}
+        </button>
       </div>
 
       {/* Note */}
