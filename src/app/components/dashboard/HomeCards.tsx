@@ -91,7 +91,7 @@ export const HomeCards: React.FC<HomeCardsProps> = ({ animPhase, onPromptSelect 
           </div>
 
           {/* Payment Chart Illustration */}
-          <div className="absolute right-[10px] bottom-[10px] w-[120px] h-[105px]">
+          <div className="absolute -right-[10px] -bottom-[10px] w-[120px] h-[105px]">
             <img
               src="/payment-chart.png"
               alt="Payment integration illustration"
