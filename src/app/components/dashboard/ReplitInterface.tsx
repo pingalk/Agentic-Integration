@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { X, ChevronLeft, Play, RotateCw } from 'lucide-react';
+import { X, ChevronLeft, Play, RotateCw, Send } from 'lucide-react';
 
 interface ReplitInterfaceProps {
   onClose: () => void;
   initialPrompt?: string;
+}
+
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
 }
 
 const SAMPLE_CODE = `// server.js
@@ -42,6 +47,37 @@ app.listen(PORT, () => {
 
 export const ReplitInterface: React.FC<ReplitInterfaceProps> = ({ onClose, initialPrompt = '' }) => {
   const [activeFile, setActiveFile] = useState('server.js');
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: 'assistant',
+      content: 'Integration complete! I\'ve added the Razorpay payment integration to your project. You can see the code in server.js and test it in the preview.'
+    }
+  ]);
+  const [input, setInput] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleSend = () => {
+    if (!input.trim()) return;
+
+    setMessages(prev => [...prev, { role: 'user', content: input }]);
+    setInput('');
+
+    // Simulate assistant response
+    setTimeout(() => {
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: 'I\'ve updated the code based on your request. Check the preview to see the changes.'
+      }]);
+    }, 1000);
+  };
 
   return (
     <motion.div
@@ -80,9 +116,75 @@ export const ReplitInterface: React.FC<ReplitInterfaceProps> = ({ onClose, initi
         </div>
       </div>
 
-      {/* Main Content - Split View */}
+      {/* Main Content - Split View: Chat on left, Code/Preview on right */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Panel - Code Editor */}
+        {/* Left Panel - AI Agent Chat */}
+        <div className="w-[380px] bg-[#0e1525] border-r border-[#1c2333] flex flex-col">
+          {/* Chat Header */}
+          <div className="h-12 border-b border-[#1c2333] flex items-center px-4">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <div>
+                <div className="text-sm font-semibold text-white">Agent</div>
+                <div className="text-xs text-[#9ca3af]">Replit AI</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Messages Area */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`max-w-[85%] rounded-lg px-4 py-2.5 ${
+                    message.role === 'user'
+                      ? 'bg-[#0f62fe] text-white'
+                      : 'bg-[#1c2333] text-[#e6edf3]'
+                  }`}
+                >
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                </div>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input Area */}
+          <div className="p-4 border-t border-[#1c2333]">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend();
+                  }
+                }}
+                placeholder="Ask AI to edit or generate..."
+                className="flex-1 bg-[#1c2333] text-[#e6edf3] text-sm px-3 py-2.5 rounded-lg border border-[#2d3748] focus:outline-none focus:border-[#0f62fe] placeholder-[#6b7280] transition-colors"
+              />
+              <button
+                onClick={handleSend}
+                disabled={!input.trim()}
+                className="w-10 h-10 bg-[#0f62fe] hover:bg-[#0353e9] text-white rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#0f62fe]"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </div>
+            <p className="text-xs text-[#6b7280] mt-2">AI can make mistakes. Review code carefully.</p>
+          </div>
+        </div>
+
+        {/* Right Panel - Code Editor & Preview */}
         <div className="flex-1 bg-[#0e1525] flex flex-col">
           {/* File Tabs */}
           <div className="h-10 bg-[#0e1525] border-b border-[#1c2333] flex items-center px-2 gap-1">
