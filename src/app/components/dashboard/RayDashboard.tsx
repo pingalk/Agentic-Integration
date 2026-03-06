@@ -724,21 +724,21 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
                         } : {}}
                         initial={{ opacity: 0, scale: 0.96 }}
                         animate={{
-                            opacity: viewTransition === 'exiting' ? 0 : (animPhase >= 4 ? 1 : 0),
+                            opacity: viewTransition === 'exiting' ? 0 : 1,
                             scale: viewTransition === 'exiting' ? 0.96 : 1,
                             y: viewTransition === 'exiting' && inputStartRect ? inputStartRect.targetY : 0,
                         }}
                         transition={{
-                            opacity: { duration: 0.7, ease: [0.4, 0, 0.2, 1] },
-                            scale: { duration: 0.7, ease: [0.4, 0, 0.2, 1] },
+                            opacity: { duration: 0.5, delay: 4.5, ease: [0.4, 0, 0.2, 1] },
+                            scale: { duration: 0.5, delay: 4.5, ease: [0.4, 0, 0.2, 1] },
                             y: { duration: 0.7, ease: [0.4, 0, 0.2, 1] },
                         }}
                      >
-                        {/* Spotlight BORDER overlay for input - matches RayInputBox rounded-[20px] */}
+                        {/* Spotlight BORDER overlay for input - matches RayInputBox rounded-[20px] - DISABLED */}
                         <motion.div
                             className="absolute inset-0 rounded-[20px] pointer-events-none z-10 overflow-hidden"
                             initial={{ opacity: 0 }}
-                            animate={{ opacity: (animPhase >= 4 && animPhase < 5) || viewTransition === 'spotlightHold' ? 1 : 0 }}
+                            animate={{ opacity: 0 }}
                             transition={{ duration: 0.4, ease: "easeOut" }}
                         >
                             {/* Horizontal linear gradient - sweeps left to right across top/bottom edges */}
@@ -754,11 +754,11 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
                             <div className="absolute inset-[2px] rounded-[18px] bg-white" />
                         </motion.div>
 
-                        {/* Input content - only visible after spotlight ends */}
+                        {/* Input content - fades in with the box */}
                         <motion.div
                             initial={{ opacity: 0 }}
-                            animate={{ opacity: animPhase >= 6 ? 1 : 0 }}
-                            transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.4, delay: 4.5, ease: [0.4, 0, 0.2, 1] }}
                         >
                             <RayInputBox
                                 value={prompt}
@@ -767,7 +767,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
                                 variant="hero"
                                 placeholder="Ask Ray anything related to Razorpay..."
                                 animatePlaceholder={false}
-                                showShadow={animPhase >= 6}
+                                showShadow={true}
                                 autoFocus
                                 attachmentChip={shyamAttachment}
                                 onRemoveAttachment={() => setShyamAttachment(null)}
@@ -776,16 +776,15 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
                      </motion.div>
 
                      {/* CTA Button - "Integrate payments with Replit" */}
-                     {animPhase >= 7 && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{
-                                opacity: viewTransition === 'exiting' ? 0 : 1,
-                                y: viewTransition === 'exiting' ? -10 : 0
-                            }}
-                            transition={{ duration: viewTransition === 'exiting' ? 0.2 : 0.4, delay: viewTransition === 'exiting' ? 0 : 0.2, ease: [0.4, 0, 0.2, 1] }}
-                            className="mt-4"
-                        >
+                     <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{
+                            opacity: viewTransition === 'exiting' ? 0 : 1,
+                            y: viewTransition === 'exiting' ? -10 : 0
+                        }}
+                        transition={{ duration: viewTransition === 'exiting' ? 0.2 : 0.4, delay: viewTransition === 'exiting' ? 0 : 5.2, ease: [0.4, 0, 0.2, 1] }}
+                        className="mt-4"
+                     >
                             <button
                                 onClick={() => {
                                     setLastQuery("replit_integration");
@@ -805,8 +804,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
                                 </svg>
                                 Integrate payments with Replit
                             </button>
-                        </motion.div>
-                     )}
+                     </motion.div>
 
                      {/* Suggestion Chips Panel - REMOVED per user request */}
 
@@ -902,19 +900,22 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
                      </div>
 
                      {/* Dynamic Cards Grid - fades out during transition */}
-                     {(
                      <motion.div
                         className="w-full max-w-full md:max-w-[850px] mt-[80px]"
+                        initial={{ opacity: 0, y: 20 }}
                         animate={{
                             opacity: viewTransition === 'exiting' ? 0 : 1,
                             y: viewTransition === 'exiting' ? 40 : 0,
                             filter: viewTransition === 'exiting' ? 'blur(4px)' : 'blur(0px)',
                         }}
-                        transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+                        transition={{
+                            opacity: { duration: 0.5, delay: 5.5 },
+                            y: { duration: 0.5, delay: 5.5 },
+                            filter: { duration: 0.3, ease: [0.32, 0.72, 0, 1] }
+                        }}
                      >
-                        <HomeCards animPhase={animPhase} onPromptSelect={setPrompt} />
+                        <HomeCards animPhase={10} onPromptSelect={setPrompt} />
                      </motion.div>
-                     )}
 
                      {/* OLD CARDS GRID - REPLACED BY HomeCards */}
                      {false && <div className="OLD_REMOVED_hidden">
