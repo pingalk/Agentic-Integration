@@ -4235,8 +4235,8 @@ const ReplitIntegrationArtifact = ({ data, onSuggestionClick, isLast, highlighte
   };
 
   const handleVideoEnd = () => {
-    // Video ended - keep it on screen or hide it
-    // User can click to dismiss
+    // Return to chat interface when video completes
+    setShowVideo(false);
   };
 
   return (
