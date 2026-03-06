@@ -1,36 +1,47 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { X, Send, ChevronLeft } from 'lucide-react';
-import Ray from '@/imports/Ray';
+import { X, ChevronLeft, Play, RotateCw } from 'lucide-react';
 
 interface ReplitInterfaceProps {
   onClose: () => void;
   initialPrompt?: string;
 }
 
-export const ReplitInterface: React.FC<ReplitInterfaceProps> = ({ onClose, initialPrompt = '' }) => {
-  const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([
-    {
-      role: 'assistant',
-      content: 'Integration complete! Your Razorpay checkout is now live. Try making a test payment on the preview.'
-    }
-  ]);
-  const [input, setInput] = useState('');
+const SAMPLE_CODE = `// server.js
+const express = require('express');
+const Razorpay = require('razorpay');
+const app = express();
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+const razorpay = new Razorpay({
+  key_id: 'rzp_test_5BBRP05LqWxRbD',
+  key_secret: '4e#MFL+1N!1SGqAH2MuqD+x6'
+});
 
-    setMessages(prev => [...prev, { role: 'user', content: input }]);
-    setInput('');
+app.use(express.json());
+app.use(express.static('public'));
 
-    // Simulate assistant response
-    setTimeout(() => {
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: 'I\'ve updated the code based on your request. Check the preview to see the changes.'
-      }]);
-    }, 1000);
+app.post('/create-order', async (req, res) => {
+  const options = {
+    amount: req.body.amount * 100,
+    currency: 'INR',
+    receipt: 'order_rcptid_' + Date.now()
   };
+
+  try {
+    const order = await razorpay.orders.create(options);
+    res.json(order);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(\`Server running on port \${PORT}\`);
+});`;
+
+export const ReplitInterface: React.FC<ReplitInterfaceProps> = ({ onClose, initialPrompt = '' }) => {
+  const [activeFile, setActiveFile] = useState('server.js');
 
   return (
     <motion.div
@@ -39,148 +50,144 @@ export const ReplitInterface: React.FC<ReplitInterfaceProps> = ({ onClose, initi
       exit={{ opacity: 0 }}
       className="fixed inset-0 bg-[#1e1e1e] z-50 flex flex-col"
     >
-      {/* Header */}
-      <div className="h-14 bg-[#2d2d30] border-b border-[#3e3e42] flex items-center justify-between px-4">
-        <div className="flex items-center gap-3">
+      {/* Header - Replit Style */}
+      <div className="h-14 bg-[#0e1525] border-b border-[#1c2333] flex items-center justify-between px-4">
+        <div className="flex items-center gap-4">
           <button
             onClick={onClose}
-            className="flex items-center gap-2 text-[#cccccc] hover:text-white transition-colors"
+            className="flex items-center gap-2 text-[#9ca3af] hover:text-white transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
             <span className="text-sm font-medium">Back to Ray</span>
           </button>
+
+          <div className="h-6 w-px bg-[#1c2333]" />
+
+          {/* Replit Logo */}
+          <div className="flex items-center gap-2">
+            <svg width="24" height="24" viewBox="0 0 512 512" fill="none">
+              <path d="M253.397 165.568H74.005c-17.088 0-31.36 14.272-31.36 31.36v118.144c0 17.088 14.272 31.36 31.36 31.36h179.392c17.088 0 31.36-14.272 31.36-31.36V196.928c0-17.088-14.272-31.36-31.36-31.36z" fill="#F26207"/>
+            </svg>
+            <span className="text-white font-semibold text-sm">my-razorpay-app</span>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6" style={{ '--fill-0': '#04c982' } as React.CSSProperties}>
-            <Ray static />
-          </div>
-          <span className="text-sm font-medium text-[#cccccc]">Replit Agent</span>
+          <button className="h-8 px-3 bg-[#0f62fe] hover:bg-[#0353e9] text-white text-sm font-medium rounded flex items-center gap-2 transition-colors">
+            <Play className="w-3.5 h-3.5" fill="white" />
+            Run
+          </button>
         </div>
-
-        <button
-          onClick={onClose}
-          className="w-8 h-8 flex items-center justify-center rounded hover:bg-[#3e3e42] transition-colors text-[#cccccc]"
-        >
-          <X className="w-5 h-5" />
-        </button>
       </div>
 
       {/* Main Content - Split View */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Panel - Chat/Prompts */}
-        <div className="w-[400px] bg-[#252526] border-r border-[#3e3e42] flex flex-col">
-          {/* Chat Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex flex-col gap-2 ${message.role === 'user' ? 'items-end' : 'items-start'}`}
-              >
-                {message.role === 'assistant' && (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4" style={{ '--fill-0': '#04c982' } as React.CSSProperties}>
-                      <Ray static />
-                    </div>
-                    <span className="text-xs text-[#8c8c8c]">Replit Agent</span>
-                  </div>
-                )}
-                <div
-                  className={`
-                    px-4 py-2 rounded-lg max-w-[320px]
-                    ${message.role === 'user'
-                      ? 'bg-[#0e639c] text-white'
-                      : 'bg-[#2d2d30] text-[#cccccc]'
-                    }
-                  `}
-                >
-                  <p className="text-sm leading-relaxed">{message.content}</p>
-                </div>
-              </div>
-            ))}
+        {/* Left Panel - Code Editor */}
+        <div className="flex-1 bg-[#0e1525] flex flex-col">
+          {/* File Tabs */}
+          <div className="h-10 bg-[#0e1525] border-b border-[#1c2333] flex items-center px-2 gap-1">
+            <button
+              className={`h-8 px-3 text-sm font-medium rounded transition-colors ${
+                activeFile === 'server.js'
+                  ? 'bg-[#1c2333] text-white'
+                  : 'text-[#9ca3af] hover:bg-[#1c2333]/50'
+              }`}
+              onClick={() => setActiveFile('server.js')}
+            >
+              server.js
+            </button>
+            <button
+              className={`h-8 px-3 text-sm font-medium rounded transition-colors ${
+                activeFile === 'index.html'
+                  ? 'bg-[#1c2333] text-white'
+                  : 'text-[#9ca3af] hover:bg-[#1c2333]/50'
+              }`}
+              onClick={() => setActiveFile('index.html')}
+            >
+              index.html
+            </button>
+            <button
+              className={`h-8 px-3 text-sm font-medium rounded transition-colors ${
+                activeFile === 'package.json'
+                  ? 'bg-[#1c2333] text-white'
+                  : 'text-[#9ca3af] hover:bg-[#1c2333]/50'
+              }`}
+              onClick={() => setActiveFile('package.json')}
+            >
+              package.json
+            </button>
           </div>
 
-          {/* Input Area */}
-          <div className="p-4 border-t border-[#3e3e42]">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                placeholder="Ask me to modify the integration..."
-                className="flex-1 bg-[#3c3c3c] text-[#cccccc] text-sm px-3 py-2 rounded border border-[#3e3e42] focus:outline-none focus:border-[#007acc] placeholder-[#6a6a6a]"
-              />
-              <button
-                onClick={handleSend}
-                disabled={!input.trim()}
-                className="w-10 h-10 bg-[#0e639c] text-white rounded flex items-center justify-center hover:bg-[#1177bb] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Send className="w-4 h-4" />
-              </button>
-            </div>
+          {/* Code Editor */}
+          <div className="flex-1 overflow-auto p-4 font-mono text-sm">
+            <pre className="text-[#e6edf3]">
+              <code>{SAMPLE_CODE}</code>
+            </pre>
           </div>
         </div>
 
         {/* Right Panel - Website Preview */}
-        <div className="flex-1 bg-[#1e1e1e] flex flex-col">
+        <div className="w-[600px] bg-white flex flex-col border-l border-[#1c2333]">
           {/* Preview Header */}
-          <div className="h-10 bg-[#2d2d30] border-b border-[#3e3e42] flex items-center px-4 gap-3">
-            <div className="flex gap-1.5">
-              <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
-              <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
-              <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
-            </div>
-            <div className="flex-1 bg-[#3c3c3c] text-[#8c8c8c] text-xs px-3 py-1 rounded">
-              https://your-app.replit.dev
+          <div className="h-10 bg-[#0e1525] border-b border-[#1c2333] flex items-center px-4 gap-3">
+            <span className="text-xs font-medium text-[#9ca3af]">Webview</span>
+            <div className="flex gap-2 ml-auto">
+              <button className="w-6 h-6 flex items-center justify-center rounded hover:bg-[#1c2333] text-[#9ca3af]">
+                <RotateCw className="w-3.5 h-3.5" />
+              </button>
             </div>
           </div>
 
-          {/* Preview Content */}
-          <div className="flex-1 bg-white overflow-auto relative">
-            {/* Simple Website Mockup with Razorpay Integration */}
-            <div className="w-full h-full bg-gradient-to-br from-slate-50 to-blue-50">
-              {/* Mock Navigation */}
-              <div className="h-16 bg-white border-b border-gray-200 flex items-center px-6 shadow-sm">
-                <div className="text-xl font-bold text-blue-600">MyStore</div>
-                <div className="ml-auto flex gap-6 text-sm text-gray-600">
-                  <span>Home</span>
-                  <span>Products</span>
-                  <span>Cart</span>
-                </div>
-              </div>
-
-              {/* Mock Product Page */}
-              <div className="max-w-4xl mx-auto p-8">
-                <div className="bg-white rounded-lg shadow-lg p-8">
-                  <div className="grid grid-cols-2 gap-8">
-                    {/* Product Image */}
-                    <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg h-80 flex items-center justify-center">
-                      <svg className="w-32 h-32 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                      </svg>
-                    </div>
-
-                    {/* Product Details */}
-                    <div className="flex flex-col">
-                      <h1 className="text-3xl font-bold text-gray-900 mb-2">Premium Product</h1>
-                      <p className="text-gray-600 mb-4">High-quality item with amazing features</p>
-                      <div className="text-4xl font-bold text-blue-600 mb-6">₹2,999</div>
-
-                      {/* Razorpay Payment Button - Integrated */}
-                      <button className="w-full h-14 bg-gradient-to-b from-[#1566f1] to-[#4793fd] text-white rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                        </svg>
-                        Pay with Razorpay
+          {/* Preview Content - Simple Website */}
+          <div className="flex-1 overflow-auto">
+            <div className="w-full h-full bg-white">
+              {/* Simple landing page */}
+              <div className="min-h-full bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+                <div className="max-w-6xl mx-auto px-8 py-16">
+                  <div className="text-center space-y-8">
+                    <h1 className="text-6xl font-bold text-gray-900">
+                      Welcome to My App
+                    </h1>
+                    <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                      A simple and elegant web application built with modern technologies
+                    </p>
+                    <div className="flex gap-4 justify-center pt-8">
+                      <button className="px-8 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-colors">
+                        Get Started
                       </button>
+                      <button className="px-8 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:border-gray-400 transition-colors">
+                        Learn More
+                      </button>
+                    </div>
+                  </div>
 
-                      <div className="mt-4 flex items-center gap-2 text-sm text-gray-500">
-                        <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  <div className="grid grid-cols-3 gap-8 mt-24">
+                    <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+                      <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
+                        <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
-                        Secure payment powered by Razorpay
                       </div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Fast</h3>
+                      <p className="text-gray-600 text-sm">Lightning quick performance</p>
+                    </div>
+                    <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+                      <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                        <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Secure</h3>
+                      <p className="text-gray-600 text-sm">Enterprise-grade security</p>
+                    </div>
+                    <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+                      <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center mb-4">
+                        <svg className="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Simple</h3>
+                      <p className="text-gray-600 text-sm">Easy to use interface</p>
                     </div>
                   </div>
                 </div>
