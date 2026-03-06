@@ -79,7 +79,7 @@ export const HomeCards: React.FC<HomeCardsProps> = ({ animPhase, onPromptSelect 
         onMouseLeave={() => setHoveredCard(null)}
         onClick={() => onPromptSelect?.("Help me integrate Razorpay payments")}
       >
-        <div className="bg-gradient-to-b from-[#47A9FF]/0 to-[#47A9FF] h-[221px] overflow-hidden relative rounded-lg w-full p-3 flex flex-col justify-between">
+        <div className="bg-gradient-to-b from-[#47A9FF]/0 to-[#47A9FF]/40 h-[221px] overflow-hidden relative rounded-lg w-full p-3 flex flex-col justify-between">
           <div className="flex flex-col gap-2">
             <p className="font-['Inter',sans-serif] font-medium text-[12px] text-[#7d7d7d] leading-[18px]">Payment Integration</p>
             <p className="font-['Inter',sans-serif] font-medium text-[20px] text-[#050505] tracking-[-0.528px] leading-[28px]">
@@ -91,7 +91,7 @@ export const HomeCards: React.FC<HomeCardsProps> = ({ animPhase, onPromptSelect 
           </div>
 
           {/* Payment Chart Illustration */}
-          <div className="absolute left-[10px] bottom-[10px] w-[120px] h-[105px]">
+          <div className="absolute right-[10px] bottom-[10px] w-[120px] h-[105px]">
             <img
               src="/payment-chart.png"
               alt="Payment integration illustration"
