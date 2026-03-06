@@ -464,6 +464,15 @@ export interface RayResponseData {
       accountName?: string;
       isConfirmed?: boolean;
     };
+  } | {
+    type: 'replit_integration';
+    data: {
+      heading: string;
+      text: string;
+      prompt: string;
+      note: string;
+      suggestions: string[];
+    };
   };
 }
 
@@ -4202,6 +4211,124 @@ const EarlySettlementsEnabledArtifact = ({ data, isLast, onSuggestionClick, high
   );
 };
 
+// --- Replit Integration Artifact Component ---
+const ReplitIntegrationArtifact = ({ data, onSuggestionClick, isLast, highlightedSuggestionIndex = null }: any) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(data.prompt);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+      className="w-full max-w-[680px] flex flex-col gap-6"
+    >
+      {/* Heading and Text */}
+      <div className="flex flex-col gap-2">
+        <h2 className="text-[20px] font-['TASA_Orbiter_Display'] font-semibold leading-[26px] text-[#050505]">
+          {data.heading}
+        </h2>
+        <p className="text-[14px] leading-[20px] tracking-[-0.182px] text-[#292f32]">
+          {parseMarkdownBold(data.text)}
+        </p>
+      </div>
+
+      {/* Code Card */}
+      <div className="bg-white border border-[rgba(67,75,81,0.12)] rounded-[12px] overflow-hidden shadow-[0px_2px_2px_0px_rgba(237,236,236,0.16)]">
+        {/* Card Header */}
+        <div className="px-4 py-3 border-b border-[rgba(67,75,81,0.12)]">
+          <p className="text-[14px] font-medium text-[#050505]">Your Custom Integration Prompt</p>
+        </div>
+
+        {/* Code Content */}
+        <div className="p-4 bg-[#fafafa]">
+          <pre className="text-[12px] font-['Monaco','Courier_New',monospace] leading-[17px] tracking-[-0.156px] text-[#050505] whitespace-pre-wrap">
+            {data.prompt}
+          </pre>
+        </div>
+
+        {/* Card Footer */}
+        <div className="px-4 py-3 border-t border-[rgba(67,75,81,0.12)] flex items-center justify-center">
+          <button
+            onClick={handleCopy}
+            className="relative h-10 px-5 bg-gradient-to-b from-[#1566f1] to-[#4793fd] text-white rounded-[8px] text-[14px] font-medium tracking-[-0.112px] overflow-hidden border border-[#0354e0] transition-all hover:shadow-md"
+          >
+            <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_1.5px_0px_0px_rgba(255,255,255,0.32),inset_0px_-2px_0px_0px_rgba(255,255,255,0.18),inset_0px_0px_0px_0.5px_#1566f1,inset_0px_-1.5px_0px_0px_#0e54cc]" />
+            {copied ? 'Copied!' : 'Copy Prompt'}
+          </button>
+        </div>
+      </div>
+
+      {/* Note */}
+      <p className="text-[14px] leading-[20px] tracking-[-0.182px] text-[#292f32]">
+        {data.note}
+      </p>
+
+      {/* Footer Buttons (thumbs up/down, etc) */}
+      {isLast && (
+        <div className="flex items-center justify-between">
+          <div className="flex gap-2">
+            <button className="w-8 h-8 flex items-center justify-center rounded-[12px] hover:bg-black/5 transition-colors">
+              <ThumbsUp className="w-4 h-4 text-[#616d75]" />
+            </button>
+            <button className="w-8 h-8 flex items-center justify-center rounded-[12px] hover:bg-black/5 transition-colors">
+              <ThumbsDown className="w-4 h-4 text-[#616d75]" />
+            </button>
+            <button className="w-8 h-8 flex items-center justify-center rounded-[12px] hover:bg-black/5 transition-colors">
+              <CopyIcon className="w-4 h-4 text-[#616d75]" />
+            </button>
+            <button className="w-8 h-8 flex items-center justify-center rounded-[12px] hover:bg-black/5 transition-colors">
+              <Share2 className="w-4 h-4 text-[#616d75]" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Divider */}
+      {isLast && data.suggestions && data.suggestions.length > 0 && (
+        <div className="h-px bg-[rgba(67,75,81,0.12)] w-full" />
+      )}
+
+      {/* Suggestions */}
+      {isLast && data.suggestions && data.suggestions.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-3 py-1">
+            <div className="w-4 h-4 flex items-center justify-center">
+              <Ray static />
+            </div>
+            <p className="text-[14px] font-medium leading-[20px] tracking-[-0.182px] text-[#292f32]">
+              How can I help you next?
+            </p>
+          </div>
+          <div className="flex flex-col gap-0.5 px-2">
+            {data.suggestions.map((suggestion: string, index: number) => (
+              <motion.button
+                key={index}
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1, duration: 0.3 }}
+                onClick={() => onSuggestionClick?.(suggestion)}
+                className={`
+                  px-2 py-2 rounded-[8px] text-left text-[14px] leading-[20px] tracking-[-0.182px] text-[#050505]
+                  transition-colors
+                  ${highlightedSuggestionIndex === index ? 'bg-[rgba(67,75,81,0.06)]' : 'hover:bg-[rgba(67,75,81,0.06)]'}
+                `}
+              >
+                {index + 1}. {suggestion}
+              </motion.button>
+            ))}
+          </div>
+        </div>
+      )}
+    </motion.div>
+  );
+};
+
 // --- Block Sequencer ---
 const BlockSequencer = ({ blocks, onComplete }: { blocks: ContentBlock[], onComplete?: () => void }) => {
   const [visibleIndex, setVisibleIndex] = useState(0);
@@ -5395,6 +5522,19 @@ export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast
           accountName={accountName}
           onChangeAccount={handleChangeAccount}
           isConfirmed={isConfirmed}
+        />
+      </div>
+    );
+  }
+
+  if (data.artifact?.type === 'replit_integration') {
+    return (
+      <div className="w-full animate-fade-in-up">
+        <ReplitIntegrationArtifact
+          data={data.artifact.data}
+          onSuggestionClick={onSuggestionClick}
+          isLast={isLast}
+          highlightedSuggestionIndex={highlightedSuggestionIndex}
         />
       </div>
     );

@@ -654,19 +654,37 @@ export const RayChatInterface = ({ initialQuery, isSplit, isEntering, onGoHome, 
         };
         setMessages(prev => [...prev, thinkingMsg]);
 
-        // For now, just show thinking state - will be replaced with actual response later
+        // After loading animation, show Replit integration prompt
         setTimeout(() => {
           setMessages(prev => prev.map(msg =>
             msg.id === 'replit-ai-1' ? {
               id: 'replit-ai-1',
               sender: 'ai' as const,
-              blocks: [{
-                type: 'text',
-                content: 'Great! I\'ve prepared your Replit integration. You can now start collecting payments on your Replit app.'
-              }]
+              artifact: {
+                type: 'replit_integration' as const,
+                data: {
+                  heading: 'One-Click Replit Integration',
+                  text: 'I\'ve analyzed your website and generated a custom integration prompt below. **Paste it into Replit** to complete the integration.',
+                  prompt: `Integrate Razorpay Standard Web Checkout into this codebase.
+
+=== CREDENTIALS ===
+
+RAZORPAY_KEY_ID: rzp_test_5BBRP05LqWxRbD
+RAZORPAY_KEY_SECRET: 4e#MFL+1N!1SGqAH2MuqD+x6
+
+=== TASK ===
+
+Create a complete payment integration with checkout page and order creation.`,
+                  note: 'Note: Your test API keys are already embedded for safe testing.',
+                  suggestions: [
+                    'Verify my integration',
+                    'Validate my test payment'
+                  ]
+                }
+              }
             } : msg
           ));
-          setTimeout(() => setIsStreaming(false), 3000);
+          setTimeout(() => setIsStreaming(false), 500);
         }, 3500);
       }, 600);
     }, 100);
