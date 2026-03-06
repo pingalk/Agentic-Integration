@@ -1280,6 +1280,57 @@ Create a complete payment integration with checkout page and order creation.`,
         return;
       }
     }
+
+    // Handle Replit Integration flow
+    if (activeFlow === 'replit_integration') {
+      // Handle "Validate my test payment" suggestion
+      if (suggestion.toLowerCase().includes('validate') || suggestion.toLowerCase().includes('test payment')) {
+        // Add user message
+        setMessages(prev => [...prev, {
+          id: `replit-u-validate`,
+          sender: 'user',
+          blocks: [{ type: 'text', content: 'I\'ve made a test payment — check the integration' }]
+        }]);
+
+        // Show thinking state
+        setTimeout(() => {
+          setIsStreaming(true);
+          const thinkingId = `replit-thinking-validate`;
+          setMessages(prev => [...prev, {
+            id: thinkingId,
+            sender: 'ai',
+            isThinking: true
+          }]);
+
+          // After thinking, show success response
+          setTimeout(() => {
+            setMessages(prev => {
+              const withoutThinking = prev.filter(m => !m.isThinking);
+              return [...withoutThinking, {
+                id: `replit-ai-validate`,
+                sender: 'ai' as const,
+                artifact: {
+                  type: 'test_payment_success' as const,
+                  data: {
+                    headline: 'Your test transaction was successful.',
+                    subtext: 'Verified: ₹15,000 test payment received.',
+                    amount: '15,000',
+                    email: 'pingal.kakati@gmail.com',
+                    status: 'Test transaction was successful',
+                    suggestions: [
+                      'Try another test transaction',
+                      'Swap test keys for live keys and start collecting live payments'
+                    ]
+                  }
+                }
+              }];
+            });
+            setIsStreaming(false);
+          }, 1500);
+        }, 600);
+        return;
+      }
+    }
   };
 
   // Helper function to advance Sarah's flow
