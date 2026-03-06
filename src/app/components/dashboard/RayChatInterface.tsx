@@ -2392,30 +2392,34 @@ Create a complete payment integration with checkout page and order creation.`,
          {/* Input Container - z-60 (below co-star card) - using RayInputBox for consistency */}
          {/* Fades in when transitioning from landing page to create seamless illusion */}
          {/* Starts above (y: -12) and settles down to final position, matching hero's downward motion */}
-         <motion.div
-            className="fixed bottom-[24px] left-0 right-0 z-[60] px-3 md:px-4 pointer-events-none"
-            initial={isEntering ? { opacity: 0, y: -8 } : false}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-         >
-            <div className="w-full max-w-2xl mx-auto relative pointer-events-auto">
-               <RayInputBox
-                  value={inputValue}
-                  onChange={setInputValue}
-                  onSend={handleInputSubmit}
-                  variant="hero"
-                  placeholder="Ask anything..."
-                  isStreaming={isStreaming}
-                  onStopStreaming={() => setIsStreaming(false)}
-                  showShadow
-               />
-            </div>
-         </motion.div>
+         {/* Hidden when Replit interface is open */}
+         {!isReplitInterfaceOpen && (
+           <motion.div
+              className="fixed bottom-[24px] left-0 right-0 z-[60] px-3 md:px-4 pointer-events-none"
+              initial={isEntering ? { opacity: 0, y: -8 } : false}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+           >
+              <div className="w-full max-w-2xl mx-auto relative pointer-events-auto">
+                 <RayInputBox
+                    value={inputValue}
+                    onChange={setInputValue}
+                    onSend={handleInputSubmit}
+                    variant="hero"
+                    placeholder="Ask anything..."
+                    isStreaming={isStreaming}
+                    onStopStreaming={() => setIsStreaming(false)}
+                    showShadow
+                 />
+              </div>
+           </motion.div>
+         )}
         </div>
       </motion.div>
 
       {/* Modal Overlay Input - Only shows when a modal is open, rendered via portal at z-60 */}
-      {(isPaymentLinkModalOpen || isCaptureSettingsModalOpen) && createPortal(
+      {/* Hidden when Replit interface is open */}
+      {!isReplitInterfaceOpen && (isPaymentLinkModalOpen || isCaptureSettingsModalOpen) && createPortal(
         <div className="fixed bottom-[24px] left-0 right-0 z-[60] px-3 md:px-4">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
