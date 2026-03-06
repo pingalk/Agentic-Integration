@@ -12,6 +12,7 @@ import { KYCReviewModal } from './chat/KYCReviewModal';
 import { SuccessAnimation } from './SuccessAnimation';
 import { FloatingImageUpload } from './FloatingImageUpload';
 import { BusinessCategoryLoadingState } from './BusinessCategoryLoadingState';
+import { ReplitInterface } from './ReplitInterface';
 import { ArrowDown, ArrowUp, Mic, Plus, Sparkles } from 'lucide-react';
 import { RayInputBox } from './RayInputBox';
 import { useDemo } from '@/context/DemoContext';
@@ -191,6 +192,7 @@ export const RayChatInterface = ({ initialQuery, isSplit, isEntering, onGoHome, 
 
   // Replit Integration Flow State
   const [replitFlowStep, setReplitFlowStep] = useState(0);
+  const [isReplitInterfaceOpen, setIsReplitInterfaceOpen] = useState(false);
 
   // Streaming state - shows stop button while Ray is responding
   const [isStreaming, setIsStreaming] = useState(false);
@@ -810,10 +812,15 @@ Create a complete payment integration with checkout page and order creation.`,
   const handleScroll = () => {
     if (!scrollContainerRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
-    
+
     // Show button if we are not at the bottom (with 50px buffer)
     const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
     setShowScrollButton(!isAtBottom);
+  };
+
+  // Handle opening Replit interface
+  const handleOpenReplitInterface = () => {
+    setIsReplitInterfaceOpen(true);
   };
 
   // Scroll to next response logic
@@ -1866,6 +1873,7 @@ Create a complete payment integration with checkout page and order creation.`,
                         highlightedSuggestionIndex={highlightedSuggestionIndex}
                         animatingCardId={isPaymentLinkModalOpen ? activeFormCardId : null}
                         personaId={activeFlow || 'default'}
+                        onOpenReplitInterface={handleOpenReplitInterface}
                         kycPanNumber={kycPanNumber}
                         kycWebsite={kycWebsite}
                         kycBusinessName={kycBusinessName}
@@ -2425,6 +2433,11 @@ Create a complete payment integration with checkout page and order creation.`,
           </motion.div>
         </div>,
         document.body
+      )}
+
+      {/* Replit Interface */}
+      {isReplitInterfaceOpen && (
+        <ReplitInterface onClose={() => setIsReplitInterfaceOpen(false)} />
       )}
 
     </div>

@@ -4212,13 +4212,17 @@ const EarlySettlementsEnabledArtifact = ({ data, isLast, onSuggestionClick, high
 };
 
 // --- Replit Integration Artifact Component ---
-const ReplitIntegrationArtifact = ({ data, onSuggestionClick, isLast, highlightedSuggestionIndex = null }: any) => {
+const ReplitIntegrationArtifact = ({ data, onSuggestionClick, isLast, highlightedSuggestionIndex = null, onOpenReplitInterface }: any) => {
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = () => {
+  const handleCopyAndOpen = () => {
     navigator.clipboard.writeText(data.prompt);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+    // Open Replit interface after a brief moment
+    setTimeout(() => {
+      onOpenReplitInterface?.();
+    }, 300);
   };
 
   return (
@@ -4256,7 +4260,7 @@ const ReplitIntegrationArtifact = ({ data, onSuggestionClick, isLast, highlighte
 
         {/* Copy Button - Left Aligned */}
         <button
-          onClick={handleCopy}
+          onClick={handleCopyAndOpen}
           className="relative h-10 px-5 bg-gradient-to-b from-[#1566f1] to-[#4793fd] text-white rounded-[8px] text-[14px] font-medium tracking-[-0.112px] overflow-hidden border border-[#0354e0] transition-all hover:shadow-md w-fit"
         >
           <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_1.5px_0px_0px_rgba(255,255,255,0.32),inset_0px_-2px_0px_0px_rgba(255,255,255,0.18),inset_0px_0px_0px_0.5px_#1566f1,inset_0px_-1.5px_0px_0px_#0e54cc]" />
@@ -4503,7 +4507,7 @@ const ChatAttachmentPill = ({ filename, fileType, onClick }: { filename: string;
   );
 };
 
-export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast = true, highlightedSuggestionIndex = null, onMiniCardClick, onMiniCardAnimationComplete, onStreamComplete, animatingCardId, personaId, kycPanNumber, kycWebsite, kycBusinessName, kycBusinessModel, kycBankAccount, isKYCReviewModalOpen, showFinalVideo, onKYCPanelSettled, onKYCPanelClosed }: { data: RayResponseData; onSuggestionClick?: (suggestion: string) => void; onRowClick?: (rowData: any) => void; isLast?: boolean; highlightedSuggestionIndex?: number | null; onMiniCardClick?: (formId: string, sourceRect?: SourceRect) => void; onMiniCardAnimationComplete?: (formId: string) => void; onStreamComplete?: () => void; animatingCardId?: string | null; personaId?: string; kycPanNumber?: string; kycWebsite?: string; kycBusinessName?: string; kycBusinessModel?: string; kycBankAccount?: string; isKYCReviewModalOpen?: boolean; showFinalVideo?: boolean; onKYCPanelSettled?: () => void; onKYCPanelClosed?: () => void }) => {
+export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast = true, highlightedSuggestionIndex = null, onMiniCardClick, onMiniCardAnimationComplete, onStreamComplete, animatingCardId, personaId, kycPanNumber, kycWebsite, kycBusinessName, kycBusinessModel, kycBankAccount, isKYCReviewModalOpen, showFinalVideo, onKYCPanelSettled, onKYCPanelClosed, onOpenReplitInterface }: { data: RayResponseData; onSuggestionClick?: (suggestion: string) => void; onRowClick?: (rowData: any) => void; isLast?: boolean; highlightedSuggestionIndex?: number | null; onMiniCardClick?: (formId: string, sourceRect?: SourceRect) => void; onMiniCardAnimationComplete?: (formId: string) => void; onStreamComplete?: () => void; animatingCardId?: string | null; personaId?: string; kycPanNumber?: string; kycWebsite?: string; kycBusinessName?: string; kycBusinessModel?: string; kycBankAccount?: string; isKYCReviewModalOpen?: boolean; showFinalVideo?: boolean; onKYCPanelSettled?: () => void; onKYCPanelClosed?: () => void; onOpenReplitInterface?: () => void }) => {
   // State for WhatsApp preview modal
   const [isWhatsAppPreviewOpen, setIsWhatsAppPreviewOpen] = useState(false);
 
@@ -5535,6 +5539,7 @@ export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast
           onSuggestionClick={onSuggestionClick}
           isLast={isLast}
           highlightedSuggestionIndex={highlightedSuggestionIndex}
+          onOpenReplitInterface={onOpenReplitInterface}
         />
       </div>
     );
