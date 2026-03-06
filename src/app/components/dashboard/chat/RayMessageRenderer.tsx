@@ -4242,7 +4242,7 @@ const ReplitIntegrationArtifact = ({ data, onSuggestionClick, isLast, highlighte
       <div className="flex flex-col gap-3">
         <div className="bg-white border border-[rgba(67,75,81,0.12)] rounded-[12px] overflow-hidden shadow-[0px_2px_2px_0px_rgba(237,236,236,0.16)]">
           {/* Card Header */}
-          <div className="px-4 py-3 border-b border-[rgba(67,75,81,0.12)]">
+          <div className="px-4 py-3">
             <p className="text-[14px] font-medium text-[#050505]">Your Custom Integration Prompt</p>
           </div>
 
