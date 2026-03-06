@@ -4247,7 +4247,7 @@ const ReplitIntegrationArtifact = ({ data, onSuggestionClick, isLast, highlighte
           </div>
 
           {/* Code Content - Dark Background */}
-          <div className="p-4 bg-[#0d1117]">
+          <div className="p-4 bg-[#0d1117] mx-1 mb-1 rounded-[8px]">
             <pre className="text-[12px] font-['Monaco','Courier_New',monospace] leading-[17px] tracking-[-0.156px] text-[#e6edf3] whitespace-pre-wrap">
               {data.prompt}
             </pre>
