@@ -12,7 +12,7 @@ import { KYCReviewModal } from './chat/KYCReviewModal';
 import { SuccessAnimation } from './SuccessAnimation';
 import { FloatingImageUpload } from './FloatingImageUpload';
 import { BusinessCategoryLoadingState } from './BusinessCategoryLoadingState';
-import { ReplitInterface } from './ReplitInterface';
+import { ReplitWorkspace } from './ReplitWorkspace';
 import { ArrowDown, ArrowUp, Mic, Plus, Sparkles } from 'lucide-react';
 import { RayInputBox } from './RayInputBox';
 import { useDemo } from '@/context/DemoContext';
@@ -2441,9 +2441,9 @@ Create a complete payment integration with checkout page and order creation.`,
         document.body
       )}
 
-      {/* Replit Interface */}
+      {/* Replit Workspace */}
       {isReplitInterfaceOpen && (
-        <ReplitInterface onClose={() => {
+        <ReplitWorkspace onClose={() => {
           setIsReplitInterfaceOpen(false);
           onReplitInterfaceChange?.(false);
         }} />
