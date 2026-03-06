@@ -189,6 +189,9 @@ export const RayChatInterface = ({ initialQuery, isSplit, isEntering, onGoHome, 
   // Briefing Review Flow State
   const [briefingReviewHandled, setBriefingReviewHandled] = useState(false);
 
+  // Replit Integration Flow State
+  const [replitFlowStep, setReplitFlowStep] = useState(0);
+
   // Streaming state - shows stop button while Ray is responding
   const [isStreaming, setIsStreaming] = useState(false);
 
@@ -383,6 +386,16 @@ export const RayChatInterface = ({ initialQuery, isSplit, isEntering, onGoHome, 
   // Query-based routing: Detect flow type from initialQuery and trigger appropriate flow
   useEffect(() => {
     if (messages.length === 0 && initialQuery && !demoFlowStartedRef.current) {
+      // Check for Replit integration trigger
+      if (initialQuery === 'replit_integration') {
+        demoFlowStartedRef.current = true;
+        setActiveFlow('replit_integration');
+        setTimeout(() => {
+          startReplitIntegrationFlow();
+        }, 100);
+        return;
+      }
+
       const flowType = detectFlowType(initialQuery);
       if (flowType) {
         demoFlowStartedRef.current = true;
@@ -619,6 +632,44 @@ export const RayChatInterface = ({ initialQuery, isSplit, isEntering, onGoHome, 
     setShowFloatingImage(true);
   };
 
+  // Replit Integration Flow - triggered from CTA button
+  const startReplitIntegrationFlow = () => {
+    const userText = "Start integration";
+
+    setTimeout(() => {
+      setMessages([{
+        id: 'replit-u1',
+        sender: 'user',
+        blocks: [{ type: 'text', content: userText }]
+      }]);
+      setReplitFlowStep(1);
+
+      setTimeout(() => {
+        setIsStreaming(true);
+        const thinkingMsg: RayResponseData = {
+          id: 'replit-ai-1',
+          sender: 'ai',
+          isThinking: true
+        };
+        setMessages(prev => [...prev, thinkingMsg]);
+
+        // For now, just show thinking state - will be replaced with actual response later
+        setTimeout(() => {
+          setMessages(prev => prev.map(msg =>
+            msg.id === 'replit-ai-1' ? {
+              id: 'replit-ai-1',
+              sender: 'ai' as const,
+              blocks: [{
+                type: 'text',
+                content: 'Great! I\'ve prepared your Replit integration. You can now start collecting payments on your Replit app.'
+              }]
+            } : msg
+          ));
+          setTimeout(() => setIsStreaming(false), 3000);
+        }, 3500);
+      }, 600);
+    }, 100);
+  };
 
   // Handle floating image drop - adds image to chat and starts Shyam flow
   const handleFloatingImageDrop = useCallback(() => {

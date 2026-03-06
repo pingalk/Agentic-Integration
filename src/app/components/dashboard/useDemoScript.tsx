@@ -36,6 +36,10 @@ export const thinkingSteps: Record<string, string[]> = {
         "Calculating settlement amount...",
         "Checking settlement cycle...",
         "Reviewing payment collection..."
+    ],
+    replit_integration: [
+        "Securing your Test API keys",
+        "Finalising your integration snippet"
     ]
 };
 

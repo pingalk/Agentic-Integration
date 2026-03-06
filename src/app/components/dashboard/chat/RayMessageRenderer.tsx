@@ -20,6 +20,7 @@ import { ChainOfThought } from '../ChainOfThought';
 import { KYCLoadingState } from '../KYCLoadingState';
 import { BusinessCategoryLoadingState } from '../BusinessCategoryLoadingState';
 import { useStreamSequencer } from '../useStreamSequencer';
+import { thinkingSteps } from '../useDemoScript';
 import { SmartHighlight, SmartHighlightWithBold } from './SmartHighlight';
 import { StreamingBulletList } from './StreamingBulletList';
 import { AnimatedLoadingCard } from './AnimatedLoadingCard';
@@ -4433,7 +4434,9 @@ export const RayMessageRenderer = ({ data, onSuggestionClick, onRowClick, isLast
     if (data.kycLoading) {
       return <KYCLoadingState />;
     }
-    return <ChainOfThought mode="waiting" />;
+    // Use persona-specific thinking steps if available
+    const steps = personaId && thinkingSteps[personaId] ? thinkingSteps[personaId] : undefined;
+    return <ChainOfThought mode="waiting" steps={steps} />;
   }
 
   // 3. Business Category Loading State

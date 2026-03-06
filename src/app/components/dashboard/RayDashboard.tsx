@@ -787,7 +787,11 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
                             className="mt-4"
                         >
                             <button
-                                onClick={() => setPrompt("Integrate payments with Replit")}
+                                onClick={() => {
+                                    setLastQuery("replit_integration");
+                                    setView('chat');
+                                    setViewTransition('entering');
+                                }}
                                 className="relative h-12 px-6 border border-[#0354e0] rounded-[12px] text-white font-sans font-medium text-[14px] tracking-[-0.112px] transition-all flex items-center justify-center gap-2 overflow-hidden shadow-md hover:shadow-lg"
                                 style={{
                                     backgroundImage: 'linear-gradient(-23.46deg, rgb(21, 102, 241) 54.842%, rgb(71, 147, 253) 98.573%)'
