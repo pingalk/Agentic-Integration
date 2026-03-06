@@ -4362,6 +4362,20 @@ const ReplitIntegrationArtifact = ({ data, onSuggestionClick, isLast, highlighte
             className="w-full h-full object-contain"
             src="/replit-copy-prompt.mp4"
           />
+
+          {/* Skip Button */}
+          <motion.button
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.3 }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowVideo(false);
+            }}
+            className="absolute bottom-8 right-8 px-6 py-3 bg-white/10 backdrop-blur-md border border-white/20 text-white font-medium text-sm rounded-full hover:bg-white/20 transition-all duration-200 z-10"
+          >
+            Skip
+          </motion.button>
         </motion.div>,
         document.body
       )}
