@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { SmartTable, MessageFooter, SuggestionStack } from './RayComponents';
 import Ray from '@/imports/Ray';
 import Copy from '@/imports/Copy';
@@ -4214,15 +4214,21 @@ const EarlySettlementsEnabledArtifact = ({ data, isLast, onSuggestionClick, high
 // --- Replit Integration Artifact Component ---
 const ReplitIntegrationArtifact = ({ data, onSuggestionClick, isLast, highlightedSuggestionIndex = null, onOpenReplitInterface }: any) => {
   const [copied, setCopied] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const handleCopyAndOpen = () => {
     navigator.clipboard.writeText(data.prompt);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    // Open Replit interface after a brief moment
-    setTimeout(() => {
-      onOpenReplitInterface?.();
-    }, 300);
+    // Show video
+    setShowVideo(true);
+  };
+
+  const handleVideoEnd = () => {
+    setShowVideo(false);
+    // Open Replit interface after video ends
+    onOpenReplitInterface?.();
   };
 
   return (
@@ -4329,6 +4335,33 @@ const ReplitIntegrationArtifact = ({ data, onSuggestionClick, isLast, highlighte
           </div>
         </div>
       )}
+
+      {/* Video Overlay - shows when copy prompt is clicked */}
+      <AnimatePresence>
+        {showVideo && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black z-[9999] flex items-center justify-center"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setShowVideo(false);
+              }
+            }}
+          >
+            <video
+              ref={videoRef}
+              autoPlay
+              muted
+              playsInline
+              onEnded={handleVideoEnd}
+              className="w-full h-full object-contain"
+              src="/replit-copy-prompt.mp4"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };
