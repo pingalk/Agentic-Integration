@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { SmartTable, MessageFooter, SuggestionStack } from './RayComponents';
 import Ray from '@/imports/Ray';
 import Copy from '@/imports/Copy';
@@ -4217,18 +4218,25 @@ const ReplitIntegrationArtifact = ({ data, onSuggestionClick, isLast, highlighte
   const [showVideo, setShowVideo] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const handleCopyAndOpen = () => {
+  const handleCopyAndOpen = async () => {
     navigator.clipboard.writeText(data.prompt);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     // Show video
     setShowVideo(true);
+    // Wait for video element to be ready
+    setTimeout(() => {
+      if (videoRef.current) {
+        videoRef.current.play().catch(err => {
+          console.error('Video playback failed:', err);
+        });
+      }
+    }, 100);
   };
 
   const handleVideoEnd = () => {
-    setShowVideo(false);
-    // Open Replit interface after video ends
-    onOpenReplitInterface?.();
+    // Video ended - keep it on screen or hide it
+    // User can click to dismiss
   };
 
   return (
@@ -4337,31 +4345,26 @@ const ReplitIntegrationArtifact = ({ data, onSuggestionClick, isLast, highlighte
       )}
 
       {/* Video Overlay - shows when copy prompt is clicked */}
-      <AnimatePresence>
-        {showVideo && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black z-[9999] flex items-center justify-center"
-            onClick={(e) => {
-              if (e.target === e.currentTarget) {
-                setShowVideo(false);
-              }
-            }}
-          >
-            <video
-              ref={videoRef}
-              autoPlay
-              muted
-              playsInline
-              onEnded={handleVideoEnd}
-              className="w-full h-full object-contain"
-              src="/replit-copy-prompt.mp4"
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {showVideo && createPortal(
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black z-[9999]"
+          onClick={() => setShowVideo(false)}
+        >
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            playsInline
+            onEnded={handleVideoEnd}
+            className="w-full h-full object-contain"
+            src="/replit-copy-prompt.mp4"
+          />
+        </motion.div>,
+        document.body
+      )}
     </motion.div>
   );
 };
