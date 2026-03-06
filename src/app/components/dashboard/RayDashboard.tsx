@@ -658,24 +658,20 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
                             className="relative shrink-0 size-10"
                             style={{ '--fill-0': currentMagicColor.primary } as React.CSSProperties}
                             initial={{ opacity: 0, rotate: -90, scale: 0.3 }}
-                            animate={{
-                                opacity: animPhase >= 1 ? 1 : 0,
-                                rotate: animPhase >= 1 ? 0 : -90,
-                                scale: animPhase >= 1 ? 1 : 0.3
-                            }}
+                            animate={{ opacity: 1, rotate: 0, scale: 1 }}
                             transition={{
-                                opacity: { duration: 0.5 },
+                                opacity: { duration: 0.5, delay: 2.3 },
                                 rotate: {
                                     type: "spring",
                                     stiffness: 100,
                                     damping: 10,
-                                    duration: 1.5
+                                    delay: 2.3
                                 },
                                 scale: {
                                     type: "spring",
                                     stiffness: 100,
                                     damping: 12,
-                                    duration: 1.2
+                                    delay: 2.3
                                 }
                             }}
                           >
@@ -683,7 +679,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
                           </motion.div>
                           <h1 className="font-sans font-normal text-[32px] leading-[46px] text-[#050505]">
                             {landingVariant === 'default' ? (
-                                // Staggered character animation for default mode - starts after greeting finishes
+                                // Staggered character animation for default mode - starts after Ray icon finishes
                                 "Let's integrate in 2 minutes?".split('').map((char, i) => (
                                     <motion.span
                                         key={i}
@@ -693,7 +689,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
                                         animate={{ opacity: 1, filter: 'blur(0px)' }}
                                         transition={{
                                             duration: 0.2,
-                                            delay: 2.0 + i * 0.03,
+                                            delay: 3.5 + i * 0.03,
                                             ease: [0.25, 0.1, 0.25, 1]
                                         }}
                                     >
