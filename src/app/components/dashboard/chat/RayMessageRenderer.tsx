@@ -4345,48 +4345,38 @@ const ReplitIntegrationArtifact = ({ data, onSuggestionClick, isLast, highlighte
       )}
 
       {/* Video Overlay - shows when copy prompt is clicked */}
-      {createPortal(
-        <AnimatePresence>
-          {showVideo && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-              className="fixed inset-0 bg-black z-[9999]"
-              onClick={() => setShowVideo(false)}
-            >
-              <motion.video
-                ref={videoRef}
-                autoPlay
-                muted
-                playsInline
-                onEnded={handleVideoEnd}
-                className="w-full h-full object-contain"
-                src="/replit-copy-prompt.mp4"
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-              />
+      {showVideo && createPortal(
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black z-[9999]"
+          onClick={() => setShowVideo(false)}
+        >
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            playsInline
+            onEnded={handleVideoEnd}
+            className="w-full h-full object-contain"
+            src="/replit-copy-prompt.mp4"
+          />
 
-              {/* Skip Button */}
-              <motion.button
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ delay: 0.5, duration: 0.3 }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowVideo(false);
-                }}
-                className="absolute bottom-8 right-8 px-6 py-3 bg-white/10 backdrop-blur-md border border-white/20 text-white font-medium text-sm rounded-full hover:bg-white/20 transition-all duration-200 z-10"
-              >
-                Skip
-              </motion.button>
-            </motion.div>
-          )}
-        </AnimatePresence>,
+          {/* Skip Button */}
+          <motion.button
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.3 }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowVideo(false);
+            }}
+            className="absolute bottom-8 right-8 px-6 py-3 bg-white/10 backdrop-blur-md border border-white/20 text-white font-medium text-sm rounded-full hover:bg-white/20 transition-all duration-200 z-10"
+          >
+            Skip
+          </motion.button>
+        </motion.div>,
         document.body
       )}
     </motion.div>
