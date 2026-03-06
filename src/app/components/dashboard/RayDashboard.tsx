@@ -20,7 +20,6 @@ import svgPathsStats from "../../../imports/svg-h6d9ul042g";
 import { motion, AnimatePresence, LayoutGroup } from 'motion/react';
 import { SparkRipplesBackground } from './SparkRipplesBackground';
 import { AvatarMenu } from '../AvatarMenu';
-import { SuggestionChipsPanel } from './SuggestionChipsPanel';
 import { HomeCards } from './HomeCards';
 import { FloatingImageUpload } from './FloatingImageUpload';
 
@@ -815,20 +814,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
                         </motion.div>
                      )}
 
-                     {/* Suggestion Chips Panel - appears after animation completes, fades out on transition */}
-                     {animPhase >= 7 && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{
-                                opacity: viewTransition === 'exiting' ? 0 : 1,
-                                y: viewTransition === 'exiting' ? -10 : 0
-                            }}
-                            transition={{ duration: viewTransition === 'exiting' ? 0.2 : 0.4, delay: viewTransition === 'exiting' ? 0 : 0.2, ease: [0.4, 0, 0.2, 1] }}
-                            className="mt-0"
-                        >
-                            <SuggestionChipsPanel onPromptSelect={setPrompt} />
-                        </motion.div>
-                     )}
+                     {/* Suggestion Chips Panel - REMOVED per user request */}
 
                      <div className="w-full max-w-2xl relative flex flex-col gap-[32px] items-center">
 
