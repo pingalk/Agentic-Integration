@@ -1283,8 +1283,11 @@ Create a complete payment integration with checkout page and order creation.`,
 
     // Handle Replit Integration flow
     if (activeFlow === 'replit_integration') {
-      // Handle "Validate my test payment" suggestion
-      if (suggestion.toLowerCase().includes('validate') || suggestion.toLowerCase().includes('test payment')) {
+      // Handle both "Verify my integration" and "Validate my test payment" suggestions
+      if (suggestion.toLowerCase().includes('verify') ||
+          suggestion.toLowerCase().includes('validate') ||
+          suggestion.toLowerCase().includes('test payment') ||
+          suggestion.toLowerCase().includes('integration')) {
         // Add user message
         setMessages(prev => [...prev, {
           id: `replit-u-validate`,
