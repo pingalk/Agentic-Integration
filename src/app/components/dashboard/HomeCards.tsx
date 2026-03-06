@@ -10,33 +10,6 @@ const ArrowIcon = ({ color = "#7d7d7d" }: { color?: string }) => (
   </svg>
 );
 
-// SVG-based Donut Chart component for Payment Integration card
-const PaymentChart = () => (
-  <svg viewBox="0 0 120 105" className="w-full h-full">
-    <defs>
-      <linearGradient id="chartGradient1" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#4D7FFF" stopOpacity="0.8" />
-        <stop offset="100%" stopColor="#305eff" stopOpacity="1" />
-      </linearGradient>
-      <linearGradient id="chartGradient2" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#6EE7B7" stopOpacity="0.8" />
-        <stop offset="100%" stopColor="#10b981" stopOpacity="1" />
-      </linearGradient>
-      <linearGradient id="chartGradient3" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#FDBA74" stopOpacity="0.8" />
-        <stop offset="100%" stopColor="#ea580c" stopOpacity="1" />
-      </linearGradient>
-    </defs>
-    {/* Three overlapping circles representing payment methods */}
-    <circle cx="45" cy="70" r="35" fill="url(#chartGradient1)" opacity="0.9" />
-    <circle cx="75" cy="70" r="35" fill="url(#chartGradient2)" opacity="0.9" />
-    <circle cx="60" cy="45" r="25" fill="url(#chartGradient3)" opacity="0.9" />
-    {/* Currency symbols */}
-    <text x="38" y="78" fill="white" fontSize="20" fontWeight="600">₹</text>
-    <text x="68" y="78" fill="white" fontSize="16" fontWeight="600">₹</text>
-    <text x="55" y="52" fill="white" fontSize="12" fontWeight="600">₹</text>
-  </svg>
-);
 
 interface HomeCardsProps {
   animPhase: number;
@@ -117,9 +90,13 @@ export const HomeCards: React.FC<HomeCardsProps> = ({ animPhase, onPromptSelect 
             </p>
           </div>
 
-          {/* Payment Chart */}
+          {/* Payment Chart Illustration */}
           <div className="absolute right-[10px] bottom-[10px] w-[120px] h-[105px]">
-            <PaymentChart />
+            <img
+              src="/payment-chart.png"
+              alt="Payment integration illustration"
+              className="w-full h-full object-contain"
+            />
           </div>
         </div>
         <CardFooter label="Integrate payments" isHovered={hoveredCard === 'payment-integration'} magicColor={magicColorConfig.primary} />
