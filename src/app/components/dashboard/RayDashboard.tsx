@@ -214,6 +214,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
   const gradientGreenColor = `hsl(${gradientConfig.greenHue}, ${gradientConfig.greenSaturation}%, ${gradientConfig.greenLightness}%)`;
 
   const [view, setView] = useState<'landing' | 'chat'>(kycPhoneData ? 'chat' : 'landing');
+  const [isReplitInterfaceOpen, setIsReplitInterfaceOpen] = useState(false);
 
   // If coming from KYC landing page, go directly to chat view
   React.useEffect(() => {
@@ -478,8 +479,8 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
         '--magic-bubble': currentMagicColor.bubbleColor,
       } as React.CSSProperties}
     >
-      {/* Hide sidebar in KYC mode */}
-      {!kycPhoneData && (
+      {/* Hide sidebar in KYC mode or Replit mode */}
+      {!kycPhoneData && !isReplitInterfaceOpen && (
         <RaySidebar
           currentView={view === 'landing' ? 'new-chat' : 'chat'}
           onChangeView={(v) => {
@@ -505,10 +506,11 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
         "flex-1 relative flex flex-col h-full transition-all duration-300",
         kycPhoneData ? "" : (isSidebarCollapsed ? "md:ml-[72px]" : "md:ml-64")
       )}>
-        {/* Top Nav - Dark theme for KYC mode */}
-        <div className={`h-14 flex items-center px-4 md:px-6 justify-between z-20 ${
-          kycPhoneData ? 'bg-black border-b-0' : 'border-b border-slate-100/50'
-        }`}>
+        {/* Top Nav - Dark theme for KYC mode, hidden in Replit mode */}
+        {!isReplitInterfaceOpen && (
+          <div className={`h-14 flex items-center px-4 md:px-6 justify-between z-20 ${
+            kycPhoneData ? 'bg-black border-b-0' : 'border-b border-slate-100/50'
+          }`}>
             {kycPhoneData ? (
               /* KYC Mode Header - Dark theme */
               <>
@@ -579,7 +581,8 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
                 </div>
               </>
             )}
-        </div>
+          </div>
+        )}
 
         {/* Content Body */}
         <div className="flex-1 relative overflow-hidden dashboard-bg transition-[background] duration-700">
@@ -1356,7 +1359,7 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
                 </div>
                 )
             ) : (
-                <RayLayout initialQuery={lastQuery} isEntering={viewTransition === 'entering'} onGoHome={handleHomeClick} skipInitialUserMessage={!!kycPhoneData} kycPanNumber={kycPhoneData?.pan} />
+                <RayLayout initialQuery={lastQuery} isEntering={viewTransition === 'entering'} onGoHome={handleHomeClick} skipInitialUserMessage={!!kycPhoneData} kycPanNumber={kycPhoneData?.pan} onReplitInterfaceChange={setIsReplitInterfaceOpen} />
             )}
 
         </div>

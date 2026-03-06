@@ -105,9 +105,10 @@ interface RayChatInterfaceProps {
   onGoHome?: () => void; // Navigate back to landing page
   skipInitialUserMessage?: boolean; // Skip showing user query, go directly to Ray's response
   kycPanNumber?: string; // PAN number from KYC landing page
+  onReplitInterfaceChange?: (isOpen: boolean) => void; // Callback when Replit interface opens/closes
 }
 
-export const RayChatInterface = ({ initialQuery, isSplit, isEntering, onGoHome, skipInitialUserMessage, kycPanNumber }: RayChatInterfaceProps) => {
+export const RayChatInterface = ({ initialQuery, isSplit, isEntering, onGoHome, skipInitialUserMessage, kycPanNumber, onReplitInterfaceChange }: RayChatInterfaceProps) => {
   const demoContext = useDemo();
   const { config: currentMagicColor } = useMagicColor();
   const { arjunScript, sarahScript, mayaScript, samScript, shyamScript, kiaraScript, varunScript, kycScript, briefingReviewResponses, showcaseCards } = useDemoScript();
@@ -821,6 +822,7 @@ Create a complete payment integration with checkout page and order creation.`,
   // Handle opening Replit interface
   const handleOpenReplitInterface = () => {
     setIsReplitInterfaceOpen(true);
+    onReplitInterfaceChange?.(true);
   };
 
   // Scroll to next response logic
@@ -2437,7 +2439,10 @@ Create a complete payment integration with checkout page and order creation.`,
 
       {/* Replit Interface */}
       {isReplitInterfaceOpen && (
-        <ReplitInterface onClose={() => setIsReplitInterfaceOpen(false)} />
+        <ReplitInterface onClose={() => {
+          setIsReplitInterfaceOpen(false);
+          onReplitInterfaceChange?.(false);
+        }} />
       )}
 
     </div>
