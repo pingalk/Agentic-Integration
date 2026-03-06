@@ -648,10 +648,10 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
                         </motion.div>
                         {/* Greeting text with KYC-style typography */}
                         <div className="space-y-3">
-                        <p className={`font-sans font-normal text-[14px] leading-[20px] tracking-[-0.182px] text-[rgba(0,0,0,0.56)] transition-colors duration-300`}>
+                        <p className={`font-sans font-normal text-[16px] leading-[26px] text-[#050505] transition-colors duration-300`}>
                             {landingVariant === 'default' ? (
                                 // Staggered character animation for default mode - starts after Ray appears
-                                LANDING_CONFIG.greeting.split('').map((char: string, i: number) => (
+                                "Hi, I see you're building on Replit...".split('').map((char: string, i: number) => (
                                     <motion.span
                                         key={i}
                                         className="inline-block"
@@ -677,20 +677,22 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
                                     }}
                                     transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
                                 >
-                                    {LANDING_CONFIG.greeting}
+                                    Hi, I see you're building on Replit...
                                 </motion.span>
                             )}
                         </p>
-                        {/* Tagline with KYC-style gradient text */}
-                        <h1
-                          className="font-sans font-normal text-[32px] leading-[38px] text-transparent bg-clip-text text-center"
-                          style={{
-                            backgroundImage: 'linear-gradient(90deg, rgb(5, 5, 5) 0%, rgb(46, 66, 165) 37.048%, rgb(46, 66, 165) 73.478%, rgb(5, 5, 5) 100%)'
-                          }}
-                        >
+                        {/* Tagline with green icon and black text */}
+                        <div className="flex items-center justify-center gap-3">
+                          <div className="size-10 flex items-center justify-center">
+                            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                              <rect width="40" height="40" rx="8" fill="#10B981"/>
+                              <path d="M12 20L18 26L28 14" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </div>
+                          <h1 className="font-sans font-normal text-[32px] leading-[46px] text-[#050505]">
                             {landingVariant === 'default' ? (
                                 // Staggered character animation for default mode - starts after greeting finishes
-                                "What can I do for you today?".split('').map((char, i) => (
+                                "Let's integrate in 2 minutes?".split('').map((char, i) => (
                                     <motion.span
                                         key={i}
                                         className="inline-block"
@@ -716,10 +718,11 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
                                     }}
                                     transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
                                 >
-                                    What can I do for you today?
+                                    Let's integrate in 2 minutes?
                                 </motion.span>
                             )}
-                        </h1>
+                          </h1>
+                        </div>
                         </div>
                      </motion.div>
 
@@ -774,8 +777,8 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
                                 onChange={setPrompt}
                                 onSend={handleSend}
                                 variant="hero"
-                                placeholder={landingVariant === 'default' ? placeholderSuggestions[placeholderIndex] : ""}
-                                animatePlaceholder={landingVariant === 'default'}
+                                placeholder="Ask Ray anything related to Razorpay..."
+                                animatePlaceholder={false}
                                 showShadow={animPhase >= 6}
                                 autoFocus
                                 attachmentChip={shyamAttachment}
@@ -783,6 +786,34 @@ const RayDashboardContent: React.FC<RayDashboardProps> = ({ onNavigate, initialQ
                             />
                         </motion.div>
                      </motion.div>
+
+                     {/* CTA Button - "Integrate payments with Replit" */}
+                     {animPhase >= 7 && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{
+                                opacity: viewTransition === 'exiting' ? 0 : 1,
+                                y: viewTransition === 'exiting' ? -10 : 0
+                            }}
+                            transition={{ duration: viewTransition === 'exiting' ? 0.2 : 0.4, delay: viewTransition === 'exiting' ? 0 : 0.2, ease: [0.4, 0, 0.2, 1] }}
+                            className="mt-4"
+                        >
+                            <button
+                                onClick={() => setPrompt("Integrate payments with Replit")}
+                                className="relative h-12 px-6 border border-[#0354e0] rounded-[12px] text-white font-sans font-medium text-[14px] tracking-[-0.112px] transition-all flex items-center justify-center gap-2 overflow-hidden shadow-md hover:shadow-lg"
+                                style={{
+                                    backgroundImage: 'linear-gradient(-23.46deg, rgb(21, 102, 241) 54.842%, rgb(71, 147, 253) 98.573%)'
+                                }}
+                            >
+                                {/* Glass effect inset shadows */}
+                                <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_-1.5px_0px_0px_#0e54cc,inset_0px_0px_0px_0.5px_#1566f1,inset_0px_-2px_0px_0px_rgba(255,255,255,0.18),inset_0px_1.5px_0px_0px_rgba(255,255,255,0.32)]" />
+                                <svg width="17" height="20" viewBox="0 0 17 20" fill="none">
+                                    <path d="M8.5 0L0 6V14L8.5 20L17 14V6L8.5 0Z" fill="white"/>
+                                </svg>
+                                Integrate payments with Replit
+                            </button>
+                        </motion.div>
+                     )}
 
                      {/* Suggestion Chips Panel - appears after animation completes, fades out on transition */}
                      {animPhase >= 7 && (
