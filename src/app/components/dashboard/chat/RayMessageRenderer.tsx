@@ -4224,15 +4224,6 @@ const ReplitIntegrationArtifact = ({ data, onSuggestionClick, isLast, highlighte
     setTimeout(() => setCopied(false), 2000);
     // Show video
     setShowVideo(true);
-    // Wait for video element to be ready
-    setTimeout(() => {
-      if (videoRef.current) {
-        videoRef.current.playbackRate = 2; // Play at 2x speed
-        videoRef.current.play().catch(err => {
-          console.error('Video playback failed:', err);
-        });
-      }
-    }, 100);
   };
 
   const handleVideoEnd = () => {
@@ -4360,6 +4351,10 @@ const ReplitIntegrationArtifact = ({ data, onSuggestionClick, isLast, highlighte
             muted
             playsInline
             onEnded={handleVideoEnd}
+            onLoadedMetadata={(e) => {
+              const video = e.currentTarget;
+              video.playbackRate = 2; // Play at 2x speed
+            }}
             className="w-full h-full object-contain"
             src="/replit-copy-prompt.mp4"
           />
