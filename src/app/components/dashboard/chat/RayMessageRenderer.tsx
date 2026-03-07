@@ -4227,6 +4227,7 @@ const ReplitIntegrationArtifact = ({ data, onSuggestionClick, isLast, highlighte
     // Wait for video element to be ready
     setTimeout(() => {
       if (videoRef.current) {
+        videoRef.current.playbackRate = 2; // Play at 2x speed
         videoRef.current.play().catch(err => {
           console.error('Video playback failed:', err);
         });
